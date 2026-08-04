@@ -17,7 +17,7 @@
   --bad:#bb0000; --bad-bg:#fbe8e8; --info:#0070f2;
   --shadow-sm:0 0 0 1px rgba(34,54,84,.03),0 1px 2px rgba(34,54,84,.10);
   --shadow:0 0 0 1px rgba(34,54,84,.04),0 8px 20px rgba(34,54,84,.18);
-  --radius:12px; --radius-sm:8px;
+  --radius:12px; --radius-sm:8px; --f-h:1.7rem;
   --font:"72","72full","Helvetica Neue",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
 }
 @media (prefers-color-scheme:dark){
@@ -266,26 +266,52 @@ main{max-width:1200px;width:100%;margin:0 auto;padding:18px 16px 60px;
   padding:10px 12px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
 .field{display:flex;flex-direction:column;gap:4px}
 .field label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600}
-input,select,textarea{font-family:inherit;font-size:14px;color:var(--text);background:var(--surface);
-  border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:8px 10px;
-  transition:border-color .12s ease,box-shadow .12s ease}
-input:hover,select:hover,textarea:hover{border-color:var(--faint)}
-input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+/* ===== SAP Fiori canonical field format (from the Account System) =====
+   text box : flat, dashed underline, subtle fill · dropdown : boxed w/ caret ·
+   search / filter fields : full-border box · brand frame on focus. */
+input:not([type=checkbox]):not([type=radio]),textarea{
+  height:var(--f-h);font-family:inherit;font-size:.82rem;color:var(--text);
+  background:color-mix(in srgb,var(--text) 5%,transparent);
+  border:0;border-bottom:1px dashed var(--border-strong);border-radius:2px 2px 0 0;padding:.2rem .4rem;
+  transition:border-color .12s ease,background .12s ease}
+textarea{height:auto;border:1px solid var(--border);border-radius:2px}
+input:not([type=checkbox]):not([type=radio]):focus,textarea:focus{
+  outline:none;border-bottom:1px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+input[readonly]{opacity:.75}
+/* dropdown list: quiet box + CSS caret triangle; brand frame on focus */
+select{height:var(--f-h);font-family:inherit;font-size:.82rem;color:var(--text);
+  border:1px solid var(--border);border-radius:2px;
+  background-color:color-mix(in srgb,var(--text) 4%,transparent);
+  -webkit-appearance:none;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+  padding:0 1.5rem 0 .4rem;transition:border-color .12s ease}
+select:focus{border-color:var(--accent);outline:none}
+select option{background:var(--surface);color:var(--text)}
+/* shell selects manage their own caret — suppress the global triangle */
+.search-box .scope{background-image:none}
+.shell-lang{-webkit-appearance:auto;appearance:auto;background-image:none;padding-right:4px}
+/* framed fields carrying a search / suggest / column filter: full border box
+   (!important beats the global input rule, whose :not() selectors add specificity) */
+.search input,.colf,.combo input,input.suggest{
+  border:1px solid var(--border-strong)!important;border-radius:2px}
+.search input:focus,.colf:focus,.combo input:focus,input.suggest:focus{border-color:var(--accent)!important}
 .search{position:relative;flex:1;min-width:220px}
-.search input{width:100%;padding-left:34px}
+.search input{width:100%;padding-left:34px;height:calc(var(--f-h) + 6px)}
 .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;fill:var(--faint)}
 
 /* ---- Buttons ---- */
-.btn{border:1px solid var(--border-strong);background:var(--surface);color:var(--text);
-  padding:8px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:13.5px;font-weight:600;
-  display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
-.btn:hover{background:var(--surface-2);border-color:var(--accent)}
+/* Fiori buttons: default = brand outline, primary = filled, ghost = text only. */
+.btn{border:1px solid var(--accent);background:var(--surface);color:var(--accent);
+  padding:.45rem 1rem;border-radius:var(--radius-sm);cursor:pointer;font-size:.82rem;font-weight:600;
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:background .15s ease}
+.btn:hover{background:var(--surface-2)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
 .btn.ghost{border-color:transparent;background:transparent;color:var(--accent)}
 .btn.ghost:hover{background:var(--accent-soft)}
 .btn svg{width:15px;height:15px;fill:currentColor}
-.btn.sm{padding:6px 10px;font-size:12.5px}
+.btn.sm{padding:.25rem .6rem;font-size:.75rem}
 .btn.xs{padding:3px 8px;font-size:11.5px}
 .btn.xs svg{width:12px;height:12px}
 .nowrap{white-space:nowrap}
