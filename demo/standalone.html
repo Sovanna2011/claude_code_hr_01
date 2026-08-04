@@ -50,16 +50,18 @@
   --shadow:0 2px 4px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
+html{height:100%}
+/* App-shell: fixed viewport, the shell bar stays put and only the content region scrolls. */
 html,body{max-width:100%;overflow-x:hidden}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);
   font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;
-  padding-top:var(--shell-h,58px)}
+  height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
 .num{font-variant-numeric:tabular-nums}
 button{font-family:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 
 /* ---- ShellBar ---- */
-.shell{position:fixed;top:0;left:0;right:0;width:100%;z-index:20;background:var(--shell-bg);
+.shell{flex:0 0 auto;position:relative;z-index:20;background:var(--shell-bg);
   color:#fff;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   padding:6px 16px;min-height:52px;box-shadow:var(--shadow-sm)}
 .shell .brandtext{white-space:nowrap;font-weight:600;font-size:14px;opacity:.95}
@@ -147,7 +149,8 @@ button{font-family:inherit}
 .action-menu .act-sep{height:1px;background:var(--border);margin:5px 4px}
 
 /* ---- Layout ---- */
-main{max-width:1200px;width:100%;margin:0 auto;padding:18px 16px 60px}
+main{max-width:1200px;width:100%;margin:0 auto;padding:18px 16px 60px;
+  flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden}
 .card,.tbl-wrap,.toolbar,.stat-row,.home-grid{max-width:100%}
 /* Use more width on large / ultrawide monitors */
 @media (min-width:1500px){main{max-width:1360px}}
@@ -306,7 +309,7 @@ a.mail:hover{text-decoration:underline}
 
 /* ---- Tabs ---- */
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow:visible;
-  position:sticky;top:var(--shell-h,60px);z-index:15;background:var(--bg);padding-top:6px}
+  position:sticky;top:0;z-index:15;background:var(--bg);padding-top:6px}
 .tab-more-wrap{position:relative;margin-left:auto;align-self:center}
 .tab-morebtn{background:transparent;border:0;color:var(--muted);padding:10px 12px;cursor:pointer;
   font-size:13.5px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:6px;border-bottom:3px solid transparent}
@@ -477,6 +480,7 @@ a.mail:hover{text-decoration:underline}
 .home-tile .ti svg{width:22px;height:22px;fill:currentColor}
 .home-tile .tt{font-weight:700;font-size:15px}
 .home-tile .ts{color:var(--muted);font-size:12.5px}
+.mc-total td{border-top:2px solid var(--border-strong);background:var(--surface-2);font-weight:600}
 .home-tile .tbadge{position:absolute;top:12px;right:12px;background:var(--bad);color:#fff;font-weight:700;
   font-size:11px;border-radius:20px;padding:2px 8px;min-width:20px;text-align:center}
 .home-hero{background:linear-gradient(120deg,var(--accent),var(--accent-strong));color:#fff;border-radius:var(--radius);
@@ -606,7 +610,8 @@ function seed(){return{
    {pernr:1002,begda:"2019-01-01",endda:HIGH,schkz:"NORM",zterf:"0",empct:100,teilk:false,wostd:40,arbst:8,mostd:173.33,jrstd:2080,wkwdy:5,beguz:"08:30",enduz:"17:30",break:60}],
   PA0008:[
    {pernr:1000,begda:"2020-03-01",endda:HIGH,trfgr:"E4",bsgrd:100,waers:"EUR",ansal:96000,wt:[{lgart:"1010",betrg:8000,waers:"EUR"}]},
-   {pernr:1001,begda:"2021-06-15",endda:HIGH,trfgr:"E2",bsgrd:100,waers:"EUR",ansal:60000,wt:[{lgart:"1010",betrg:5000,waers:"EUR"}]}],
+   {pernr:1001,begda:"2021-06-15",endda:HIGH,trfgr:"E2",bsgrd:100,waers:"EUR",ansal:60000,wt:[{lgart:"1010",betrg:5000,waers:"EUR"}]},
+   {pernr:1002,begda:"2020-01-06",endda:HIGH,trfgr:"E3",bsgrd:100,waers:"USD",ansal:54000,wt:[{lgart:"1010",betrg:4500,waers:"USD"}]}],
   PA0009:[
    {pernr:1000,begda:"2020-03-01",endda:HIGH,subty:"0",banks:"DE",bankl:"10070000",bankn:"DE89370400440532013000",bkont:"00",banka:"Deutsche Bank",bic:"DEUTDEBBXXX",emftx:"Andreas Schmidt",zlsch:"D",bdpct:100,waers:"EUR",purpose:"Monthly salary"},
    {pernr:1001,begda:"2021-06-15",endda:HIGH,subty:"0",banks:"US",bankl:"021000021",bankn:"US64SVBKUS6S3300958879",bkont:"01",banka:"JPMorgan Chase",bic:"CHASUS33XXX",emftx:"Linda Nguyen",zlsch:"D",bdpct:100,waers:"EUR",purpose:"Monthly salary"}],
@@ -2593,6 +2598,30 @@ function payMonths(centerYm){
     list.push({ym,label:lbl,range:fmtDate(r.from)+" – "+fmtDate(r.to)});}
   return list;
 }
+/* Payroll totals grouped by each employee's local (pay) currency, plus the
+   converted grand total in the chosen document currency. */
+function multiCurrencyTotals(run,doc,totGrossDoc,totNetDoc){
+  const fmtC=(v,c)=>fmtAmt(v,c);
+  const by={};
+  run.forEach(r=>{const c=r.currency;(by[c]=by[c]||{cur:c,n:0,gross:0,ded:0,net:0});
+    by[c].n++;by[c].gross+=r.gross;by[c].ded+=r.tax+r.social;by[c].net+=r.net;});
+  const rows=Object.values(by).sort((a,b)=>a.cur<b.cur?-1:a.cur>b.cur?1:0);
+  const totDedDoc=run.reduce((a,r)=>a+fxConvert(r.tax+r.social,r.currency,doc),0);
+  const body=rows.map(x=>`<tr>
+    <td><b>${esc(x.cur)}</b>${x.cur===doc?` <span class="pill" style="font-size:10px;padding:0 5px">document</span>`:""}</td>
+    <td class="num td-r">${x.n}</td>
+    <td class="num td-r">${fmtC(x.gross,x.cur)}</td>
+    <td class="num td-r">${fmtC(x.ded,x.cur)}</td>
+    <td class="num td-r"><b>${fmtC(x.net,x.cur)}</b></td>
+    <td class="num td-r">${x.cur===doc?"1.0000":fxConvert(1,x.cur,doc).toFixed(4)}</td>
+    <td class="num td-r">${fmtC(fxConvert(x.net,x.cur,doc),doc)}</td></tr>`).join("");
+  return `<div class="card"><div class="card-head"><h2>Total amount by currency</h2><span class="count">${rows.length}</span><div class="spacer"></div>
+    <span class="muted" style="font-size:13px">${rows.length>1?"Multi-currency payroll":"Single currency"} · document currency <b>${esc(doc)}</b></span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Local currency</th><th class="th-r">Employees</th><th class="th-r">Gross</th><th class="th-r">Deductions</th><th class="th-r">Net</th><th class="th-r">Rate → ${esc(doc)}</th><th class="th-r">Net (${esc(doc)})</th></tr></thead>
+    <tbody>${body}
+      <tr class="mc-total"><td><b>Total (${esc(doc)})</b></td><td class="num td-r">${run.length}</td><td class="num td-r">${fmtC(totGrossDoc,doc)}</td><td class="num td-r">${fmtC(totDedDoc,doc)}</td><td class="num td-r"><b>${fmtC(totNetDoc,doc)}</b></td><td class="num td-r">—</td><td class="num td-r"><b>${fmtC(totNetDoc,doc)}</b></td></tr>
+    </tbody></table></div></div>`;
+}
 function renderPayroll(){
   if(!S.payMonth)S.payMonth="2026-06";
   const mr=monthRange(S.payMonth);S.payFrom=mr.from;S.payTo=mr.to;
@@ -2623,6 +2652,7 @@ function renderPayroll(){
     <div class="stat"><div class="v num">${fmtC(totGrossDoc,doc)}</div><div class="l">Total gross (${doc})</div></div>
     <div class="stat"><div class="v num">${fmtC(totNetDoc,doc)}</div><div class="l">Total net (${doc})</div></div>
   </div>
+  ${multiCurrencyTotals(run,doc,totGrossDoc,totNetDoc)}
   ${dtTable("payroll","Payroll results · "+monthLbl+" · local & document currency",[
     {k:"pernr",l:"Pers.No.",always:true,html:r=>`<span class="pernr num">${r.pernr}</span>`},
     {k:"name",l:"Employee",always:true},
