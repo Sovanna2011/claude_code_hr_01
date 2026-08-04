@@ -1,53 +1,53 @@
-<title>HR Module — HCM Demo</title>
+<title>Oracle Fusion HCM — Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 /* ===================================================================
-   HR Module — self-contained demo (SAP Fiori "Horizon"-inspired)
+   HR Module — self-contained demo (Oracle Redwood / Fusion Applications-inspired)
    All data + business logic run in the browser; nothing is fetched.
    =================================================================== */
 :root{
-  --accent:#0064d9; --accent-strong:#0a4bb0; --accent-soft:#e5eefc; --shell-bg:#0a4bb0;
-  --bg:#eef1f3; --surface:#ffffff; --surface-2:#f6f8f9; --surface-3:#eef2f4;
-  --border:#d3dbe0; --border-strong:#b9c4cc;
-  --text:#1a2733; --muted:#56646f; --faint:#8592a0;
-  --good:#107e3e; --good-bg:#e6f3ea; --warn:#c25400; --warn-bg:#fcefe3;
-  --bad:#bb0000; --bad-bg:#fbe8e8; --info:#0070f2;
-  --shadow-sm:0 1px 2px rgba(20,40,60,.08);
-  --shadow:0 2px 4px rgba(20,40,60,.08),0 6px 20px rgba(20,40,60,.06);
-  --radius:12px; --radius-sm:8px;
-  --font:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --accent:#c74634; --accent-strong:#a3382a; --accent-soft:#f7e8e5; --shell-bg:#c74634;
+  --bg:#f2f0ed; --surface:#ffffff; --surface-2:#f8f6f3; --surface-3:#f1ede7;
+  --border:#e3dfd8; --border-strong:#c9c2b8;
+  --text:#1a1613; --muted:#5d564d; --faint:#8b8379;
+  --good:#2e7d32; --good-bg:#e7f2e8; --warn:#a15c00; --warn-bg:#f8ecd9;
+  --bad:#b3261e; --bad-bg:#f9e6e4; --info:#1668b3;
+  --shadow-sm:0 1px 2px rgba(40,30,20,.08);
+  --shadow:0 2px 4px rgba(40,30,20,.08),0 8px 24px rgba(40,30,20,.07);
+  --radius:10px; --radius-sm:8px;
+  --font:"Oracle Sans","Helvetica Neue",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
 }
 @media (prefers-color-scheme:dark){
   :root{
-    --accent:#4db1ff; --accent-strong:#7cc6ff; --accent-soft:#122a44; --shell-bg:#0c1620;
-    --bg:#0f151b; --surface:#1b2531; --surface-2:#202c3a; --surface-3:#25333f;
-    --border:#31404e; --border-strong:#425364;
-    --text:#e7ecf0; --muted:#9fb0bd; --faint:#6f808e;
-    --good:#4bb97a; --good-bg:#12261a; --warn:#f0904a; --warn-bg:#2c1e12;
-    --bad:#ff6b6b; --bad-bg:#2c1414; --info:#4db1ff;
-    --shadow-sm:0 1px 2px rgba(0,0,0,.4);
-    --shadow:0 2px 4px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3);
+    --accent:#ec6a58; --accent-strong:#f2836f; --accent-soft:#3a201b; --shell-bg:#241d19;
+    --bg:#171310; --surface:#221d19; --surface-2:#2a241f; --surface-3:#322b25;
+    --border:#3a332c; --border-strong:#4c4339;
+    --text:#efe9e2; --muted:#b2a99e; --faint:#807870;
+    --good:#5cb96f; --good-bg:#16261a; --warn:#e0913f; --warn-bg:#2c1e12;
+    --bad:#f28b7d; --bad-bg:#2c1614; --info:#63a6e0;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.5);
+    --shadow:0 2px 4px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
   }
 }
 :root[data-theme="light"]{
-  --accent:#0064d9; --accent-strong:#0a4bb0; --accent-soft:#e5eefc; --shell-bg:#0a4bb0;
-  --bg:#eef1f3; --surface:#fff; --surface-2:#f6f8f9; --surface-3:#eef2f4;
-  --border:#d3dbe0; --border-strong:#b9c4cc;
-  --text:#1a2733; --muted:#56646f; --faint:#8592a0;
-  --good:#107e3e; --good-bg:#e6f3ea; --warn:#c25400; --warn-bg:#fcefe3;
-  --bad:#bb0000; --bad-bg:#fbe8e8; --info:#0070f2;
-  --shadow-sm:0 1px 2px rgba(20,40,60,.08);
-  --shadow:0 2px 4px rgba(20,40,60,.08),0 6px 20px rgba(20,40,60,.06);
+  --accent:#c74634; --accent-strong:#a3382a; --accent-soft:#f7e8e5; --shell-bg:#c74634;
+  --bg:#f2f0ed; --surface:#ffffff; --surface-2:#f8f6f3; --surface-3:#f1ede7;
+  --border:#e3dfd8; --border-strong:#c9c2b8;
+  --text:#1a1613; --muted:#5d564d; --faint:#8b8379;
+  --good:#2e7d32; --good-bg:#e7f2e8; --warn:#a15c00; --warn-bg:#f8ecd9;
+  --bad:#b3261e; --bad-bg:#f9e6e4; --info:#1668b3;
+  --shadow-sm:0 1px 2px rgba(40,30,20,.08);
+  --shadow:0 2px 4px rgba(40,30,20,.08),0 8px 24px rgba(40,30,20,.07);
 }
 :root[data-theme="dark"]{
-  --accent:#4db1ff; --accent-strong:#7cc6ff; --accent-soft:#122a44; --shell-bg:#0c1620;
-  --bg:#0f151b; --surface:#1b2531; --surface-2:#202c3a; --surface-3:#25333f;
-  --border:#31404e; --border-strong:#425364;
-  --text:#e7ecf0; --muted:#9fb0bd; --faint:#6f808e;
-  --good:#4bb97a; --good-bg:#12261a; --warn:#f0904a; --warn-bg:#2c1e12;
-  --bad:#ff6b6b; --bad-bg:#2c1414; --info:#4db1ff;
-  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
-  --shadow:0 2px 4px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3);
+  --accent:#ec6a58; --accent-strong:#f2836f; --accent-soft:#3a201b; --shell-bg:#241d19;
+  --bg:#171310; --surface:#221d19; --surface-2:#2a241f; --surface-3:#322b25;
+  --border:#3a332c; --border-strong:#4c4339;
+  --text:#efe9e2; --muted:#b2a99e; --faint:#807870;
+  --good:#5cb96f; --good-bg:#16261a; --warn:#e0913f; --warn-bg:#2c1e12;
+  --bad:#f28b7d; --bad-bg:#2c1614; --info:#63a6e0;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.5);
+  --shadow:0 2px 4px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);
@@ -60,7 +60,9 @@ button{font-family:inherit}
 .shell{position:sticky;top:0;z-index:20;background:var(--shell-bg);
   color:#fff;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   padding:6px 16px;min-height:52px;box-shadow:var(--shadow-sm)}
-.shell .brandtext{white-space:nowrap}
+.shell .brandtext{white-space:nowrap;font-weight:600;font-size:14px;opacity:.95}
+.shell .owm{font-weight:800;letter-spacing:2.5px;font-size:16px;color:#fff}
+.shell .brandsep{width:1px;height:20px;background:rgba(255,255,255,.42);flex:0 0 auto}
 .shell nav{flex:1 1 auto;overflow:visible;min-width:0}
 @media (max-width:760px){
   .shell{gap:8px}
@@ -424,14 +426,14 @@ a.mail:hover{text-decoration:underline}
   body>*{display:none!important}
   #printArea{display:block!important;position:static}
   #printArea,.ps-doc,.ps-doc *{color:#111!important}
-  .ps-doc .ps-sec{color:#0a4bb0!important}
+  .ps-doc .ps-sec{color:#a3382a!important}
   .ps-doc .ps-row,.ps-doc .ps-row.tot{border-color:#ccc!important}
   .ps-doc .net{color:#0a7a3d!important}
 }
 </style>
 
 <header class="shell">
-  <div class="logo"><span class="mark">HR</span> <span class="brandtext">HR Module</span></div>
+  <div class="logo"><span class="owm">ORACLE</span><span class="brandsep"></span><span class="brandtext">Fusion HCM</span></div>
   <span id="whoami" class="whoami" style="display:none"></span>
   <nav id="nav"></nav>
   <div class="spacer"></div>
@@ -530,7 +532,7 @@ function seed(){return{
   PA0024:[
    {pernr:1000,subty:"03",begda:"2020-03-01",endda:HIGH,quali:"People leadership",auspr:8},
    {pernr:1000,subty:"02",begda:"2020-03-01",endda:HIGH,quali:"English (fluent)",auspr:7},
-   {pernr:1000,subty:"01",begda:"2020-03-01",endda:HIGH,quali:"SAP SuccessFactors",auspr:6},
+   {pernr:1000,subty:"01",begda:"2020-03-01",endda:HIGH,quali:"Oracle Fusion HCM",auspr:6},
    {pernr:1001,subty:"01",begda:"2021-06-15",endda:HIGH,quali:"HR Analytics",auspr:8},
    {pernr:1001,subty:"02",begda:"2021-06-15",endda:HIGH,quali:"Spanish (intermediate)",auspr:5}],
   PA2002:[
@@ -679,7 +681,7 @@ function seed(){return{
    {id:3,reqId:50002,name:"Ana Silva",email:"a.silva@mail.com",stage:"Offer",applied:"2026-07-08"}],
   courses:[
    {id:"D100",title:"Leadership Essentials",cat:"Leadership",hours:16,date:"2026-09-15",seats:12},
-   {id:"D200",title:"SAP HCM Fundamentals",cat:"Technical",hours:24,date:"2026-10-06",seats:20},
+   {id:"D200",title:"Oracle Fusion HCM Fundamentals",cat:"Technical",hours:24,date:"2026-10-06",seats:20},
    {id:"D300",title:"Business English (B2)",cat:"Language",hours:40,date:"2026-11-03",seats:15},
    {id:"D400",title:"Data Privacy & GDPR",cat:"Compliance",hours:4,date:"2026-09-01",seats:50}],
   bookings:[
@@ -731,7 +733,7 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",
 /* Employee photo: uploaded data URI, else a generated initials avatar (SVG data URI). */
 function avatarSvg(name,seed){
   const init=((name||"").split(" ").filter(Boolean).map(w=>w[0]).join("").slice(0,2)||"?").toUpperCase();
-  const colors=["#0a6ed1","#107e3e","#c25400","#7d3fbb","#0891b2","#be123c","#2563eb"];
+  const colors=["#c74634","#107e3e","#c25400","#7d3fbb","#0891b2","#be123c","#2563eb"];
   const c=colors[Math.abs(seed||0)%colors.length];
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" rx="48" fill="${c}"/><text x="48" y="61" font-family="Segoe UI,Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" text-anchor="middle">${init}</text></svg>`;
   return "data:image/svg+xml;base64,"+btoa(svg);
@@ -1130,8 +1132,8 @@ function render(){
 
 function renderLogin(){
   app.innerHTML=`<div class="login-wrap"><div class="login">
-    <div class="brandrow"><span class="mark">HR</span><div><h1>${esc(t("Sign in"))}</h1></div></div>
-    <div class="tag">HR Module — Human Capital Management</div>
+    <div class="brandrow"><span class="mark">O</span><div><h1>${esc(t("Sign in"))}</h1></div></div>
+    <div class="tag">Oracle Fusion Cloud HCM — Human Resources</div>
     <div class="err" id="loginErr"></div>
     <div class="grp"><label>${esc(t("Username"))}</label><input id="lu" autocomplete="username" placeholder="e.g. admin"></div>
     <div class="grp"><label>${esc(t("Password"))}</label><input id="lp" type="password" autocomplete="current-password" placeholder="${esc(t("Password"))}"></div>
