@@ -278,6 +278,9 @@ textarea{height:auto;border:1px solid var(--border);border-radius:2px}
 input:not([type=checkbox]):not([type=radio]):focus,textarea:focus{
   outline:none;border-bottom:1px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
 input[readonly]{opacity:.75}
+/* Amount / number fields: no spinner arrows (as in the Accounting System). */
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;appearance:none;margin:0}
 /* dropdown list: quiet box + CSS caret triangle; brand frame on focus */
 select{height:var(--f-h);font-family:inherit;font-size:.82rem;color:var(--text);
   border:1px solid var(--border);border-radius:2px;
@@ -354,10 +357,11 @@ table.mtx th,table.mtx td{text-align:center;padding:4px 6px;font-size:12px}
 .m-hol{background:rgba(180,120,20,.18);color:#b47814}
 .m-off{background:var(--surface-2);color:var(--muted)}
 .list-card .card-head{border-radius:var(--radius) var(--radius) 0 0}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
+/* Grid density follows the Accounting System: compact rows (td .55rem .85rem). */
+table{width:100%;border-collapse:collapse;font-size:.8rem}
 th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);
-  font-weight:700;padding:10px 16px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface-2)}
-td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+  font-weight:700;padding:.6rem .85rem;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface-2)}
+td{padding:.55rem .85rem;border-bottom:1px solid var(--border);vertical-align:middle}
 .cols-panel{margin-bottom:14px}
 .colmenu-wrap{position:relative;display:inline-block}
 .colmenu{position:absolute;top:calc(100% + 4px);right:0;left:auto;z-index:40;background:var(--surface);color:var(--text);
@@ -573,7 +577,7 @@ a.mail:hover{text-decoration:underline}
 .login .grp{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
 .login .grp label{font-size:12px;color:var(--muted);font-weight:600}
 .login .grp label{font-weight:600}
-.login input{width:100%;min-height:44px}
+.login input{width:100%;height:var(--f-h)}
 .login .btn{width:100%;justify-content:center;margin-top:4px}
 .login .err{background:var(--bad-bg);color:var(--bad);border-radius:8px;padding:9px 12px;font-size:13px;margin-bottom:14px;display:none}
 .demo-users{margin-top:20px;border-top:1px solid var(--border);padding-top:16px}
