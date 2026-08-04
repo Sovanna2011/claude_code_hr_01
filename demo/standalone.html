@@ -199,19 +199,20 @@ button{font-family:inherit}
 .todo-item .ti-ic svg{width:18px;height:18px;fill:currentColor}
 .todo-item .ti-tx b{font-size:13.5px}.todo-item .ti-tx div{font-size:12px;color:var(--muted)}
 .todo-item .ti-go{margin-left:auto}
-.ftiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
-.ftile{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);
-  padding:16px;cursor:pointer;text-align:left;display:flex;flex-direction:column;color:var(--text);position:relative;min-height:118px;
-  transition:box-shadow .15s,transform .15s,border-color .15s}
-.ftile:hover{box-shadow:var(--shadow);transform:translateY(-2px);border-color:var(--accent)}
-.ftile .ft-title{font-weight:700;font-size:14px;line-height:1.25}
-.ftile .ft-sub{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.25}
-.ftile .ft-body{flex:1;display:flex;align-items:flex-end;gap:8px;min-height:40px;margin-top:6px}
-.ftile .ft-ico{width:24px;height:24px;color:var(--muted);fill:currentColor;flex:0 0 auto}
-.ftile .ft-ico svg{width:24px;height:24px;fill:currentColor}
-.ftile .ft-num{font-size:30px;font-weight:300;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+/* Fiori dynamic tile dimensions match the S/4HANA reference: fixed 11rem square. */
+.ftiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:1rem}
+.ftile{background:var(--surface);border:1px solid var(--border);border-radius:.5rem;
+  height:11rem;padding:1rem;cursor:pointer;text-align:left;display:flex;flex-direction:column;color:var(--text);position:relative;
+  transition:border-color .15s,background .15s}
+.ftile:hover{border-color:var(--accent);background:var(--surface-2)}
+.ftile .ft-title{font-weight:700;font-size:.88rem;line-height:1.25}
+.ftile .ft-sub{font-size:.8rem;color:var(--muted);margin-top:.1rem;line-height:1.25}
+.ftile .ft-body{flex:1;display:flex;align-items:flex-end;gap:.5rem;min-height:2.5rem}
+.ftile .ft-ico{width:1.5rem;height:1.5rem;color:var(--muted);fill:currentColor;flex:0 0 auto}
+.ftile .ft-ico svg{width:1.5rem;height:1.5rem;fill:currentColor}
+.ftile .ft-num{font-size:1.9rem;font-weight:300;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .ftile .ft-num.neg{color:var(--bad)}.ftile .ft-num.pos{color:var(--good)}
-.ftile .ft-foot{font-size:12px;color:var(--muted);margin-top:10px}
+.ftile .ft-foot{font-size:.78rem;color:var(--muted);margin-top:.6rem}
 .ftile .tbadge{position:absolute;top:12px;right:12px;background:var(--bad);color:#fff;font-weight:700;
   min-width:18px;height:18px;padding:0 5px;border-radius:9px;font-size:11px;display:grid;place-items:center}
 .more-wrap{position:relative;flex:0 0 auto}
