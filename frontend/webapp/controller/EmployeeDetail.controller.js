@@ -38,6 +38,8 @@ sap.ui.define([
 
         onTabSelect: function () { /* content is bound; nothing to load lazily */ },
 
+        onNavLeave: function () { this.getRouter().navTo("leave"); },
+
         // ---- Edit Personal Data (IT0002) -----------------------------------
         onOpenEditPersonal: function () {
             var oData = this.getView().getModel().getData();

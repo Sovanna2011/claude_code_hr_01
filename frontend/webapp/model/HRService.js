@@ -110,6 +110,19 @@ sap.ui.define([
             return this._request("POST", "/employees/" + iPernr + "/absences", oData);
         },
 
+        // ---- Leave management ----------------------------------------------
+        getLeaveRequests: function () {
+            return this._request("GET", "/leave-requests");
+        },
+
+        requestLeave: function (oData) {
+            return this._request("POST", "/leave-requests", oData);
+        },
+
+        decideLeave: function (iRequestId, bApprove) {
+            return this._request("POST", "/leave-requests/" + iRequestId + "/decide", { approve: !!bApprove });
+        },
+
         // ---- Organizational Management -------------------------------------
         getOrgUnits: function (sKeyDate) {
             var sQuery = sKeyDate ? "?keyDate=" + sKeyDate : "";

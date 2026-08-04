@@ -26,6 +26,7 @@ builder.Services.AddDbContext<HRDbContext>(opt =>
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IOrgService, OrgService>();
 builder.Services.AddScoped<ITimeService, TimeService>();
+builder.Services.AddScoped<ILeaveService, LeaveService>();
 builder.Services.AddScoped<IValueHelpService, ValueHelpService>();
 
 // ---- Authentication (JWT) ----

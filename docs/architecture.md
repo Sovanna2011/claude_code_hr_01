@@ -90,6 +90,9 @@ range (`NumberRange`, emulating SAP SNRO).
 | `PUT /api/employees/{pernr}/reassign` | Org reassignment, delimits IT0001 |
 | `GET /api/employees/{pernr}/leave-balances` | IT2006 quota balances |
 | `POST /api/employees/{pernr}/absences` | Record IT2001 + quota deduction |
+| `GET /api/leave-requests` | Leave worklist (own for ESS, all for MSS/HR) |
+| `POST /api/leave-requests` | Submit a leave request (ESS) |
+| `POST /api/leave-requests/{id}/decide` | Approve/reject → posts IT2001 + deducts IT2006 (MSS/HR) |
 | `GET /api/orgunits` | Flat org unit list |
 | `GET /api/orgunits/{root}/structure` | Nested org hierarchy (PPOME) |
 | `GET /api/orgunits/positions?orgUnitId=` | Positions with holder/vacancy |

@@ -118,14 +118,15 @@ Org structure: **Executive Board** → **Human Resources**, **Finance**.
 
 ## 4. Navigation overview
 
-The app has three main screens, reachable from the buttons in the top-right of
-the header:
+The app's main screens are reachable from the buttons in the top-right of the
+header:
 
 | Button | Screen | Purpose |
 |--------|--------|---------|
 | *(home)* | **Employees** | List, search and open employees; hire |
 | **Org Chart** | **Organizational Structure** | Browse the org hierarchy |
 | **Positions** | **Positions** | List positions and who holds them |
+| **Leave** | **Leave Management** | Submit, approve and track leave requests |
 
 Use the **back arrow** (top-left) to return to the previous screen. The
 **Refresh** icon reloads the current data.
@@ -234,6 +235,33 @@ matching leave quota.
 
 > **Note:** if the remaining quota is smaller than the absence, the system
 > **rejects** the entry with a message. Reduce the days or check the balance.
+
+### 6.3 Leave requests (ESS / MSS)
+The **Leave** screen is the self-service leave workflow. Open it from the
+**Leave** button in the header of the employee list or an employee's detail
+screen.
+
+**Submit a request (employee self-service)**
+
+1. Click **Request Leave**.
+2. Select the **Leave Type**, then enter the **From** and **To** dates.
+3. Optionally enter **Days** (calculated from the dates when left empty) and a
+   **Note**.
+4. Click **Submit**. The request appears with status **Pending**.
+
+Employees see only their own requests; HR administrators and managers see all
+requests and can filter the worklist by status.
+
+**Approve or reject (manager / HR)**
+
+For a **Pending** request, click **Approve** or **Reject** (visible to HR
+administrators and managers). On **approval** the leave is posted as an absence
+(IT2001) and **deducted** from the matching quota (IT2006) — exactly as
+*Record Absence* does. If the remaining quota is insufficient, approval is
+**rejected** with a message and the request stays pending.
+
+> **Note:** a request can be decided only once; an already approved or rejected
+> request cannot be changed.
 
 ---
 

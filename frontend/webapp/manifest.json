@@ -102,6 +102,11 @@
           "name": "positions",
           "pattern": "positions",
           "target": "positions"
+        },
+        {
+          "name": "leave",
+          "pattern": "leave",
+          "target": "leave"
         }
       ],
       "targets": {
@@ -123,6 +128,10 @@
         },
         "positions": {
           "viewName": "Positions",
+          "viewLevel": 1
+        },
+        "leave": {
+          "viewName": "Leave",
           "viewLevel": 1
         }
       }

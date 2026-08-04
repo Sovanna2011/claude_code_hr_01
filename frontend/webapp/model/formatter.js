@@ -64,6 +64,20 @@ sap.ui.define([
          */
         vacantText: function (bVacant) {
             return bVacant ? "Vacant" : "Occupied";
+        },
+
+        /**
+         * Maps a leave-request status to a sap.ui.core.ValueState.
+         * @param {string} sStatus "Pending" / "Approved" / "Rejected"
+         * @returns {sap.ui.core.ValueState} value state
+         */
+        leaveState: function (sStatus) {
+            switch (sStatus) {
+                case "Approved": return "Success";
+                case "Rejected": return "Error";
+                case "Pending": return "Warning";
+                default: return "None";
+            }
         }
     };
 });

@@ -97,6 +97,7 @@ Quick smoke test:
 ```bash
 curl http://localhost:5000/api/employees
 curl http://localhost:5000/api/orgunits/50000001/structure
+curl http://localhost:5000/api/leave-requests
 ```
 
 ## 3. Frontend (SAPUI5)
@@ -130,6 +131,13 @@ port 5000 (see `ui5.yaml`), so no CORS setup is needed for local development.
 **Time Management**
 - Leave-balance display (entitlement / deducted / remaining)
 - **Record absence** (IT2001) with automatic quota deduction and validation
+
+**Leave Management (ESS / MSS)**
+- **Request leave** — employees submit requests against a leave (absence) type
+- **Approve / reject** — HR / managers action pending requests from a worklist
+- On approval the leave is posted as an absence (IT2001) and deducted from the
+  matching quota (IT2006); approval is rejected when the remaining balance is
+  insufficient. Employees see only their own requests; HR / managers see all.
 
 ## Business rules of note (SAP fidelity)
 - **Time slicing** — reads return the record valid on the key date.

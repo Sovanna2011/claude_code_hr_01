@@ -1,6 +1,7 @@
 using HRModule.Api.Models;
 using HRModule.Api.Models.Customizing;
 using HRModule.Api.Models.Infotypes;
+using HRModule.Api.Models.Modules;
 using HRModule.Api.Models.OrgManagement;
 using HRModule.Api.Models.Security;
 using Microsoft.EntityFrameworkCore;
@@ -56,6 +57,9 @@ public class HRDbContext : DbContext
     public DbSet<T547T> T547T => Set<T547T>();
     public DbSet<DomainValue> DomainValues => Set<DomainValue>();
     public DbSet<NumberRange> NumberRanges => Set<NumberRange>();
+
+    // Functional modules
+    public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
 
     // Security
     public DbSet<AppUser> AppUsers => Set<AppUser>();
@@ -138,6 +142,14 @@ public class HRDbContext : DbContext
         mb.Entity<T547T>(e => { e.ToTable("T547T", "HR"); e.HasKey(x => x.CTTYP); });
         mb.Entity<DomainValue>(e => { e.ToTable("DomainValue", "HR"); e.HasKey(x => new { x.Domain, x.ValueKey }); });
         mb.Entity<NumberRange>(e => { e.ToTable("NumberRange", "HR"); e.HasKey(x => x.RangeObject); });
+
+        // ---- Functional modules ----------------------------------------
+        mb.Entity<LeaveRequest>(e =>
+        {
+            e.ToTable("LeaveRequest", "HR");
+            e.HasKey(x => x.RequestId);
+            e.Property(x => x.RequestId).ValueGeneratedOnAdd();
+        });
 
         // ---- Security --------------------------------------------------
         mb.Entity<AppRole>(e => { e.ToTable("AppRole", "HR"); e.HasKey(x => x.RoleKey); });

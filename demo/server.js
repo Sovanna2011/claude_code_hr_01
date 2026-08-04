@@ -173,8 +173,8 @@ function seed() {
         roleNames: { HR_ADMIN: "HR Administrator", HR_MANAGER: "HR Manager", EMPLOYEE: "Employee (Self-Service)" },
         leaveSeq: 2,
         leaveRequests: [
-            { id: 1, pernr: 1001, name: "Linda Nguyen", type: "0100", begda: "2026-08-10", endda: "2026-08-14", days: 5, status: "Pending", note: "Summer holiday" },
-            { id: 2, pernr: 1001, name: "Linda Nguyen", type: "0200", begda: "2026-05-04", endda: "2026-05-04", days: 1, status: "Approved", note: "Doctor" }
+            { id: 1, pernr: 1001, awart: "0100", begda: "2026-08-10", endda: "2026-08-14", days: 5, status: "Pending", note: "Summer holiday", requestedOn: "2026-07-20T09:00:00", decidedBy: null, decidedOn: null },
+            { id: 2, pernr: 1001, awart: "0200", begda: "2026-05-04", endda: "2026-05-04", days: 1, status: "Approved", note: "Doctor", requestedOn: "2026-05-01T08:00:00", decidedBy: "Andreas Schmidt", decidedOn: "2026-05-02T10:00:00" }
         ],
         requisitions: [
             { id: 50001, title: "HR Business Partner", orgeh: 50000010, orgN: "Human Resources", status: "Open", openings: 1, posted: "2026-06-01" },
@@ -477,24 +477,46 @@ function directReports(mgrPernr, key) {
         return null;
     }).filter(Boolean);
 }
+/** Resolves a leave (absence) type text (T554S). */
+function leaveTypeText(awart) { const t = db.T554S.find(x => x.awart === awart); return t ? t.atext : null; }
+/** Employee display name valid today (falls back to the PERNR). */
+function empName(pernr) { const p = validOn(db.PA0002, pernr, today()); return p ? (p.vorna + " " + p.nachn) : String(pernr); }
+/** Maps a stored leave request to the client contract (matches C# LeaveRequestDto). */
+function leaveDto(r) {
+    return {
+        requestId: r.id, pernr: r.pernr, employeeName: empName(r.pernr),
+        leaveTypeKey: r.awart, leaveType: leaveTypeText(r.awart),
+        begda: r.begda, endda: r.endda, days: r.days, status: r.status, note: r.note,
+        requestedOn: r.requestedOn, decidedBy: r.decidedBy, decidedOn: r.decidedOn
+    };
+}
 function listLeave(user) {
-    if (has(user, "EMPLOYEE")) return db.leaveRequests.filter(r => r.pernr === user.pernr);
-    return db.leaveRequests;
+    const rows = has(user, "EMPLOYEE") ? db.leaveRequests.filter(r => r.pernr === user.pernr) : db.leaveRequests;
+    return rows.slice().sort((a, b) => (a.requestedOn < b.requestedOn ? 1 : -1)).map(leaveDto);
 }
 function requestLeave(user, body) {
-    const pernr = user.pernr; const emp = validOn(db.PA0002, pernr, today());
+    const pernr = user.pernr;
+    if (pernr == null) return { _status: 400, message: "This account is not linked to an employee and cannot request leave." };
     if (body.endda < body.begda) return { _status: 400, message: "End date must not be before start date." };
     const days = body.days != null ? body.days : daysBetween(body.begda, body.endda);
-    db.leaveRequests.push({ id: ++db.leaveSeq, pernr, name: emp ? emp.vorna + " " + emp.nachn : String(pernr), type: body.type, begda: body.begda, endda: body.endda, days, status: "Pending", note: body.note || "" });
-    return { _status: 204 };
+    const rec = {
+        id: ++db.leaveSeq, pernr, awart: body.leaveType,
+        begda: body.begda, endda: body.endda, days, status: "Pending", note: body.note || "",
+        requestedOn: new Date().toISOString().slice(0, 19), decidedBy: null, decidedOn: null
+    };
+    db.leaveRequests.push(rec);
+    return { _status: 201, ...leaveDto(rec) };
 }
-function decideLeave(id, approve) {
+function decideLeave(id, approve, user) {
     const r = db.leaveRequests.find(x => x.id === id); if (!r) return { _status: 404, message: "Request not found." };
+    if (r.status !== "Pending") return { _status: 400, message: `Request ${id} has already been ${r.status.toLowerCase()}.` };
     if (approve) {
-        const q = db.PA2006.filter(x => x.pernr === r.pernr && x.ktart === r.type && x.begda <= r.begda && x.endda >= r.begda).sort((a, b) => a.begda < b.begda ? 1 : -1)[0];
-        if (q) { if (q.anzhl - q.kverb < r.days) return { _status: 400, message: "Insufficient quota to approve." }; q.kverb += r.days; }
-        db.PA2001.push({ pernr: r.pernr, begda: r.begda, endda: r.endda, awart: r.type, abwtg: r.days }); r.status = "Approved";
+        const q = db.PA2006.filter(x => x.pernr === r.pernr && x.ktart === r.awart && x.begda <= r.begda && x.endda >= r.begda).sort((a, b) => a.begda < b.begda ? 1 : -1)[0];
+        if (q) { if (q.anzhl - q.kverb < r.days) return { _status: 400, message: "Insufficient leave quota to approve this request." }; q.kverb += r.days; }
+        db.PA2001.push({ pernr: r.pernr, begda: r.begda, endda: r.endda, awart: r.awart, abwtg: r.days, approved: true }); r.status = "Approved";
     } else r.status = "Rejected";
+    r.decidedBy = user ? user.name : "WEBUI";
+    r.decidedOn = new Date().toISOString().slice(0, 19);
     return { _status: 204 };
 }
 const STAGES = ["Screening", "Interview", "Offer", "Hired", "Rejected"];
@@ -564,7 +586,7 @@ function handleApi(req, res, path, q, json, user) {
         if (path === "/api/leave-requests" && m === "GET") return result(res, listLeave(user));
         if (path === "/api/leave-requests" && m === "POST") return result(res, requestLeave(user, json));
         if ((mm = path.match(/^\/api\/leave-requests\/(\d+)\/decide$/)) && m === "POST")
-            return has(user, "HR_ADMIN", "HR_MANAGER") ? result(res, decideLeave(+mm[1], !!json.approve)) : deny();
+            return has(user, "HR_ADMIN", "HR_MANAGER") ? result(res, decideLeave(+mm[1], !!json.approve, user)) : deny();
 
         // ---- Recruitment ----
         if (path === "/api/recruitment/requisitions" && m === "GET")

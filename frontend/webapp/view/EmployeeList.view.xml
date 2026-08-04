@@ -10,6 +10,7 @@
             <Text text="{auth>/displayName} · {auth>/roleName}" class="sapUiTinyMarginEnd"/>
             <Button icon="sap-icon://org-chart" text="{i18n>navOrg}" press=".onNavOrg"/>
             <Button icon="sap-icon://employee-lookup" text="{i18n>navPositions}" press=".onNavPositions"/>
+            <Button icon="sap-icon://calendar" text="{i18n>navLeave}" press=".onNavLeave"/>
             <Button type="Emphasized" icon="sap-icon://add-employee" text="{i18n>hireEmployee}"
                 press=".onOpenHire" visible="{auth>/isAdmin}"/>
             <Button icon="sap-icon://log" tooltip="{i18n>signOut}" press=".onLogout"/>

@@ -60,6 +60,10 @@ sap.ui.define([
             this.getRouter().navTo("positions");
         },
 
+        onNavLeave: function () {
+            this.getRouter().navTo("leave");
+        },
+
         // ---- Hire dialog ---------------------------------------------------
         onOpenHire: function () {
             var oView = this.getView();

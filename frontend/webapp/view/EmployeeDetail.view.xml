@@ -17,6 +17,7 @@
                 visible="{= ${auth>/isAdmin} || ${auth>/isManager} }"/>
             <Button type="Emphasized" icon="sap-icon://calendar" text="{i18n>recordAbsence}" press=".onOpenAbsence"
                 visible="{= ${auth>/isAdmin} || ${auth>/isManager} }"/>
+            <Button icon="sap-icon://calendar" text="{i18n>navLeave}" press=".onNavLeave"/>
             <Button icon="sap-icon://log" tooltip="{i18n>signOut}" press=".onLogout"/>
         </headerContent>
 
