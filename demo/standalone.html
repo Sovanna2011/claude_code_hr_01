@@ -115,9 +115,11 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 60px}
   padding:10px 12px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
 .field{display:flex;flex-direction:column;gap:4px}
 .field label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600}
-input,select{font-family:inherit;font-size:14px;color:var(--text);background:var(--surface);
-  border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:8px 10px}
-input:focus,select:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px var(--accent-soft)}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--text);background:var(--surface);
+  border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:8px 10px;
+  transition:border-color .12s ease,box-shadow .12s ease}
+input:hover,select:hover,textarea:hover{border-color:var(--faint)}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
 .search{position:relative;flex:1;min-width:220px}
 .search input{width:100%;padding-left:34px}
 .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;fill:var(--faint)}
@@ -321,18 +323,21 @@ a.mail:hover{text-decoration:underline}
 .modal-bg{position:fixed;inset:0;background:rgba(15,25,35,.45);backdrop-filter:blur(2px);
   display:grid;place-items:center;z-index:50;padding:16px;animation:fade .15s ease}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-.modal{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
-  width:min(520px,100%);max-height:90vh;display:flex;flex-direction:column;animation:pop .18s ease}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+  width:min(600px,100%);max-height:90vh;display:flex;flex-direction:column;animation:pop .18s ease}
 @keyframes pop{from{transform:translateY(8px) scale(.98);opacity:0}to{transform:none;opacity:1}}
-.modal h3{margin:0;padding:16px 20px;border-bottom:1px solid var(--border);font-size:16px}
-.modal .body{padding:18px 20px;overflow:auto;display:flex;flex-direction:column;gap:14px}
-.modal .foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;
+.modal h3{margin:0;padding:16px 22px;border-bottom:1px solid var(--border);font-size:16px;font-weight:700;
+  letter-spacing:-.1px;display:flex;align-items:center;gap:9px}
+.modal h3::before{content:"";width:4px;height:18px;border-radius:3px;background:var(--accent);flex:0 0 auto}
+.modal .body{padding:20px 22px;overflow:auto;display:flex;flex-direction:column;gap:16px}
+.modal .foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;
   background:var(--surface-2)}
-.modal .grp{display:flex;flex-direction:column;gap:5px}
-.modal .grp label{font-size:12px;color:var(--muted);font-weight:600}
-.modal .grp label .req{color:var(--bad)}
-.modal .grp input,.modal .grp select{width:100%}
-.modal .grp input[type=checkbox]{width:auto;flex:0 0 auto;margin:0}
+.modal .grp{display:flex;flex-direction:column;gap:6px}
+.modal .grp label{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.1px}
+.modal .grp label .req{color:var(--bad);margin-left:2px}
+.modal .grp input,.modal .grp select,.modal .grp textarea{width:100%;min-height:42px}
+.modal .grp textarea{min-height:78px;resize:vertical;line-height:1.45}
+.modal .grp input[type=checkbox]{width:auto;flex:0 0 auto;margin:0;min-height:auto;height:auto;accent-color:var(--accent)}
 .modal .grp label.chk{flex-direction:row;align-items:center;gap:8px;cursor:pointer;margin-top:26px}
 .rolechk{cursor:pointer;justify-content:flex-start;text-align:left}
 .modal .hint{font-size:12.5px;color:var(--muted);background:var(--surface-3);border-radius:var(--radius-sm);
@@ -341,9 +346,9 @@ a.mail:hover{text-decoration:underline}
 .hint{font-size:12.5px;color:var(--muted);background:var(--surface-3);border-radius:var(--radius-sm);
   padding:9px 12px;display:flex;gap:8px;align-items:flex-start}
 .hint svg{width:15px;height:15px;fill:var(--info);flex:0 0 auto;margin-top:1px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.modal .grp.sec{margin-top:2px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
-  color:var(--accent);font-weight:700;border-top:1px solid var(--border);padding-top:12px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.modal .grp.sec{margin-top:4px;font-size:11px;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--accent);font-weight:700;border-top:1px solid var(--border);padding-top:13px}
 
 /* ---- Toast ---- */
 #toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:80;
@@ -374,7 +379,8 @@ a.mail:hover{text-decoration:underline}
 .login .tag{color:var(--muted);font-size:13px;margin:2px 0 22px}
 .login .grp{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
 .login .grp label{font-size:12px;color:var(--muted);font-weight:600}
-.login input{width:100%}
+.login .grp label{font-weight:600}
+.login input{width:100%;min-height:44px}
 .login .btn{width:100%;justify-content:center;margin-top:4px}
 .login .err{background:var(--bad-bg);color:var(--bad);border-radius:8px;padding:9px 12px;font-size:13px;margin-bottom:14px;display:none}
 .demo-users{margin-top:20px;border-top:1px solid var(--border);padding-top:16px}
