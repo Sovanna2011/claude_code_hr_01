@@ -1,0 +1,209 @@
+# HR Module — Human Capital Management (SAP ECC 6.0 EHP8 style) · Oracle edition
+
+> **Project 02 (Oracle).** This is the **Oracle Database** edition of the HR
+> module — a port of `claude_code_hr_01` (SQL Server). The frontend, demo and
+> the C# services are unchanged; the database scripts are rewritten for Oracle
+> and the backend uses the ODP.NET EF Core provider. See **[Oracle port
+> notes](#oracle-port-notes)** below (including the unverified-port caveat).
+
+A full-stack **HR / HCM module** modelled on the **SAP ECC 6.0 EHP8** Human
+Capital Management application, built on an open stack:
+
+- **Database** — **Oracle Database** 19c/21c/23ai (or XE) — SAP-faithful schema:
+  PA infotypes, Organizational Management, customizing/T-tables, PL/SQL stored
+  procedures, views
+- **Backend** — **C# / ASP.NET Core 8** Web API with **Entity Framework Core**
+  (Oracle.EntityFrameworkCore / ODP.NET)
+- **Frontend** — **SAPUI5** master–detail application, re-skinned to an **Odoo
+  Enterprise**-inspired look (plum brand, squared surfaces) over the Horizon base
+
+It covers the core HCM sub-modules plus common HR processes:
+
+- **PA — Personnel Administration**: infotypes 0000, 0001, 0002, 0006, 0007,
+  0008, 0009, 0016, 0019, 0021, 0022, 0023, 0024, 0105 with SAP time-slicing
+  and time-constraint-1 updates
+- **OM — Organizational Management**: objects (HRP1000) and relationships
+  (HRP1001) — org units, positions, jobs, **reporting lines (line manager)**,
+  chief positions
+- **PT — Time Management**: absences (2001), attendances (2002), quotas (2006)
+- **Leave Management**: request / approval workflow (ESS → MSS/HR)
+- **Recruitment**: job requisitions and applicant pipeline
+- **Training & Event Management**: course catalog and bookings
+- **ESS / MSS**: employee and manager self-service
+- **Authentication & authorization**: JWT login with three roles
+  (HR Administrator, HR Manager, Employee) gating both UI and API
+
+See **[docs/architecture.md](docs/architecture.md)** for the full design, and the
+**[User Manual](docs/USER_MANUAL.md)** for step-by-step end-user instructions.
+
+## Try it in one command (demo)
+
+Want to see it running without installing .NET or SQL Server? A self-contained
+demo serves the real SAPUI5 app plus a faithful stand-in of the API from a
+single zero-dependency Node process:
+
+```bash
+node demo/server.js       # then open http://localhost:8080
+```
+
+See **[demo/README.md](demo/README.md)** for details. For the full production
+stack (C# + Oracle), follow the setup steps below.
+
+```
+Claude-Code/
+├── database/                 # Oracle SQL*Plus scripts (run via run_all.sql)
+│   ├── 01_schema.sql · 02_seed.sql · 03_views_procedures.sql
+│   └── run_all.sql           # SQL*Plus master installer
+├── backend/HRModule.Api/     # ASP.NET Core 8 Web API (EF Core)
+│   ├── Models/               # EmployeeMaster, Infotypes, OrgManagement, Customizing
+│   ├── Data/HRDbContext.cs   # EF Core mappings (schema [HR])
+│   ├── DTOs/ Services/ Controllers/ Middleware/
+│   └── Program.cs · appsettings.json
+├── frontend/                 # SAPUI5 (Fiori) app
+│   ├── webapp/               # Component, manifest, views, controllers, fragments, i18n
+│   ├── ui5.yaml · package.json
+└── docs/architecture.md
+```
+
+## Prerequisites
+
+| Tool | Version | Used for |
+|------|---------|----------|
+| Oracle Database | 19c / 21c / 23ai / XE | database |
+| .NET SDK | 8.0 | backend build/run |
+| Node.js | 18+ | UI5 dev server / build |
+
+## 1. Database
+
+Run the master installer with **SQL\*Plus** or **SQLcl**, connected as a
+privileged user (it creates the `HR` schema/user — clean install, drop &
+recreate):
+
+```bash
+cd database
+sqlplus system/<password>@localhost:1521/XEPDB1 @run_all.sql
+```
+
+The scripts run in order:
+
+| Script | Purpose |
+|--------|---------|
+| `01_schema.sql` | Creates the `HR` user/schema and every table + index |
+| `02_seed.sql`   | Reference/customizing data, org structure, demo employees, users |
+| `03_views_procedures.sql` | Views (`vw_EmployeeCurrent`, `vw_LeaveBalance`) + PL/SQL procedures |
+
+This creates the `HR` schema, all tables, seed customizing data, a small
+organizational structure, two demo employees (PERNR **1000** & **1001**),
+PL/SQL stored procedures and reporting views.
+
+## 2. Backend API
+
+Set the connection string in `backend/HRModule.Api/appsettings.json`
+(`ConnectionStrings:HRModule`) if it differs from the local default, then:
+
+```bash
+cd backend/HRModule.Api
+dotnet restore
+dotnet run
+```
+
+The API starts on `http://localhost:5000` (Swagger UI at `/swagger` in
+Development). Health check: `GET /health`.
+
+## Oracle port notes
+
+This edition was ported from the SQL Server original. What changed and what to
+be aware of:
+
+**Database (`database/`)** — rewritten for Oracle:
+- `NVARCHAR→NVARCHAR2`, `INT→NUMBER(10)`, `BIGINT→NUMBER(19)`,
+  `DECIMAL→NUMBER`, `BIT→NUMBER(1)`, `DATETIME2→TIMESTAMP`, `TIME→INTERVAL`.
+- `IDENTITY` → `GENERATED BY DEFAULT ON NULL AS IDENTITY`; the computed OT
+  category → an Oracle **virtual column**.
+- `MERGE`/multi-row `VALUES` → `INSERT` / `INSERT ALL`; `GETDATE()`/
+  `SYSDATETIME()` → `SYSDATE`/`SYSTIMESTAMP`; `ISNULL`→`NVL`; `TOP n`→
+  `FETCH FIRST n ROWS ONLY`; `GO` batches removed; T-SQL procs → PL/SQL.
+- **Clean-install model**: `run_all.sql` drops and recreates the `HR`
+  user/schema, so no `IF OBJECT_ID` guards are needed.
+
+**Backend (`backend/`)**:
+- `Oracle.EntityFrameworkCore` (ODP.NET) replaces the SQL Server provider;
+  `UseOracle(...)` and an Oracle connection string.
+- `InfotypeBase` now defaults blank SAP key fields (`SUBTY`/`OBJPS`) to a
+  single space, because **Oracle treats `''` as `NULL`** and these columns are
+  part of the primary key.
+
+**Frontend & demo** — unchanged (database-agnostic).
+
+> **Caveats (please read).** This port has **not been executed against a live
+> Oracle instance** (none was available in the porting environment), so treat
+> the SQL and provider wiring as a solid starting point, not a verified build.
+> One integration step remains: Oracle folds unquoted identifiers to
+> UPPER CASE, while the ODP.NET EF Core provider quotes identifiers preserving
+> the model's casing. Pure-upper-case names (`PA0000`, `T001`, …) match, but
+> mixed-case ones (`EmployeeMaster`, `DomainValue`, `LeaveRequest`, and mixed
+> columns) need alignment — either create those objects with quoted mixed-case
+> names, or map the EF Core model to upper-case via a naming convention.
+
+Quick smoke test:
+
+```bash
+curl http://localhost:5000/api/employees
+curl http://localhost:5000/api/orgunits/50000001/structure
+curl http://localhost:5000/api/leave-requests
+```
+
+## 3. Frontend (SAPUI5)
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+Opens `http://localhost:8080`. The dev server proxies `/api/*` to the backend on
+port 5000 (see `ui5.yaml`), so no CORS setup is needed for local development.
+
+> The app bootstraps SAPUI5 from the public CDN (`ui5.sap.com`). For an
+> air-gapped setup, point the bootstrap `src` in `webapp/index.html` at a local
+> UI5 runtime and serve it alongside the app.
+
+## Features
+
+**Personnel Administration**
+- Employee list with name/PERNR search and **key-date** selection (time travel)
+- Full master-data detail across all infotypes in a tabbed layout
+- **Hire** action (PA40-style) — creates a new personnel number + IT0000/1/2
+- **Change Personal Data** (IT0002) — creates a new time slice, delimits prior
+- **Organizational reassignment** (IT0001) — delimits current, carries fields forward
+
+**Organizational Management**
+- Org structure **tree** with head counts and manager per unit
+- **Positions** list with job assignment, holder and vacancy status
+
+**Time Management**
+- Leave-balance display (entitlement / deducted / remaining)
+- **Record absence** (IT2001) with automatic quota deduction and validation
+
+**Leave Management (ESS / MSS)**
+- **Request leave** — employees submit requests against a leave (absence) type
+- **Approve / reject** — HR / managers action pending requests from a worklist
+- On approval the leave is posted as an absence (IT2001) and deducted from the
+  matching quota (IT2006); approval is rejected when the remaining balance is
+  insufficient. Employees see only their own requests; HR / managers see all.
+
+## Business rules of note (SAP fidelity)
+- **Time slicing** — reads return the record valid on the key date.
+- **Time constraint 1** — updates delimit the open record at `newBegin − 1` and
+  insert a new open-ended slice; no overlaps.
+- **Number ranges** — personnel numbers drawn atomically from `NumberRange`.
+- **Quota deduction** — an absence deducts from the matching IT2006 quota and is
+  rejected if the remaining balance is insufficient.
+
+## Demo data
+| PERNR | Name | Position | Org unit |
+|-------|------|----------|----------|
+| 1000 | Andreas Schmidt | Head of Human Resources | Human Resources |
+| 1001 | Linda Nguyen | HR Specialist | Human Resources |
+
+Org units: **Executive Board** → { **Human Resources**, **Finance** }.

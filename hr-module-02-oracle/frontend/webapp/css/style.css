@@ -1,0 +1,114 @@
+/* ============================================================================
+   HR Module — Odoo Enterprise-inspired theme, layered over SAP Horizon.
+
+   Matches the Odoo form UX (teal actions, plum app navbar, underlined form
+   fields, squared surfaces, Roboto, light warm-gray canvas) by overriding the
+   Horizon theming variables (--sapXxx) plus a few control-level tweaks. No
+   control markup changes are required.
+
+   Palette: Odoo plum #714B67 (chrome / navbar) + Odoo teal #00A09D (actions,
+   links, focus) — the two brand colours shown in the Odoo backend.
+   ============================================================================ */
+
+:root,
+.sapUiBody {
+    /* ---- Accent / actions (Odoo teal #00A09D) ----------------------------- */
+    --sapBrandColor: #00A09D;
+    --sapHighlightColor: #00A09D;
+    --sapLinkColor: #00A09D;
+    --sapActiveColor: #017E7B;
+    --sapSelectedColor: #00A09D;
+    --sapContent_FocusColor: #00A09D;
+
+    /* ---- Emphasized (primary) buttons — Odoo teal "SAVE" ------------------ */
+    --sapButton_Emphasized_Background: #00A09D;
+    --sapButton_Emphasized_BorderColor: #00A09D;
+    --sapButton_Emphasized_TextColor: #ffffff;
+    --sapButton_Emphasized_Hover_Background: #017E7B;
+    --sapButton_Emphasized_Hover_BorderColor: #017E7B;
+    --sapButton_Emphasized_Active_Background: #016360;
+
+    /* ---- The page header acts as the Odoo app navbar (plum, white text) ---- */
+    --sapPageHeader_Background: #714B67;
+    --sapPageHeader_TextColor: #ffffff;
+    --sapPageHeader_BorderColor: #714B67;
+    --sapShell_Background: #714B67;
+    --sapShellColor: #ffffff;
+    --sapShell_TextColor: #ffffff;
+
+    /* ---- Canvas / surfaces (Odoo light warm gray + white sheets) ---------- */
+    --sapBackgroundColor: #f0eeee;
+    --sapGroup_ContentBackground: #ffffff;
+    --sapObjectHeader_Background: #ffffff;
+    --sapList_Background: #ffffff;
+    --sapList_HeaderBackground: #ffffff;
+    --sapTile_Background: #ffffff;
+
+    /* ---- Squared corners (Odoo is flatter than Horizon) ------------------- */
+    --sapButton_BorderCornerRadius: 4px;
+    --sapField_BorderCornerRadius: 4px;
+    --sapElement_BorderCornerRadius: 4px;
+    --sapContainer_BorderCornerRadius: 4px;
+    --sapTile_BorderCornerRadius: 4px;
+
+    /* ---- Typography ------------------------------------------------------- */
+    --sapFontFamily: "Roboto", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* On the plum page-header bar, an Emphasized button (e.g. "Hire") would be
+   teal-on-plum with low contrast; render it as a white chip with teal text. */
+.sapMPage > header.sapMBar .sapMBtnEmphasized .sapMBtnInner {
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #00A09D !important;
+}
+.sapMPage > header.sapMBar .sapMBtnTransparent:hover .sapMBtnInner {
+    background: rgba(255, 255, 255, .14) !important;
+}
+
+/* ---- Odoo form fields: underline only, teal underline on focus ----------
+   Scoped to Forms/SimpleForms (the edit dialogs) so toolbars/search keep their
+   boxed look, exactly as in the Odoo form view. */
+.sapUiForm .sapMInputBaseContentWrapper,
+.sapUiForm .sapMComboBoxBase .sapMInputBaseContentWrapper,
+.sapUiForm .sapMDPInnerInput,
+.sapUiForm .sapMSltInner {
+    border-width: 0 0 1px 0;
+    border-radius: 0;
+    background: transparent;
+}
+.sapUiForm .sapMInputBaseContentWrapper.sapMFocus,
+.sapUiForm .sapMInputBaseContentWrapperState,
+.sapUiForm .sapMInputBaseContentWrapper:focus-within {
+    border-bottom: 2px solid #00A09D;
+    box-shadow: none;
+}
+
+/* List view: Odoo-style plain header text and a soft teal row hover. */
+.sapMListTblHeaderCell {
+    text-transform: none;
+}
+.sapMLIB.sapMLIBHoverable:hover {
+    background: #e2f3f2;
+}
+
+/* IconTabBar → Odoo "notebook": teal text + underline on the selected tab. */
+.sapMITBSelected .sapMITBText {
+    color: #00A09D;
+}
+
+/* Object header rendered as a white Odoo form "sheet". */
+#empHeader,
+.sapMObjectHeader {
+    background-color: var(--sapObjectHeader_Background, #ffffff);
+}
+
+/* Give tree items a little breathing room. */
+.sapMTree .sapMLIB {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+.sapMTextBold {
+    font-weight: bold;
+}
