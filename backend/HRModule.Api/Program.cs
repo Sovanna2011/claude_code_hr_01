@@ -21,7 +21,7 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddDbContext<HRDbContext>(opt =>
-    opt.UseSqlServer(builder.Configuration.GetConnectionString("HRModule")));
+    opt.UseOracle(builder.Configuration.GetConnectionString("HRModule")));
 
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IOrgService, OrgService>();
@@ -59,7 +59,7 @@ builder.Services.AddAuthorization(o =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "HR Module API", Version = "v1",
-        Description = "SAP ECC 6.0 EHP8-style HCM module (PA, OM, PT) - C# / SQL Server backend for SAPUI5." }));
+        Description = "SAP ECC 6.0 EHP8-style HCM module (PA, OM, PT) - C# / Oracle backend for SAPUI5." }));
 
 var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
                   ?? new[] { "http://localhost:8080" };

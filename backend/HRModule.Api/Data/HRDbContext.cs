@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 namespace HRModule.Api.Data;
 
 /// <summary>
-/// EF Core context mapping the HR module tables. All objects live in the SQL
-/// schema [HR], mirroring the SAP HR application area. Infotypes use the
+/// EF Core context mapping the HR module tables. All objects live in the Oracle
+/// schema HR, mirroring the SAP HR application area. Infotypes use the
 /// composite SAP key (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, SEQNR).
 /// </summary>
 public class HRDbContext : DbContext
@@ -147,6 +147,23 @@ public class HRDbContext : DbContext
             e.HasKey(x => x.UserId);
             e.HasIndex(x => x.Username).IsUnique();
         });
+
+        // ---- Oracle identifier folding ---------------------------------
+        // Oracle stores unquoted identifiers in UPPERCASE, while EF Core quotes
+        // the identifiers it generates and preserves their case. To keep the
+        // provider-generated SQL in step with the (clean, unquoted, uppercase)
+        // Oracle DDL in database/*.sql, force every table, schema and column
+        // name to upper case. The SAP business columns are already upper case;
+        // this only affects the helper columns (HireDate, IsActive, LineNo, ...).
+        foreach (var entity in mb.Model.GetEntityTypes())
+        {
+            if (entity.GetTableName() is string table)
+                entity.SetTableName(table.ToUpperInvariant());
+            if (entity.GetSchema() is string schema)
+                entity.SetSchema(schema.ToUpperInvariant());
+            foreach (var property in entity.GetProperties())
+                property.SetColumnName(property.Name.ToUpperInvariant());
+        }
 
         base.OnModelCreating(mb);
     }

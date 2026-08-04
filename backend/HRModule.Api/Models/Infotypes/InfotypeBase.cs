@@ -10,10 +10,13 @@ public abstract class InfotypeBase
     public int PERNR { get; set; }
 
     /// <summary>Subtype (SUBTY).</summary>
-    public string SUBTY { get; set; } = string.Empty;
+    // SAP initialises character key fields to SPACE. On Oracle this matters: an
+    // empty string '' is stored as NULL, which the NOT NULL infotype key would
+    // reject, so the initial value for SUBTY/OBJPS/SPRPS is a single space.
+    public string SUBTY { get; set; } = " ";
 
     /// <summary>Object identification (OBJPS).</summary>
-    public string OBJPS { get; set; } = string.Empty;
+    public string OBJPS { get; set; } = " ";
 
     /// <summary>Lock indicator (SPRPS); 'X' means the record is locked.</summary>
     public string SPRPS { get; set; } = " ";

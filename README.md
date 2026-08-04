@@ -3,8 +3,8 @@
 A full-stack **HR / HCM module** modelled on the **SAP ECC 6.0 EHP8** Human
 Capital Management application, built on an open stack:
 
-- **Database** — Microsoft **SQL Server** (SAP-faithful schema: PA infotypes,
-  Organizational Management, customizing/T-tables, stored procedures, views)
+- **Database** — **Oracle Database** (SAP-faithful schema: PA infotypes,
+  Organizational Management, customizing/T-tables, PL/SQL procedures, views)
 - **Backend** — **C# / ASP.NET Core 8** Web API with **Entity Framework Core**
 - **Frontend** — **SAPUI5** (Fiori, Horizon theme) master–detail application
 
@@ -29,7 +29,7 @@ See **[docs/architecture.md](docs/architecture.md)** for the full design, and th
 
 ## Try it in one command (demo)
 
-Want to see it running without installing .NET or SQL Server? A self-contained
+Want to see it running without installing .NET or Oracle? A self-contained
 demo serves the real SAPUI5 app plus a faithful stand-in of the API from a
 single zero-dependency Node process:
 
@@ -38,16 +38,16 @@ node demo/server.js       # then open http://localhost:8080
 ```
 
 See **[demo/README.md](demo/README.md)** for details. For the full production
-stack (C# + SQL Server), follow the setup steps below.
+stack (C# + Oracle), follow the setup steps below.
 
 ```
 Claude-Code/
-├── database/                 # SQL Server scripts (run in numeric order)
-│   ├── 01_create_database.sql … 08_views.sql
-│   └── run_all.sql           # SQLCMD master installer
-├── backend/HRModule.Api/     # ASP.NET Core 8 Web API (EF Core)
+├── database/                 # Oracle SQL / PL-SQL scripts (run in numeric order)
+│   ├── 01_create_schema.sql … 13_schema_payroll_time.sql
+│   └── run_all.sql           # SQL*Plus / SQLcl master installer
+├── backend/HRModule.Api/     # ASP.NET Core 8 Web API (EF Core, Oracle provider)
 │   ├── Models/               # EmployeeMaster, Infotypes, OrgManagement, Customizing
-│   ├── Data/HRDbContext.cs   # EF Core mappings (schema [HR])
+│   ├── Data/HRDbContext.cs   # EF Core mappings (schema HR)
 │   ├── DTOs/ Services/ Controllers/ Middleware/
 │   └── Program.cs · appsettings.json
 ├── frontend/                 # SAPUI5 (Fiori) app
@@ -60,23 +60,27 @@ Claude-Code/
 
 | Tool | Version | Used for |
 |------|---------|----------|
-| SQL Server | 2019+ (or Azure SQL / LocalDB) | database |
+| Oracle Database | 19c / 21c / 23ai (Express / Free edition is fine) | database |
 | .NET SDK | 8.0 | backend build/run |
 | Node.js | 18+ | UI5 dev server / build |
 
 ## 1. Database
 
-Run the scripts in order (idempotent). With **sqlcmd**:
+Run the scripts in order (idempotent) from a privileged account (e.g. `SYSTEM`)
+against your target pluggable database. With **SQL\*Plus** (or **SQLcl**):
 
 ```bash
 cd database
-sqlcmd -S localhost -i run_all.sql
+sqlplus system/<password>@//localhost:1521/XEPDB1 @run_all.sql
 ```
 
-Or open `01…08` individually in SQL Server Management Studio. This creates the
-`HRModule` database, the `HR` schema, all tables, seed customizing data, a small
-organizational structure, two demo employees (PERNR **1000** & **1001**),
-stored procedures and reporting views.
+`01_create_schema.sql` creates the **`HR`** user/schema (default password
+`HrModule#2024` — change it outside a throwaway dev box); the remaining scripts
+create, fully qualified as `HR.<name>`, all tables, seed customizing data, a
+small organizational structure, two demo employees (PERNR **1000** & **1001**),
+PL/SQL procedures and reporting views. You can also open the files individually
+in SQL Developer / SQLcl. Adjust the service name (`XEPDB1`, `FREEPDB1`, …) to
+match your instance.
 
 ## 2. Backend API
 
