@@ -52,13 +52,14 @@
 *{box-sizing:border-box}
 html,body{max-width:100%;overflow-x:hidden}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);
-  font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  padding-top:var(--shell-h,58px)}
 .num{font-variant-numeric:tabular-nums}
 button{font-family:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 
 /* ---- ShellBar ---- */
-.shell{position:sticky;top:0;z-index:20;background:var(--shell-bg);
+.shell{position:fixed;top:0;left:0;right:0;width:100%;z-index:20;background:var(--shell-bg);
   color:#fff;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   padding:6px 16px;min-height:52px;box-shadow:var(--shadow-sm)}
 .shell .brandtext{white-space:nowrap;font-weight:600;font-size:14px;opacity:.95}
@@ -828,7 +829,8 @@ function seed(){return{
    {pernr:1001,date:"2026-06-14",hours:3.0},   // Sun - Sunday OT
    {pernr:1001,date:"2026-12-25",hours:2.0}],  // Public holiday OT
   // Payroll: rates & OT multipliers (SAP-style customizing)
-  payroll:{taxRate:0.15,socialRate:0.09,otMult:{normal:1.25,sunday:1.5,holiday:2.0},monthlyFactor:4.33,cutoffDay:26},
+  payroll:{taxRate:0.15,socialRate:0.09,otMult:{normal:1.25,sunday:1.5,holiday:2.0},monthlyFactor:4.33,cutoffDay:26,
+    periodFreq:"monthly",periodStart:"2026-01",periodCount:12,openPeriod:"2026-06"},
   photos:{},  // pernr -> data URI (uploaded photo); default is a generated avatar
   attachments:[],  // {id,kind,pernr,refId,name,mime,size,data,uploaded}
   // Daily attendance register: one row per employee per day
@@ -1164,16 +1166,7 @@ function navGroups(role){
       ["reports","Employee Attendance",{rep:"empatt"}],
       ["reports","Daily Attendance",{rep:"matrix"}]
     ]},
-    {label:"Admin Center",ico:"doc",items:[
-      ["config","Configuration"],
-      ["config","Actions · IT0000",{cfg:"action"}],
-      ["config","Payroll Run",{cfg:"payrollcfg"}],
-      ["config","Enterprise Structure",{cfg:"company"}],
-      ["config","Personnel Structure",{cfg:"groups"}],
-      ["config","Organizational Units",{cfg:"org"}],
-      ["config","Users & Roles",{cfg:"users"}],
-      ["config","Authorizations",{cfg:"auth"}]
-    ]}
+    {label:"Admin Center",ico:"doc",items:CONFIG_GROUPS.map(g=>["config",g.label,{grp:g.label,cfg:g.tabs[0][0]}])}
   ];
   if(role==="HR_MANAGER")return [
     {label:"Home",ico:"home",items:[["home","Home"]]},
@@ -1199,13 +1192,13 @@ function navBar(){
   const groups=navGroups(SESSION.role);
   const va=v=>S.view===v||(S.view==="detail"&&v==="list");
   // active state for an item, honouring an optional sub-selection (config tab or report)
-  const ia=(v,o)=>{o=o||{};return o.cfg?(S.view==="config"&&S.cfgTab===o.cfg):o.rep?(S.view==="reports"&&(S.rep||"ot")===o.rep):va(v);};
+  const ia=(v,o)=>{o=o||{};return o.grp?(S.view==="config"&&(S.cfgGroup||CONFIG_GROUPS[0].label)===o.grp):o.cfg?(S.view==="config"&&S.cfgTab===o.cfg):o.rep?(S.view==="reports"&&(S.rep||"ot")===o.rep):va(v);};
   $("#nav").innerHTML=groups.map((g,gi)=>{
     if(g.items.length===1){const v=g.items[0][0];
       return `<button data-nav="${v}" class="navitem ${va(v)?'active':''}">${I[g.ico]}${esc(t(g.label))}</button>`;}
     const ga=g.items.some(([v,,o])=>ia(v,o));
     return `<div class="navgroup"><button class="navitem navtop ${ga?'active':''}" data-navmenu="${gi}">${I[g.ico]}${esc(t(g.label))} ▾</button>`+
-      `<div class="nav-sub" id="navSub${gi}">${g.items.map(([v,l,o])=>{o=o||{};return `<button class="nav-subitem ${ia(v,o)?'active':''}" data-nav="${v}"${o.cfg?` data-cfgtab="${o.cfg}"`:""}${o.rep?` data-rep="${o.rep}"`:""}>${esc(t(l))}</button>`;}).join("")}</div></div>`;
+      `<div class="nav-sub" id="navSub${gi}">${g.items.map(([v,l,o])=>{o=o||{};return `<button class="nav-subitem ${ia(v,o)?'active':''}" data-nav="${v}"${o.grp?` data-cfggrp="${esc(o.grp)}"`:""}${o.cfg?` data-cfgtab="${o.cfg}"`:""}${o.rep?` data-rep="${o.rep}"`:""}>${esc(t(l))}</button>`;}).join("")}</div></div>`;
   }).join("");
   requestAnimationFrame(syncShellH);
 }
@@ -2172,19 +2165,63 @@ function payrollCfgDialog(){
     <div class="grp"><label>OT × public holiday</label><input type="number" step="0.05" id="pc_oth" value="${p.otMult.holiday}"></div>
   </div>`,`<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="payrollcfg">Save</button>`);
 }
+/* Payroll period calendar configuration — frequency, first period, cut-off, and the open period.
+   Shows the generated periods with From–To dates and status; periods can be opened/closed in sequence. */
+function renderPayperiodCfg(){
+  const p=db.payroll;const admin=isAdmin();
+  const periods=payrollPeriods();
+  const freqLbl={monthly:"Monthly",quarterly:"Quarterly"}[p.periodFreq||"monthly"];
+  const openP=periods.find(x=>x.status==="Open");
+  const settings=[
+    ["Period frequency",freqLbl],
+    ["Period cut-off","Day <b>"+p.cutoffDay+"</b> → "+(p.cutoffDay-1)+" (e.g. 26 May – 25 Jun)"],
+    ["First period",periods[0]?`<b>${esc(periods[0].label)}</b> · ${fmtDate(periods[0].from)} – ${fmtDate(periods[0].to)}`:"—"],
+    ["Number of periods",p.periodCount],
+    ["Currently open period",openP?`<b>${esc(openP.label)}</b> · ${fmtDate(openP.from)} – ${fmtDate(openP.to)}`:"— (all closed)"]
+  ];
+  const pill=s=>`<span class="pill ${s==="Open"?"good":s==="Closed"?"":"warn"}">${s}</span>`;
+  const rows=periods.map(x=>`<tr>
+    <td class="num">${x.idx}</td>
+    <td><b>${esc(x.label)}</b> <span class="muted">${esc(x.ym)}</span></td>
+    <td>${fmtDate(x.from)}</td><td>${fmtDate(x.to)}</td>
+    <td class="num">${x.days}</td>
+    <td>${pill(x.status)}</td>
+    ${admin?`<td class="td-r nowrap">${x.status==="Planned"?`<button class="btn xs primary" data-act="periodOpen" data-ym="${x.ym}">Open</button>`:x.status==="Open"?`<button class="btn xs" data-act="periodClose" data-ym="${x.ym}">Close</button>`:`<span class="muted">—</span>`}</td>`:""}
+  </tr>`).join("");
+  return `<div class="card"><div class="card-head"><h2>Payroll period configuration</h2><div class="spacer"></div>${admin?`<button class="btn sm primary" data-act="payperiodcfg">${I.edit} Edit period settings</button>`:""}</div>
+    <div class="hint">${I.info}<span>Payroll periods follow the rolling cut-off (day ${p.cutoffDay} → ${p.cutoffDay-1}). Only one period is <b>Open</b> for processing at a time; opening the next period closes the current one.</span></div>
+    <div class="subcard">${dl(settings)}</div>
+    <div class="tbl-wrap" style="margin-top:12px"><table><thead><tr><th>#</th><th>Period</th><th>From</th><th>To</th><th title="Mon–Fri working days">Work days</th><th>Status</th>${admin?`<th class="th-r">Action</th>`:""}</tr></thead>
+    <tbody>${rows}</tbody></table></div></div>`;
+}
+function payperiodCfgDialog(){
+  const p=db.payroll;const periods=payrollPeriods();
+  const openOpts=periods.map(x=>`<option value="${x.ym}" ${(p.openPeriod||"")===x.ym?"selected":""}>${esc(x.label)} · ${fmtDate(x.from)} – ${fmtDate(x.to)}</option>`).join("");
+  modal("Edit payroll period configuration",`<div class="two">
+    <div class="grp"><label>Period frequency</label><select id="pp_freq"><option value="monthly" ${(p.periodFreq||"monthly")==="monthly"?"selected":""}>Monthly</option><option value="quarterly" ${p.periodFreq==="quarterly"?"selected":""}>Quarterly</option></select></div>
+    <div class="grp"><label>Period cut-off day (1–28) <span class="req">*</span></label><input type="number" id="pp_cut" min="1" max="28" value="${p.cutoffDay}"></div>
+    <div class="grp"><label>First period (month) <span class="req">*</span></label><input type="month" id="pp_start" value="${esc(p.periodStart||"2026-01")}"></div>
+    <div class="grp"><label>Number of periods (1–60) <span class="req">*</span></label><input type="number" id="pp_count" min="1" max="60" value="${p.periodCount||12}"></div>
+    <div class="grp" style="grid-column:1/-1"><label>Currently open period</label><select id="pp_open">${openOpts}</select></div>
+  </div>`,`<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="payperiodcfg">Save</button>`);
+}
 /* Admin Center configuration grouped into SuccessFactors-style categories. */
 const CONFIG_GROUPS=[
   {label:"Personnel Actions",tabs:[["action","Action types · IT0000"],["actreason","Action reasons"],["empstat","Employment status"]]},
   {label:"Enterprise Structure",tabs:[["company","Company codes"],["parea","Personnel areas"],["cost","Cost centers"],["dept","Departments"],["org","Organizational units"]]},
   {label:"Personnel Structure",tabs:[["groups","Employee groups"],["subgroups","Employee subgroups"]]},
-  {label:"Payroll & Currency",tabs:[["payrollcfg","Payroll Run"],["currency","Currencies"],["exchange","Exchange rates"]]},
+  {label:"Payroll & Currency",tabs:[["payrollcfg","Payroll Run"],["payperiod","Payroll periods"],["currency","Currencies"],["exchange","Exchange rates"]]},
   {label:"Master Data",tabs:[["nat","Countries"],["region","Regions"],["city","Cities"],["lang","Languages"],["anred","Forms of address"],["titles","Titles"],["addrtype","Address types"],["commtype","Comm. types"],["famtype","Family types"]]},
   {label:"Lifecycle Value Lists",tabs:[["probst","Probation statuses"],["transreason","Transfer reasons"],["promoreason","Promotion reasons"],["termreason","Termination reasons"],["offchk","Offboarding items"],["salreason","Salary adj. reasons"]]},
   {label:"Localization",tabs:[["syslang","System languages"],["numrange","Number ranges"]]},
   {label:"Security",tabs:[["roles","Roles"],["users","Users & roles"],["auth","Authorizations"]]}
 ];
 function renderConfig(){
-  if(!S.cfgTab)S.cfgTab="company";
+  // Each Admin Center sub-menu item opens one config group; show only that group's tabs.
+  let grp=CONFIG_GROUPS.find(g=>g.label===S.cfgGroup)||CONFIG_GROUPS[0];
+  S.cfgGroup=grp.label;
+  // Keep the active tab within the selected group; default to its first tab.
+  if(!grp.tabs.some(([id])=>id===S.cfgTab))S.cfgTab=grp.tabs[0][0];
   const T=(id,l)=>`<button class="btn sm ${S.cfgTab===id?'primary':''}" data-cfg="${id}">${l}</button>`;
   let body="";
   if(S.cfgTab==="auth")body=renderAuthMatrix();
@@ -2192,10 +2229,11 @@ function renderConfig(){
   else if(S.cfgTab==="users")body=cfgUsersTable();
   else if(S.cfgTab==="org")body=cfgOrgTable();
   else if(S.cfgTab==="payrollcfg")body=renderPayrollCfg();
+  else if(S.cfgTab==="payperiod")body=renderPayperiodCfg();
   else if(CFG_SCHEMA[S.cfgTab])body=cfgTable(S.cfgTab);
-  const groupsHtml=`<div class="cfg-groups">${CONFIG_GROUPS.map(g=>
-    `<div class="cfg-grp"><div class="cfg-grp-l">${esc(g.label)}</div><div class="cfg-grp-btns">${g.tabs.map(([id,l])=>T(id,l)).join("")}</div></div>`).join("")}</div>`;
-  app.innerHTML=pageHead(t("Configuration"),t("Admin Center"))+groupsHtml+body;
+  const tabsHtml=`<div class="cfg-groups"><div class="cfg-grp"><div class="cfg-grp-l">${esc(grp.label)}</div>
+    <div class="cfg-grp-btns">${grp.tabs.map(([id,l])=>T(id,l)).join("")}</div></div></div>`;
+  app.innerHTML=pageHead(t("Admin Center")+" · "+t("Configuration"),esc(grp.label))+tabsHtml+body;
 }
 
 /* ============================ MODULE VIEWS ============================ */
@@ -2370,7 +2408,7 @@ function renderHome(){
   const groups=navGroups(SESSION.role).filter(g=>!(g.items.length===1&&g.items[0][0]==="home"));
   const sections=groups.map(g=>`<div class="home-sect">${esc(g.label)}</div>
     <div class="home-grid">${g.items.map(([v,l,o])=>{o=o||{};const bd=badgeFor(v);
-      return `<button class="home-tile" data-nav="${v}"${o.cfg?` data-cfgtab="${o.cfg}"`:""}${o.rep?` data-rep="${o.rep}"`:""}>${bd?`<span class="tbadge">${bd}</span>`:""}<div class="ti">${I[g.ico]||I.doc}</div><div class="tt">${esc(l)}</div><div class="ts">${esc(g.label)}</div></button>`;}).join("")}</div>`).join("");
+      return `<button class="home-tile" data-nav="${v}"${o.grp?` data-cfggrp="${esc(o.grp)}"`:""}${o.cfg?` data-cfgtab="${o.cfg}"`:""}${o.rep?` data-rep="${o.rep}"`:""}>${bd?`<span class="tbadge">${bd}</span>`:""}<div class="ti">${I[g.ico]||I.doc}</div><div class="tt">${esc(l)}</div><div class="ts">${esc(g.label)}</div></button>`;}).join("")}</div>`).join("");
   app.innerHTML=`
     <div class="home-hero"><h1>Welcome, ${esc(SESSION.name)}</h1><p>${esc(db.roleNames[SESSION.role]||SESSION.role)} — your SuccessFactors home. Pick up where you left off.</p></div>
     <div class="stat-row">${stats.map(([l,v])=>`<div class="stat"><div class="v num">${v}</div><div class="l">${esc(l)}</div></div>`).join("")}</div>
@@ -2499,6 +2537,30 @@ function monthRange(ym){
   if(cut<=1){const last=new Date(y,m,0).getDate();return {from:ym+"-01",to:ym+"-"+pad(last)};}
   const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
   return {from:iso(new Date(y,m-2,cut)), to:iso(new Date(y,m-1,cut-1))};
+}
+/* Working (Mon–Fri) days within an inclusive date range. */
+function workdays(fromIso,toIso){let a=new Date(fromIso+"T00:00:00"),b=new Date(toIso+"T00:00:00"),n=0;
+  for(let d=new Date(a);d<=b;d.setDate(d.getDate()+1)){const w=d.getDay();if(w!==0&&w!==6)n++;}return n;}
+/* Generate the configured payroll period calendar with per-period status.
+   Status is derived from the currently-open period: past = Closed, current = Open, future = Planned. */
+function payrollPeriods(){
+  const p=db.payroll||{};
+  const freq=p.periodFreq||"monthly";
+  const step=freq==="quarterly"?3:1;                 // months per period
+  const cnt=Math.max(1,Math.min(60,p.periodCount||12));
+  const [sy,sm]=(p.periodStart||"2026-01").split("-").map(Number);
+  const openYm=p.openPeriod||(p.periodStart||"2026-01");
+  const list=[];
+  for(let i=0;i<cnt;i++){
+    const d=new Date(sy,sm-1+i*step,1);
+    const ym=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+    const r=monthRange(ym);
+    const lbl=freq==="quarterly"?("Q"+(Math.floor(d.getMonth()/3)+1)+" "+d.getFullYear())
+      :d.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+    const status=ym<openYm?"Closed":ym===openYm?"Open":"Planned";
+    list.push({idx:i+1,ym,label:lbl,from:r.from,to:r.to,days:workdays(r.from,r.to),status});
+  }
+  return list;
 }
 /* Build a searchable list of payroll months around the current selection. */
 function payMonths(centerYm){
@@ -3053,7 +3115,7 @@ document.addEventListener("click",ev=>{
   if(t.hasAttribute("data-actionmenu")){const am=$("#actionMenu");if(am)am.classList.toggle("open");return;}
   if(t.hasAttribute("data-more")){const mm=$("#moreMenu");mm.classList.toggle("open");return;}
   if(t.hasAttribute("data-tabmore")){const tm=$("#tabMoreMenu");tm.classList.toggle("open");return;}
-  if(t.dataset.nav){ev.preventDefault();if(t.dataset.cfgtab)S.cfgTab=t.dataset.cfgtab;if(t.dataset.rep)S.rep=t.dataset.rep;S.view=t.dataset.nav;S.tab="personal";render();return;}
+  if(t.dataset.nav){ev.preventDefault();if(t.dataset.cfggrp)S.cfgGroup=t.dataset.cfggrp;if(t.dataset.cfgtab)S.cfgTab=t.dataset.cfgtab;if(t.dataset.rep)S.rep=t.dataset.rep;S.view=t.dataset.nav;S.tab="personal";render();return;}
   if(t.dataset.open){S.view="detail";S.pernr=+t.dataset.open;S.tab="personal";render();return;}
   if(t.dataset.tab){S.tab=t.dataset.tab;renderDetail();return;}
   if(t.dataset.tog){const id=+t.dataset.tog;S.open.has(id)?S.open.delete(id):S.open.add(id);renderOrg();return;}
@@ -3086,6 +3148,9 @@ document.addEventListener("click",ev=>{
     else if(t.dataset.act==="attendance")attendanceDialog();
     else if(t.dataset.act==="reqleave")reqLeaveDialog();
     else if(t.dataset.act==="payrollcfg")payrollCfgDialog();
+    else if(t.dataset.act==="payperiodcfg")payperiodCfgDialog();
+    else if(t.dataset.act==="periodOpen"){db.payroll.openPeriod=t.dataset.ym;toast("Payroll period opened.","good");renderConfig();return;}
+    else if(t.dataset.act==="periodClose"){const ps=payrollPeriods();const i=ps.findIndex(x=>x.ym===t.dataset.ym);const nx=ps[i+1];db.payroll.openPeriod=nx?nx.ym:t.dataset.ym;toast(nx?"Period closed; next period opened.":"This is the last period.",nx?"good":"warn");renderConfig();return;}
     else if(t.dataset.act==="cols"){S.showCols=!S.showCols;renderList();}
     else if(t.dataset.act==="mypayslip")payslipDialog(SESSION.pernr);
     return;
@@ -3350,6 +3415,18 @@ function doAction(kind){
       db.payroll.socialRate=num("pc_soc",db.payroll.socialRate*100)/100;
       db.payroll.otMult={normal:num("pc_otn",db.payroll.otMult.normal),sunday:num("pc_ots",db.payroll.otMult.sunday),holiday:num("pc_oth",db.payroll.otMult.holiday)};
       closeModal();toast("Payroll configuration saved.","good");renderConfig();
+    }else if(kind==="payperiodcfg"){
+      const cut=Math.round(+val("pp_cut"));
+      if(!(cut>=1&&cut<=28)){toast("Cut-off day must be between 1 and 28.","bad");return;}
+      const start=val("pp_start");if(!/^\d{4}-\d{2}$/.test(start)){toast("Enter a valid first period (month).","bad");return;}
+      const count=Math.round(+val("pp_count"));
+      if(!(count>=1&&count<=60)){toast("Number of periods must be between 1 and 60.","bad");return;}
+      db.payroll.cutoffDay=cut;db.payroll.periodFreq=val("pp_freq")||"monthly";
+      db.payroll.periodStart=start;db.payroll.periodCount=count;
+      const open=val("pp_open");
+      // Keep the open period within the regenerated calendar.
+      const ps=payrollPeriods();db.payroll.openPeriod=ps.some(x=>x.ym===open)?open:(ps[0]?ps[0].ym:start);
+      closeModal();toast("Payroll period configuration saved.","good");renderConfig();
     }
   }catch(err){toast(err.message,"bad");}
 }
