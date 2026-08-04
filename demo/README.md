@@ -148,6 +148,9 @@ This is exactly how the demo screenshots in the project were produced.
 | `PUT /api/employees/{pernr}/reassign` | Organizational reassignment |
 | `GET /api/employees/{pernr}/leave-balances` | Leave balances |
 | `POST /api/employees/{pernr}/absences` | Record absence (IT2001) |
+| `GET /api/leave-requests` | Leave worklist (own for ESS, all for MSS/HR) |
+| `POST /api/leave-requests` | Submit a leave request (ESS) |
+| `POST /api/leave-requests/{id}/decide` | Approve/reject a request (MSS/HR) |
 | `PUT /api/employees/{pernr}/address` | Maintain address (IT0006) |
 | `POST /api/employees/{pernr}/family` | Add family member (IT0021) |
 | `POST /api/employees/{pernr}/attendances` | Record attendance (IT2002) |
@@ -157,3 +160,17 @@ This is exactly how the demo screenshots in the project were produced.
 | `GET /api/valuehelp/*`, `GET /api/valuehelp/domain/{d}` | Value helps |
 | `POST /api/reset` | Reset demo data to the seed |
 | `GET /health` | Health check |
+
+## Tests
+
+A small API test suite exercises the demo server (auth, the Leave Management
+workflow — submit / approve / reject, quota deduction and role scoping — plus a
+few core endpoints). It uses the built-in Node test runner (Node 18+):
+
+```bash
+cd demo
+npm test        # or: node --test
+```
+
+The tests spin up the server on a test port and reset the in-memory data between
+cases, so they are self-contained and leave no state behind.
