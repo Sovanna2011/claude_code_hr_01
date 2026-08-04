@@ -368,6 +368,18 @@ a.mail:hover{text-decoration:underline}
 .otree-tbl .otree .oic{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;background:var(--accent-soft);color:var(--accent);vertical-align:middle;margin:0 8px 0 6px}
 .otree-tbl .otree .oic svg{width:14px;height:14px;fill:currentColor}
 .otree-tbl .otree .nm{font-weight:700;vertical-align:middle}
+.otree-tbl tr.orow[draggable]{cursor:grab}
+.otree-tbl .otree .ohandle{display:inline-block;color:var(--muted);opacity:.55;cursor:grab;margin-right:4px;font-size:13px;vertical-align:middle;user-select:none}
+.otree-tbl tr.orow.dragging{opacity:.45}
+.otree-tbl tr.orow.dragging td{background:var(--accent-soft)}
+.otree-tbl tr.orow.dragover td{background:var(--accent-soft);box-shadow:inset 0 -2px 0 var(--accent),inset 0 2px 0 var(--accent)}
+.otree-tbl tr.orow.dragbad td{background:rgba(220,60,60,.10);box-shadow:inset 0 0 0 2px rgba(220,60,60,.45)}
+.otree-tbl tr.otop td{border-top:1px dashed var(--border);font-style:italic}
+.otree-tbl tr.prow td{background:var(--surface-2)}
+.otree-tbl tr.prow:hover td{background:var(--accent-soft)}
+.otree-tbl .otree .pic{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--muted);vertical-align:middle;margin:0 8px 0 6px}
+.otree-tbl .otree .pic svg{width:13px;height:13px;fill:currentColor}
+.otree-tbl .otree .pnm{font-weight:600;color:var(--text)}
 
 /* ---- Modal ---- */
 .modal-bg{position:fixed;inset:0;background:rgba(15,25,35,.45);backdrop-filter:blur(2px);
@@ -471,6 +483,14 @@ a.mail:hover{text-decoration:underline}
 .home-hero h1{margin:0 0 4px;font-size:22px;font-weight:800}
 .home-hero p{margin:0;opacity:.9;font-size:13.5px}
 .home-sect{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700;margin:20px 0 8px}
+/* Grouped Admin Center configuration launcher */
+.cfg-groups{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+.cfg-grp{display:grid;grid-template-columns:190px 1fr;gap:14px;align-items:start;padding:8px 0}
+.cfg-grp+.cfg-grp{border-top:1px solid var(--border)}
+.cfg-grp-l{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;padding-top:7px}
+.cfg-grp-btns{display:flex;flex-wrap:wrap;gap:6px}
+@media(max-width:680px){.cfg-grp{grid-template-columns:1fr;gap:5px}}
 /* Graphical org / reporting charts (boxed tree) */
 .chart-scroll{overflow-x:auto;padding:24px 16px}
 .orgtree,.orgtree ul{list-style:none;margin:0;padding:0}
@@ -1672,34 +1692,103 @@ function renderOrg(){
   if(!S._orgInit){(function addAll(ns){ns.forEach(n=>{S.open.add(n.id);addAll(n.children);});})(roots);S._orgInit=true;}
   // Total headcount = employees directly assigned + everyone in the sub-units below.
   const total=n=>{let s=n.hc||0;n.children.forEach(c=>s+=total(c));return s;};
+  // Positions (object type S) related to each org unit via the A/003 "belongs to" relationship.
+  const posByOrg={};positions("",S.key).forEach(p=>{if(p.orgId){(posByOrg[p.orgId]=posByOrg[p.orgId]||[]).push(p);}});
   // Flatten the tree to table rows, tracking depth and whether ancestors are all open.
-  const rows=[];
+  // Position rows are interleaved as children of their org unit.
+  const rows=[];let orgCount=0,posCount=0;
   (function walk(ns,depth,ancOpen){ns.forEach(n=>{
-    const open=S.open.has(n.id),leaf=!n.children.length;
-    rows.push({n,depth,open,leaf,visible:ancOpen});
+    const ps=(posByOrg[n.id]||[]);
+    const open=S.open.has(n.id),leaf=!n.children.length&&!ps.length;
+    rows.push({n,depth,open,leaf,visible:ancOpen});orgCount++;
+    ps.forEach(p=>{rows.push({pos:p,depth:depth+1,visible:ancOpen&&open});posCount++;});
     walk(n.children,depth+1,ancOpen&&open);});})(roots,0,true);
   const grand=roots.reduce((s,n)=>s+total(n),0);
-  const body=rows.map(r=>{const n=r.n;
-    return `<tr class="orow${r.visible?"":" hidden"}">
+  const canDnd=isAdmin()||allowed("O","update");
+  const body=rows.map(r=>{
+    if(r.pos){const p=r.pos;
+      return `<tr class="orow prow${r.visible?"":" hidden"}"${canDnd?` draggable="true" data-posdrag="${p.id}"`:""}>
+      <td class="otree" style="padding-left:${10+r.depth*22}px">
+        ${canDnd?`<span class="ohandle" title="Drag to move this position to another org unit">${I.drag||"⠿"}</span>`:""}<span class="tog leaf">${I.chev}</span>
+        <span class="pic">${I.badge||I.person}</span><span class="nm pnm">${esc(p.name)}</span> <span class="pill ${p.vacant?"warn":"good"}">${p.vacant?"Vacant":"Occupied"}</span></td>
+      <td class="num">${p.id}</td>
+      <td>${p.holder?esc(p.holder):"—"}</td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num muted" style="font-size:12px">Position</td></tr>`;}
+    const n=r.n;
+    return `<tr class="orow${r.visible?"":" hidden"}"${canDnd?` draggable="true" data-odrag="${n.id}"`:""}>
       <td class="otree" data-tog="${n.id}" style="padding-left:${10+r.depth*22}px">
-        <span class="tog ${r.leaf?"leaf":""}${r.open?" open":""}">${I.chev}</span>
+        ${canDnd?`<span class="ohandle" title="Drag to move this unit">${I.drag||"⠿"}</span>`:""}<span class="tog ${r.leaf?"leaf":""}${r.open?" open":""}">${I.chev}</span>
         <span class="oic">${I.org}</span><span class="nm">${esc(n.name)}</span></td>
       <td class="num">${n.id}</td>
       <td>${n.mgr?esc(n.mgr):"—"}</td>
       <td class="num"><span class="hc">${I.people}${n.hc||0}</span></td>
       <td class="num"><b>${total(n)}</b></td>
-      <td class="num">${n.children.length||"—"}</td></tr>`;}).join("");
+      <td class="num">${n.children.length||"—"}${(posByOrg[n.id]||[]).length?` · ${(posByOrg[n.id]||[]).length}P`:""}</td></tr>`;}).join("");
   app.innerHTML=`
   <div class="page-head"><div><div class="crumb">Organizational Management</div><h1>Organizational structure — tree</h1></div>
     <div style="display:flex;gap:8px;align-items:flex-end">
       <button class="btn" data-nav="orggraph">${I.org} Chart view</button>
       <div class="field"><label>Key date</label><input type="date" id="kd" value="${S.key}"></div></div></div>
-  <div class="card list-card"><div class="card-head"><h2>Organizational units</h2><span class="count">${rows.length}</span><div class="spacer"></div>
-    <span class="muted" style="font-size:13px">Total employees: <b>${grand}</b></span></div>
+  ${canDnd?`<div class="hint">${I.info}<span>The org structure changes <b>only by drag &amp; drop</b> — drag a <b>unit</b> onto another to make it report there (or onto <b>“Top level”</b> to make it a root), and drag a <b>position</b> onto a unit to assign it there.</span></div>`:""}
+  <div class="card list-card"><div class="card-head"><h2>Organizational units &amp; positions</h2><span class="count">${orgCount}</span><div class="spacer"></div>
+    <span class="muted" style="font-size:13px">${posCount} position${posCount===1?"":"s"} · Total employees: <b>${grand}</b></span></div>
     <div class="tbl-wrap dt-grid dt-grid-1"><table class="dt otree-tbl"><thead><tr>
-      <th>Organizational unit</th><th>Org ID</th><th>Manager</th><th title="Employees assigned directly to this unit">Employees</th><th title="Including all sub-units below">Total (incl. sub-units)</th><th>Sub-units</th>
-    </tr></thead><tbody>${body||`<tr><td colspan="6"><div class="empty">No organizational units.</div></td></tr>`}</tbody></table></div></div>`;
+      <th>Organizational unit / position</th><th>ID</th><th>Manager / holder</th><th title="Employees assigned directly to this unit">Employees</th><th title="Including all sub-units below">Total (incl. sub-units)</th><th>Sub-units</th>
+    </tr></thead><tbody>${body||`<tr><td colspan="6"><div class="empty">No organizational units.</div></td></tr>`}${canDnd&&body?`<tr class="orow otop" data-odroptop="1"><td class="otree" colspan="6" style="padding-left:10px;color:var(--muted)"><span class="oic">${I.org}</span><span class="nm">▲ Top level — drop a unit here to make it a root unit</span></td></tr>`:""}</tbody></table></div></div>`;
   $("#kd").addEventListener("change",e=>{S.key=e.target.value;renderOrg();});
+  if(canDnd)wireOrgDnd();
+}
+/* Drag-and-drop reparenting of organizational units (the only way to change the org hierarchy).
+   Moves the A/002 "reports to" relationship in HRP1001. Guards against self-drops and cycles. */
+function orgDescendants(id){const set=new Set();(function walk(pid){db.HRP1001.filter(r=>r.otype==="O"&&r.relat==="002"&&r.rsign==="A"&&String(r.sobid)===String(pid)).forEach(r=>{const c=+r.objid;if(!set.has(c)){set.add(c);walk(c);}});})(id);return set;}
+function orgReparent(id,parent){
+  id=+id;
+  // Remove any existing "reports to" (A 002) edge for this unit.
+  db.HRP1001=db.HRP1001.filter(r=>!(r.otype==="O"&&r.objid===id&&r.relat==="002"&&r.rsign==="A"));
+  if(parent){db.HRP1001.push({otype:"O",objid:id,rsign:"A",relat:"002",sclas:"O",sobid:String(+parent),begda:"2020-01-01",endda:HIGH});}
+  const nm=(db.HRP1000.find(o=>o.otype==="O"&&o.objid===id)||{}).stext||("Org "+id);
+  const pn=parent?((db.HRP1000.find(o=>o.otype==="O"&&o.objid===+parent)||{}).stext||("Org "+parent)):null;
+  S.open.add(+parent);renderOrg();
+  toast(pn?`“${nm}” now reports to “${pn}”.`:`“${nm}” moved to the top level.`,"good");
+}
+/* Reassign a position (S) to a different org unit — moves the A/003 "belongs to" relationship. */
+function positionReparent(posId,orgId){
+  posId=+posId;orgId=+orgId;
+  db.HRP1001=db.HRP1001.filter(r=>!(r.otype==="S"&&r.objid===posId&&r.relat==="003"&&r.rsign==="A"));
+  db.HRP1001.push({otype:"S",objid:posId,rsign:"A",relat:"003",sclas:"O",sobid:String(orgId),begda:"2020-01-01",endda:HIGH});
+  const pnm=(db.HRP1000.find(o=>o.otype==="S"&&o.objid===posId)||{}).stext||("Position "+posId);
+  const onm=(db.HRP1000.find(o=>o.otype==="O"&&o.objid===orgId)||{}).stext||("Org "+orgId);
+  S.open.add(orgId);renderOrg();
+  toast(`Position “${pnm}” now belongs to “${onm}”.`,"good");
+}
+function wireOrgDnd(){
+  let drag=null; // {type:'org'|'pos', id}
+  const clear=()=>app.querySelectorAll(".orow.dragover,.orow.dragbad").forEach(r=>r.classList.remove("dragover","dragbad"));
+  app.querySelectorAll("tr.orow[data-odrag],tr.orow[data-posdrag]").forEach(row=>{
+    row.addEventListener("dragstart",e=>{
+      drag=row.dataset.posdrag?{type:"pos",id:+row.dataset.posdrag}:{type:"org",id:+row.dataset.odrag};
+      row.classList.add("dragging");e.dataTransfer.effectAllowed="move";try{e.dataTransfer.setData("text/plain",String(drag.id));}catch(_){}});
+    row.addEventListener("dragend",()=>{drag=null;row.classList.remove("dragging");clear();});
+  });
+  // Valid drop for an org drag: any org row (not itself/descendant) or Top level. For a position drag: any org row.
+  app.querySelectorAll("tr.orow[data-odrag],tr.orow[data-odroptop]").forEach(t=>{
+    const top=t.hasAttribute("data-odroptop");
+    const tid=top?null:+t.dataset.odrag;
+    const isBad=()=>{if(!drag)return true;
+      if(drag.type==="pos")return top; // positions can only drop on an org unit
+      return top?false:(tid===drag.id||orgDescendants(drag.id).has(tid));};
+    t.addEventListener("dragover",e=>{if(!drag)return;const bad=isBad();e.preventDefault();e.dataTransfer.dropEffect=bad?"none":"move";clear();t.classList.add(bad?"dragbad":"dragover");});
+    t.addEventListener("dragleave",()=>t.classList.remove("dragover","dragbad"));
+    t.addEventListener("drop",e=>{
+      e.preventDefault();if(!drag){clear();return;}
+      const d=drag;drag=null;clear();
+      if(d.type==="pos"){if(top){toast("Assign the position to an organizational unit.","bad");return;}positionReparent(d.id,tid);return;}
+      if(!top&&(tid===d.id||orgDescendants(d.id).has(tid))){toast("Cannot move a unit into itself or one of its sub-units.","bad");return;}
+      orgReparent(d.id,tid);
+    });
+  });
 }
 
 const POS_COLS=[
@@ -2083,6 +2172,17 @@ function payrollCfgDialog(){
     <div class="grp"><label>OT × public holiday</label><input type="number" step="0.05" id="pc_oth" value="${p.otMult.holiday}"></div>
   </div>`,`<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="payrollcfg">Save</button>`);
 }
+/* Admin Center configuration grouped into SuccessFactors-style categories. */
+const CONFIG_GROUPS=[
+  {label:"Personnel Actions",tabs:[["action","Action types · IT0000"],["actreason","Action reasons"],["empstat","Employment status"]]},
+  {label:"Enterprise Structure",tabs:[["company","Company codes"],["parea","Personnel areas"],["cost","Cost centers"],["dept","Departments"],["org","Organizational units"]]},
+  {label:"Personnel Structure",tabs:[["groups","Employee groups"],["subgroups","Employee subgroups"]]},
+  {label:"Payroll & Currency",tabs:[["payrollcfg","Payroll Run"],["currency","Currencies"],["exchange","Exchange rates"]]},
+  {label:"Master Data",tabs:[["nat","Countries"],["region","Regions"],["city","Cities"],["lang","Languages"],["anred","Forms of address"],["titles","Titles"],["addrtype","Address types"],["commtype","Comm. types"],["famtype","Family types"]]},
+  {label:"Lifecycle Value Lists",tabs:[["probst","Probation statuses"],["transreason","Transfer reasons"],["promoreason","Promotion reasons"],["termreason","Termination reasons"],["offchk","Offboarding items"],["salreason","Salary adj. reasons"]]},
+  {label:"Localization",tabs:[["syslang","System languages"],["numrange","Number ranges"]]},
+  {label:"Security",tabs:[["roles","Roles"],["users","Users & roles"],["auth","Authorizations"]]}
+];
 function renderConfig(){
   if(!S.cfgTab)S.cfgTab="company";
   const T=(id,l)=>`<button class="btn sm ${S.cfgTab===id?'primary':''}" data-cfg="${id}">${l}</button>`;
@@ -2093,8 +2193,9 @@ function renderConfig(){
   else if(S.cfgTab==="org")body=cfgOrgTable();
   else if(S.cfgTab==="payrollcfg")body=renderPayrollCfg();
   else if(CFG_SCHEMA[S.cfgTab])body=cfgTable(S.cfgTab);
-  app.innerHTML=pageHead(t("Configuration"),t("System configuration"))+
-    `<div class="toolbar" style="gap:6px;flex-wrap:wrap">${T("action","Action types · IT0000")}${T("actreason","Action reasons")}${T("empstat","Employment status")}${T("payrollcfg","Payroll Run")}${T("company","Company codes")}${T("parea","Personnel areas")}${T("groups","Employee groups")}${T("subgroups","Employee subgroups")}${T("cost","Cost centers")}${T("org","Organizational units")}${T("lang","Languages")}${T("nat","Countries")}${T("currency","Currencies")}${T("exchange","Exchange rates")}${T("region","Regions")}${T("city","Cities")}${T("anred","Forms of address")}${T("titles","Titles")}${T("addrtype","Address types")}${T("commtype","Comm. types")}${T("famtype","Family types")}${T("dept","Departments")}${T("probst","Probation statuses")}${T("transreason","Transfer reasons")}${T("promoreason","Promotion reasons")}${T("termreason","Termination reasons")}${T("offchk","Offboarding items")}${T("salreason","Salary adj. reasons")}${T("syslang","System languages")}${T("numrange","Number ranges")}${T("roles","Roles")}${T("users","Users & roles")}${T("auth","Authorizations")}</div>${body}`;
+  const groupsHtml=`<div class="cfg-groups">${CONFIG_GROUPS.map(g=>
+    `<div class="cfg-grp"><div class="cfg-grp-l">${esc(g.label)}</div><div class="cfg-grp-btns">${g.tabs.map(([id,l])=>T(id,l)).join("")}</div></div>`).join("")}</div>`;
+  app.innerHTML=pageHead(t("Configuration"),t("Admin Center"))+groupsHtml+body;
 }
 
 /* ============================ MODULE VIEWS ============================ */
@@ -2258,42 +2359,22 @@ function renderHome(){
   const empCount=(db.emp||[]).length;
   const openReq=(db.reqData||[]).filter(r=>(r.status||"Open")==="Open").length;
   const deptCount=Object.keys(db.departments||{}).length;
-  let stats=[],tiles=[];
-  if(isAdmin()){
-    stats=[["Employees",empCount],["Pending leave",pendingLeave],["Open requisitions",openReq],["Departments",deptCount]];
-    tiles=[
-      ["people","Employee Directory","Browse & maintain employees",'data-nav="list"',""],
-      ["org","Org Chart","Structure & reporting lines",'data-nav="orggraph"',""],
-      ["cal","Time Off Approvals","Review leave requests",'data-nav="leave"',pendingLeave||""],
-      ["person","Recruiting","Requisitions & candidates",'data-nav="recruit"',""],
-      ["education","Learning","Courses & bookings",'data-nav="training"',""],
-      ["doc","Reports","Overtime, attendance & more",'data-nav="reports" data-rep="ot"',""],
-      ["money","Payroll","Run & review payroll",'data-nav="payroll"',""],
-      ["doc","Admin Center","Configuration & security",'data-nav="config"',""]
-    ];
-  }else if(isManager()){
-    stats=[["Pending approvals",pendingLeave],["Team size",empCount]];
-    tiles=[
-      ["people","My Team","Team overview & profiles",'data-nav="mss"',""],
-      ["cal","Approvals","Approve leave requests",'data-nav="leave"',pendingLeave||""],
-      ["org","Org Chart","Structure",'data-nav="orggraph"',""],
-      ["education","Learning","Courses",'data-nav="training"',""],
-      ["doc","Reports","Team analytics",'data-nav="reports" data-rep="ot"',""]
-    ];
-  }else{
-    const myPending=(db.leaveRequests||[]).filter(r=>r.pernr===SESSION.pernr&&r.status==="Pending").length;
-    stats=[["My pending requests",myPending],["My record",SESSION.pernr||"—"]];
-    tiles=[
-      ["person","My Profile","View & edit my data",'data-nav="ess"',""],
-      ["cal","Time Off","Request & track leave",'data-nav="myleave"',myPending||""],
-      ["education","Learning","My courses",'data-nav="training"',""]
-    ];
-  }
+  let stats;
+  if(isAdmin())stats=[["Employees",empCount],["Pending leave",pendingLeave],["Open requisitions",openReq],["Departments",deptCount]];
+  else if(isManager())stats=[["Pending approvals",pendingLeave],["Team size",empCount]];
+  else{const myPending=(db.leaveRequests||[]).filter(r=>r.pernr===SESSION.pernr&&r.status==="Pending").length;
+    stats=[["My pending requests",myPending],["My record",SESSION.pernr||"—"]];}
+  // Home cards mirror the navigation: one section per module (menu), one card
+  // per sub-menu item. A badge shows pending approvals on the leave tools.
+  const badgeFor=v=>((v==="leave"||v==="myleave")&&pendingLeave)?pendingLeave:"";
+  const groups=navGroups(SESSION.role).filter(g=>!(g.items.length===1&&g.items[0][0]==="home"));
+  const sections=groups.map(g=>`<div class="home-sect">${esc(g.label)}</div>
+    <div class="home-grid">${g.items.map(([v,l,o])=>{o=o||{};const bd=badgeFor(v);
+      return `<button class="home-tile" data-nav="${v}"${o.cfg?` data-cfgtab="${o.cfg}"`:""}${o.rep?` data-rep="${o.rep}"`:""}>${bd?`<span class="tbadge">${bd}</span>`:""}<div class="ti">${I[g.ico]||I.doc}</div><div class="tt">${esc(l)}</div><div class="ts">${esc(g.label)}</div></button>`;}).join("")}</div>`).join("");
   app.innerHTML=`
     <div class="home-hero"><h1>Welcome, ${esc(SESSION.name)}</h1><p>${esc(db.roleNames[SESSION.role]||SESSION.role)} — your SuccessFactors home. Pick up where you left off.</p></div>
     <div class="stat-row">${stats.map(([l,v])=>`<div class="stat"><div class="v num">${v}</div><div class="l">${esc(l)}</div></div>`).join("")}</div>
-    <div class="home-sect">Quick links</div>
-    <div class="home-grid">${tiles.map(([ico,tt,ts,attrs,badge])=>`<button class="home-tile" ${attrs}>${badge?`<span class="tbadge">${badge}</span>`:""}<div class="ti">${I[ico]||I.doc}</div><div class="tt">${esc(tt)}</div><div class="ts">${esc(ts)}</div></button>`).join("")}</div>`;
+    ${sections}`;
 }
 /* Reports split into separate reports selectable by the Reporting sub-menu
    (and a sub-nav bar on the page). S.rep chooses which one renders. */
