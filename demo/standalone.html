@@ -2,52 +2,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 /* ===================================================================
-   HR Module — self-contained demo (SAP Fiori "Horizon"-inspired)
+   HR Module — self-contained demo (Odoo Enterprise-inspired)
    All data + business logic run in the browser; nothing is fetched.
    =================================================================== */
 :root{
-  --accent:#0064d9; --accent-strong:#0a4bb0; --accent-soft:#e5eefc; --shell-bg:#0a4bb0;
-  --bg:#eef1f3; --surface:#ffffff; --surface-2:#f6f8f9; --surface-3:#eef2f4;
-  --border:#d3dbe0; --border-strong:#b9c4cc;
-  --text:#1a2733; --muted:#56646f; --faint:#8592a0;
-  --good:#107e3e; --good-bg:#e6f3ea; --warn:#c25400; --warn-bg:#fcefe3;
-  --bad:#bb0000; --bad-bg:#fbe8e8; --info:#0070f2;
-  --shadow-sm:0 1px 2px rgba(20,40,60,.08);
-  --shadow:0 2px 4px rgba(20,40,60,.08),0 6px 20px rgba(20,40,60,.06);
-  --radius:12px; --radius-sm:8px;
-  --font:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  /* Brand (constant across themes — Odoo plum): used by primary buttons + navbar */
+  --brand:#714b67; --brand-strong:#5b3c53; --brand-ink:#ffffff;
+  --accent:#714b67; --accent-strong:#5b3c53; --accent-soft:#f2ecf0; --shell-bg:#714b67;
+  --bg:#f0eeee; --surface:#ffffff; --surface-2:#f8f8fa; --surface-3:#eef0f2;
+  --border:#dfe2e7; --border-strong:#c4cad2;
+  --text:#2b2b33; --muted:#6c757d; --faint:#8a919b;
+  --good:#28a745; --good-bg:#e7f6ec; --warn:#e0952a; --warn-bg:#fbf0e0;
+  --bad:#e2444b; --bad-bg:#fbe9ea; --info:#17a2b8;
+  --shadow-sm:0 1px 2px rgba(45,45,60,.06);
+  --shadow:0 1px 3px rgba(45,45,60,.10),0 6px 18px rgba(45,45,60,.08);
+  --radius:6px; --radius-sm:4px;
+  --font:"Roboto","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
 }
 @media (prefers-color-scheme:dark){
   :root{
-    --accent:#4db1ff; --accent-strong:#7cc6ff; --accent-soft:#122a44; --shell-bg:#0c1620;
-    --bg:#0f151b; --surface:#1b2531; --surface-2:#202c3a; --surface-3:#25333f;
-    --border:#31404e; --border-strong:#425364;
-    --text:#e7ecf0; --muted:#9fb0bd; --faint:#6f808e;
-    --good:#4bb97a; --good-bg:#12261a; --warn:#f0904a; --warn-bg:#2c1e12;
-    --bad:#ff6b6b; --bad-bg:#2c1414; --info:#4db1ff;
+    --accent:#c9a3bd; --accent-strong:#dcc0d3; --accent-soft:#2b2130; --shell-bg:#2a2733;
+    --bg:#1b1a21; --surface:#26252e; --surface-2:#2c2b36; --surface-3:#343341;
+    --border:#3a3947; --border-strong:#4c4b5d;
+    --text:#e7e7ec; --muted:#a2a2b0; --faint:#7a7a89;
+    --good:#4bbf73; --good-bg:#16281c; --warn:#e0a94a; --warn-bg:#2c2212;
+    --bad:#f0686f; --bad-bg:#2c1618; --info:#4bb1c9;
     --shadow-sm:0 1px 2px rgba(0,0,0,.4);
-    --shadow:0 2px 4px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3);
+    --shadow:0 2px 6px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.35);
   }
 }
 :root[data-theme="light"]{
-  --accent:#0064d9; --accent-strong:#0a4bb0; --accent-soft:#e5eefc; --shell-bg:#0a4bb0;
-  --bg:#eef1f3; --surface:#fff; --surface-2:#f6f8f9; --surface-3:#eef2f4;
-  --border:#d3dbe0; --border-strong:#b9c4cc;
-  --text:#1a2733; --muted:#56646f; --faint:#8592a0;
-  --good:#107e3e; --good-bg:#e6f3ea; --warn:#c25400; --warn-bg:#fcefe3;
-  --bad:#bb0000; --bad-bg:#fbe8e8; --info:#0070f2;
-  --shadow-sm:0 1px 2px rgba(20,40,60,.08);
-  --shadow:0 2px 4px rgba(20,40,60,.08),0 6px 20px rgba(20,40,60,.06);
+  --accent:#714b67; --accent-strong:#5b3c53; --accent-soft:#f2ecf0; --shell-bg:#714b67;
+  --bg:#f0eeee; --surface:#fff; --surface-2:#f8f8fa; --surface-3:#eef0f2;
+  --border:#dfe2e7; --border-strong:#c4cad2;
+  --text:#2b2b33; --muted:#6c757d; --faint:#8a919b;
+  --good:#28a745; --good-bg:#e7f6ec; --warn:#e0952a; --warn-bg:#fbf0e0;
+  --bad:#e2444b; --bad-bg:#fbe9ea; --info:#17a2b8;
+  --shadow-sm:0 1px 2px rgba(45,45,60,.06);
+  --shadow:0 1px 3px rgba(45,45,60,.10),0 6px 18px rgba(45,45,60,.08);
 }
 :root[data-theme="dark"]{
-  --accent:#4db1ff; --accent-strong:#7cc6ff; --accent-soft:#122a44; --shell-bg:#0c1620;
-  --bg:#0f151b; --surface:#1b2531; --surface-2:#202c3a; --surface-3:#25333f;
-  --border:#31404e; --border-strong:#425364;
-  --text:#e7ecf0; --muted:#9fb0bd; --faint:#6f808e;
-  --good:#4bb97a; --good-bg:#12261a; --warn:#f0904a; --warn-bg:#2c1e12;
-  --bad:#ff6b6b; --bad-bg:#2c1414; --info:#4db1ff;
+  --accent:#c9a3bd; --accent-strong:#dcc0d3; --accent-soft:#2b2130; --shell-bg:#2a2733;
+  --bg:#1b1a21; --surface:#26252e; --surface-2:#2c2b36; --surface-3:#343341;
+  --border:#3a3947; --border-strong:#4c4b5d;
+  --text:#e7e7ec; --muted:#a2a2b0; --faint:#7a7a89;
+  --good:#4bbf73; --good-bg:#16281c; --warn:#e0a94a; --warn-bg:#2c2212;
+  --bad:#f0686f; --bad-bg:#2c1618; --info:#4bb1c9;
   --shadow-sm:0 1px 2px rgba(0,0,0,.4);
-  --shadow:0 2px 4px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3);
+  --shadow:0 2px 6px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);
@@ -428,6 +430,66 @@ a.mail:hover{text-decoration:underline}
   .ps-doc .ps-row,.ps-doc .ps-row.tot{border-color:#ccc!important}
   .ps-doc .net{color:#0a7a3d!important}
 }
+
+/* ===================================================================
+   Odoo Enterprise refinements (retheme; structure/classes unchanged)
+   =================================================================== */
+body{font-size:13px}
+/* Top bar — Odoo o_main_navbar (plum, flat, full-height items) */
+.shell{min-height:46px;padding:0 12px;gap:0;box-shadow:0 1px 0 rgba(0,0,0,.14)}
+.shell .logo{font-weight:500;font-size:15px;height:46px;padding-right:14px;margin-right:4px;border-right:1px solid rgba(255,255,255,.18)}
+.shell .logo .mark{background:#fff;color:var(--brand);border-radius:4px}
+.shell .sub{border-left-color:rgba(255,255,255,.25)}
+.shell nav{gap:0;margin-left:0}
+.shell nav button{border-radius:0;font-weight:400;font-size:13px;opacity:.92;padding:0 12px;height:46px}
+.shell nav button:hover{background:rgba(0,0,0,.12);opacity:1}
+.shell nav button.active{background:rgba(0,0,0,.18);opacity:1;box-shadow:inset 0 -3px 0 rgba(255,255,255,.65)}
+.shell .util button,.shell .util select#lang{background:transparent;border-radius:4px}
+.shell .util button:hover{background:rgba(0,0,0,.16)}
+.morebtn{border-radius:0;height:46px}
+/* Control panel / breadcrumb */
+.page-head h1{font-weight:500;font-size:20px;letter-spacing:0}
+.page-head .crumb{color:var(--muted);font-weight:500}
+.toolbar{border-radius:4px}
+/* Buttons — Odoo btn */
+.btn{border-radius:4px;font-weight:500;font-size:13px}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink);box-shadow:none}
+.btn.primary:hover{background:var(--brand-strong);border-color:var(--brand-strong)}
+.btn.sm.primary,.btn.xs.primary{color:var(--brand-ink)}
+input,select{border-radius:4px}
+/* Cards → list/form containers */
+.card{border-radius:4px;box-shadow:none}
+.card-head{background:var(--surface)}
+.card-head h2{font-weight:500;font-size:14px}
+.card-head .count{background:var(--accent-soft);color:var(--accent);border-radius:10px}
+/* List view */
+th{background:var(--surface);text-transform:none;letter-spacing:0;font-size:13px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border-strong)}
+td{font-size:13px}
+.filter-row th{background:var(--surface-2)}
+.dt-grid thead th{background:var(--surface)}
+tbody tr.click:hover{background:var(--accent-soft)}
+/* Status badges — Odoo decoration badges (squared, no dot) */
+.pill{border-radius:4px;font-weight:600;font-size:11px;padding:2px 8px;text-transform:none}
+.pill::before{display:none}
+/* Notebook tabs — text only, underlined active */
+.tabs button{font-weight:500;padding:9px 16px}
+.tabs button .ico{display:none}
+/* Smart-button-style stats */
+.stat{border-radius:4px;box-shadow:none}
+.stat .v{color:var(--accent);font-weight:700}
+/* Form sheet header */
+.obj-head{border-radius:4px;box-shadow:none}
+.obj-head .id .n{color:var(--accent)}
+/* Dialog */
+.modal{border-radius:6px}
+.modal h3{font-weight:600;font-size:15px}
+/* Sign-in card (Odoo database login) */
+.login-wrap{background:radial-gradient(1200px 640px at 50% -20%,var(--accent-soft),var(--bg))}
+.login{border-radius:6px}
+.login .brandrow .mark{background:var(--brand);color:#fff}
+.login .btn.primary{background:var(--brand);border-color:var(--brand)}
+/* Org / reporting chart accents */
+.gorg{border-top-color:var(--brand)}
 </style>
 
 <header class="shell">

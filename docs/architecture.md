@@ -16,7 +16,7 @@ open technology stack.
 
 | Layer | Technology | Responsibility |
 |-------|------------|----------------|
-| Presentation | SAPUI5 1.120+, Fiori Horizon theme | Fiori-style master/detail UI, routing, value helps, personnel actions |
+| Presentation | SAPUI5 1.120+, Odoo Enterprise-inspired skin over Horizon | Master/detail UI, routing, value helps, personnel actions |
 | Application  | C# / ASP.NET Core 8, EF Core 8 | REST API, infotype read on key date, SAP "delimit + new time slice" logic, org path evaluation |
 | Persistence  | Microsoft SQL Server | SAP-faithful schema (PA infotypes, HRP1000/1001, T-tables), stored procedures, reporting views |
 

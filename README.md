@@ -6,7 +6,8 @@ Capital Management application, built on an open stack:
 - **Database** — Microsoft **SQL Server** (SAP-faithful schema: PA infotypes,
   Organizational Management, customizing/T-tables, stored procedures, views)
 - **Backend** — **C# / ASP.NET Core 8** Web API with **Entity Framework Core**
-- **Frontend** — **SAPUI5** (Fiori, Horizon theme) master–detail application
+- **Frontend** — **SAPUI5** master–detail application, re-skinned to an **Odoo
+  Enterprise**-inspired look (plum brand, squared surfaces) over the Horizon base
 
 It covers the core HCM sub-modules plus common HR processes:
 

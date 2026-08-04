@@ -1,16 +1,95 @@
-/* HR Module - custom styles layered on top of the SAP Horizon theme */
+/* ============================================================================
+   HR Module — Odoo Enterprise-inspired theme, layered over SAP Horizon.
 
-.sapMTextBold {
-    font-weight: bold;
+   The SAPUI5 Horizon theme is driven by CSS theming variables (the --sapXxx
+   custom properties). Re-skinning to an Odoo look is therefore mostly a matter
+   of overriding those variables — Odoo plum brand, a plum "app navbar" (the page
+   header), squared corners, a Roboto stack and a light warm-gray canvas — plus a
+   few control-level tweaks. No control markup changes are needed.
+   ============================================================================ */
+
+:root,
+.sapUiBody {
+    /* ---- Brand / accent (Odoo plum #714B67) -------------------------------- */
+    --sapBrandColor: #714B67;
+    --sapHighlightColor: #714B67;
+    --sapLinkColor: #714B67;
+    --sapActiveColor: #5b3c53;
+    --sapSelectedColor: #714B67;
+    --sapContent_IconColor: #714B67;
+    --sapContent_FocusColor: #714B67;
+
+    /* ---- Emphasized (primary) buttons ------------------------------------- */
+    --sapButton_Emphasized_Background: #714B67;
+    --sapButton_Emphasized_BorderColor: #714B67;
+    --sapButton_Emphasized_TextColor: #ffffff;
+    --sapButton_Emphasized_Hover_Background: #5b3c53;
+    --sapButton_Emphasized_Hover_BorderColor: #5b3c53;
+    --sapButton_Emphasized_Active_Background: #4e3448;
+
+    /* ---- The page header acts as the Odoo app navbar (plum, white text) ---- */
+    --sapPageHeader_Background: #714B67;
+    --sapPageHeader_TextColor: #ffffff;
+    --sapPageHeader_BorderColor: #714B67;
+    --sapShell_Background: #714B67;
+    --sapShellColor: #ffffff;
+    --sapShell_TextColor: #ffffff;
+
+    /* ---- Canvas / surfaces (Odoo light warm gray + white sheets) ---------- */
+    --sapBackgroundColor: #f0eeee;
+    --sapGroup_ContentBackground: #ffffff;
+    --sapObjectHeader_Background: #ffffff;
+    --sapList_Background: #ffffff;
+    --sapList_HeaderBackground: #ffffff;
+    --sapTile_Background: #ffffff;
+
+    /* ---- Squared corners (Odoo is flatter than Horizon) ------------------- */
+    --sapButton_BorderCornerRadius: 4px;
+    --sapField_BorderCornerRadius: 4px;
+    --sapElement_BorderCornerRadius: 4px;
+    --sapContainer_BorderCornerRadius: 4px;
+    --sapTile_BorderCornerRadius: 4px;
+
+    /* ---- Typography ------------------------------------------------------- */
+    --sapFontFamily: "Roboto", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
 }
 
-/* Give tree items a little breathing room */
+/* On the plum page-header bar, an Emphasized button (e.g. "Hire") would be
+   plum-on-plum; render it as a white chip with plum text so it stays legible. */
+.sapMPage > header.sapMBar .sapMBtnEmphasized .sapMBtnInner {
+    background: #ffffff !important;
+    border-color: #ffffff !important;
+    color: #714B67 !important;
+}
+.sapMPage > header.sapMBar .sapMBtnTransparent:hover .sapMBtnInner {
+    background: rgba(255, 255, 255, .14) !important;
+}
+
+/* List view: Odoo-style plain header text and a soft plum row hover. */
+.sapMListTblHeaderCell {
+    text-transform: none;
+}
+.sapMLIB.sapMLIBHoverable:hover {
+    background: #f2ecf0;
+}
+
+/* IconTabBar → Odoo "notebook": plum text + underline on the selected tab. */
+.sapMITBSelected .sapMITBText {
+    color: #714B67;
+}
+
+/* Object header rendered as a white Odoo form "sheet". */
+#empHeader,
+.sapMObjectHeader {
+    background-color: var(--sapObjectHeader_Background, #ffffff);
+}
+
+/* Give tree items a little breathing room. */
 .sapMTree .sapMLIB {
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
 }
 
-/* Object header spacing on the detail page */
-#empHeader {
-    background-color: var(--sapObjectHeader_Background, #fff);
+.sapMTextBold {
+    font-weight: bold;
 }
