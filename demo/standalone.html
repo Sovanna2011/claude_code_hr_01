@@ -630,7 +630,29 @@ function seed(){return{
        SLART:{"10":"University","20":"Secondary school","30":"Vocational training","40":"Doctorate"},
        TMART:{"01":"Expiry of probation","02":"Work permit expiry","03":"Contract end","04":"Next appraisal"},
        QUALG:{"01":"Technical","02":"Language","03":"Leadership"},
-       ANSSA:{"1":"Permanent residence","2":"Temporary residence","3":"Home address","4":"Mailing address","5":"Emergency address"}},
+       ANSSA:{"1":"Permanent residence","2":"Temporary residence","3":"Home address","4":"Mailing address","5":"Emergency address"},
+       PROBST:{"01":"In progress","02":"Passed","03":"Failed","04":"Extended"},
+       TRFREA:{"01":"Business need","02":"Employee request","03":"Reorganization","04":"Location change","05":"Promotion-linked"},
+       PROMOR:{"01":"Performance","02":"Reorganization","03":"Succession plan","04":"Market alignment"},
+       TERMRE:{"01":"Resignation","02":"Dismissal","03":"Retirement","04":"End of contract","05":"Mutual agreement","06":"Redundancy"},
+       OFFCHK:{"01":"Return laptop & devices","02":"Revoke system access","03":"Exit interview","04":"Final settlement","05":"Handover completed","06":"Return ID badge & keys"},
+       SALREA:{"01":"Merit increase","02":"Promotion","03":"Market adjustment","04":"Cost of living","05":"Demotion","06":"Annual review"}},
+  departments:{
+   D01:{name:"Human Resources",bukrs:"1000",parent:""},
+   D02:{name:"Finance",bukrs:"1000",parent:""},
+   D03:{name:"Information Technology",bukrs:"1000",parent:""},
+   D04:{name:"Sales & Marketing",bukrs:"1000",parent:""},
+   D05:{name:"Operations",bukrs:"1000",parent:""},
+   D06:{name:"Payroll",bukrs:"1000",parent:"D02"}},
+  lifecycle:[
+   {_id:"lc1",pernr:1000,kind:"probation",begda:"2020-03-01",endda:"2020-08-31",status:"02",note:"Confirmed after 6 months."},
+   {_id:"lc2",pernr:1000,kind:"transfer",date:"2022-01-01",fromDept:"D02",toDept:"D01",reason:"05",note:"Moved to lead HR."},
+   {_id:"lc3",pernr:1000,kind:"promotion",date:"2022-01-01",fromPos:"HR Specialist",toPos:"Head of HR",grade:"E4",reason:"03",note:""},
+   {_id:"lc4",pernr:1000,kind:"salary",date:"2023-04-01",oldAmt:88000,newAmt:96000,waers:"EUR",reason:"06",note:"Annual review."},
+   {_id:"lc5",pernr:1000,kind:"dept",date:"2022-01-01",dept:"D01",note:"Head of Human Resources."},
+   {_id:"lc6",pernr:1001,kind:"probation",begda:"2021-06-15",endda:"2021-09-14",status:"01",note:""},
+   {_id:"lc7",pernr:1001,kind:"salary",date:"2024-04-01",oldAmt:55000,newAmt:60000,waers:"EUR",reason:"01",note:"Strong performance."},
+   {_id:"lc8",pernr:1001,kind:"dept",date:"2021-06-15",dept:"D01",note:""}],
   users:[
    {username:"admin",password:"admin123",name:"HAANG Sovanna",roles:["HR_ADMIN","EMPLOYEE"],pernr:1002,email:"s.hang@globalcorp.com"},
    {username:"manager",password:"manager123",name:"Andreas Schmidt",roles:["HR_MANAGER","EMPLOYEE"],pernr:1000,email:"a.schmidt@globalcorp.com"},
@@ -1240,6 +1262,73 @@ function colsDialog(){
 function tab(id,label,ico){return `<button data-tab="${id}" class="${S.tab===id?'active':''}"><span class="ico">${I[ico]}</span>${esc(t(label))}</button>`;}
 function dl(pairs){return `<dl class="dl">${pairs.map(([k,v])=>`<div class="row"><dt>${k}</dt><dd>${v==null||v===""?"—":v}</dd></div>`).join("")}</dl>`;}
 
+/* ---- Employment lifecycle infotypes (Department, Probation, Transfer,
+   Promotion, Salary adjustment, Termination, Offboarding). One generic,
+   config-driven engine renders the list, the form and the row cells. ---- */
+const LC_KINDS={
+  dept:{label:"Department assignment",ico:"org",it:"Departments",
+    fields:[{k:"date",l:"Effective date",type:"date",req:true},{k:"dept",l:"Department",src:"departments",req:true},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Effective date",date:true},{k:"dept",l:"Department",lbl:"departments"},{k:"note",l:"Note"}]},
+  probation:{label:"Probation",ico:"cal",it:"Probation",
+    fields:[{k:"begda",l:"Start date",type:"date",req:true},{k:"endda",l:"End date",type:"date"},{k:"status",l:"Status",src:"PROBST"},{k:"note",l:"Note"}],
+    cols:[{k:"begda",l:"Start",date:true},{k:"endda",l:"End",date:true},{k:"status",l:"Status",dom:"PROBST",pill:true},{k:"note",l:"Note"}]},
+  transfer:{label:"Transfers",ico:"move",it:"Transfers",
+    fields:[{k:"date",l:"Transfer date",type:"date",req:true},{k:"fromDept",l:"From department",src:"departments"},{k:"toDept",l:"To department",src:"departments",req:true},{k:"reason",l:"Reason",src:"TRFREA"},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Date",date:true},{k:"fromDept",l:"From",lbl:"departments"},{k:"toDept",l:"To",lbl:"departments"},{k:"reason",l:"Reason",dom:"TRFREA"},{k:"note",l:"Note"}]},
+  promotion:{label:"Promotions",ico:"move",it:"Promotion",
+    fields:[{k:"date",l:"Promotion date",type:"date",req:true},{k:"fromPos",l:"From position"},{k:"toPos",l:"To position",req:true},{k:"grade",l:"New pay grade"},{k:"reason",l:"Reason",src:"PROMOR"},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Date",date:true},{k:"fromPos",l:"From"},{k:"toPos",l:"To"},{k:"grade",l:"Grade"},{k:"reason",l:"Reason",dom:"PROMOR"}]},
+  salary:{label:"Salary adjustments",ico:"money",it:"Salary Adjustment",
+    fields:[{k:"date",l:"Effective date",type:"date",req:true},{k:"oldAmt",l:"Current annual salary",type:"num"},{k:"newAmt",l:"New annual salary",type:"num",req:true},{k:"waers",l:"Currency",src:"currencies"},{k:"reason",l:"Reason",src:"SALREA"},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Date",date:true},{k:"oldAmt",l:"Old",amt:"waers"},{k:"newAmt",l:"New",amt:"waers"},{k:"pct",l:"Change",pct:true},{k:"reason",l:"Reason",dom:"SALREA"}]},
+  termination:{label:"Termination",ico:"doc",it:"Termination",
+    fields:[{k:"date",l:"Last working day",type:"date",req:true},{k:"reason",l:"Reason",src:"TERMRE",req:true},{k:"rehire",l:"Eligible for rehire",type:"chk"},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Last working day",date:true},{k:"reason",l:"Reason",dom:"TERMRE"},{k:"rehire",l:"Rehire?",bool:true},{k:"note",l:"Note"}]},
+  offboard:{label:"Offboarding checklist",ico:"check",it:"Offboarding",
+    fields:[{k:"item",l:"Checklist item",src:"OFFCHK",req:true},{k:"due",l:"Due date",type:"date"},{k:"done",l:"Completed",type:"chk"},{k:"note",l:"Note"}],
+    cols:[{k:"item",l:"Item",dom:"OFFCHK"},{k:"due",l:"Due",date:true},{k:"done",l:"Status",done:true},{k:"note",l:"Note"}]}
+};
+const LC_ORDER=["dept","probation","transfer","promotion","salary","termination","offboard"];
+let lcCtx=null;
+function lcCanEdit(){return isAdmin()||isManager();}
+function lcSrc(src){return db[src]||db.dom[src]||{};}
+function lcLabel(src,key){if(!key)return "—";const v=lcSrc(src)[key];const t=v&&typeof v==="object"?(v.name||v.text||""):v;return esc(key+(t?" – "+t:""));}
+function lcCell(r,c){
+  if(c.pct){const o=+r.oldAmt,n=+r.newAmt;if(o&&!isNaN(o)&&!isNaN(n)){const p=(n-o)/o*100;return `<span class="pill ${p>=0?'good':'bad'} num">${(p>=0?"+":"")+p.toFixed(1)}%</span>`;}return "—";}
+  const v=r[c.k];
+  if(c.bool)return v?`<span class="pill good">Yes</span>`:`<span class="pill neutral">No</span>`;
+  if(c.done)return v?`<span class="pill good">Done</span>`:`<span class="pill warn">Open</span>`;
+  if(v==null||v==="")return "—";
+  if(c.date)return `<span class="num">${fmtDate(v)}</span>`;
+  if(c.amt)return `<span class="num">${fmtAmt(v,r[c.amt]||"")}</span>`;
+  if(c.lbl)return c.pill?`<span class="pill neutral">${lcLabel(c.lbl,v)}</span>`:lcLabel(c.lbl,v);
+  if(c.dom){const txt=dom(c.dom,v)||v;return c.pill?`<span class="pill neutral">${esc(txt)}</span>`:esc(txt);}
+  return esc(v);
+}
+function lifecycleSection(kind,pernr){
+  const cfg=LC_KINDS[kind];const recs=db.lifecycle.filter(r=>r.pernr===pernr&&r.kind===kind);
+  const ed=lcCanEdit();
+  const cols=cfg.cols.concat(ed?[{k:"act",l:"Actions",act:true}]:[]);
+  const rows=recs.length?recs.map(r=>`<tr>${cols.map(c=>c.act
+      ?`<td class="td-r nowrap"><button class="btn xs" data-lcedit="${esc(r._id)}">${I.edit} Edit</button> <button class="btn xs ghost" data-lcdel="${esc(r._id)}">Delete</button></td>`
+      :`<td>${lcCell(r,c)}</td>`).join("")}</tr>`).join("")
+    :`<tr><td colspan="${cols.length}"><div class="empty">No ${esc(cfg.label.toLowerCase())} records.</div></td></tr>`;
+  return `<div class="card list-card"><div class="card-head"><h2>${esc(cfg.label)} · ${esc(cfg.it)}</h2><span class="count">${recs.length}</span><div class="spacer"></div>${ed?`<button class="btn sm primary" data-act="lc:${kind}">${I[cfg.ico]||I.doc} Add</button>`:""}</div>
+    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr>${cols.map(c=>`<th${c.act?' class="th-r"':''}>${esc(c.l)}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function openLifecycle(kind,rec){
+  const cfg=LC_KINDS[kind];const edit=!!rec;rec=rec||{};
+  lcCtx={kind,id:edit?rec._id:null};
+  const body=cfg.fields.map(f=>{
+    const id="lc_"+f.k,req=f.req?' <span class="req">*</span>':'';
+    if(f.type==="chk")return `<div class="grp"><label class="chk"><input type="checkbox" id="${id}" ${rec[f.k]?"checked":""}> ${esc(f.l)}</label></div>`;
+    if(f.src)return `<div class="grp"><label>${esc(f.l)}${req}</label><select id="${id}"><option value="">—</option>${opt(lcSrc(f.src),rec[f.k]!=null?rec[f.k]:"")}</select></div>`;
+    const type=f.type==="date"?"date":f.type==="num"?"number":"text";
+    return `<div class="grp"><label>${esc(f.l)}${req}</label><input type="${type}" id="${id}" value="${esc(rec[f.k]!=null?rec[f.k]:"")}"></div>`;
+  }).join("");
+  modal((edit?"Edit ":"Add ")+cfg.label+" · "+cfg.it,`<div class="two">${body}</div>`,
+    `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="lcSave">${edit?"Save":"Add"}</button>`);
+}
 function renderDetail(){
   const e=getEmployee(S.pernr,S.key);
   if(!e.personal){app.innerHTML=`<div class="empty">Employee not found on this key date.</div>`;return;}
@@ -1378,6 +1467,8 @@ function renderDetail(){
     <div class="tbl-wrap"><table><thead><tr><th>Task</th><th>Date</th><th>Reminder</th></tr></thead><tbody>
     ${e.dates.map(d=>`<tr><td>${esc(d.task)}</td><td class="num">${fmtDate(d.date)}</td><td class="num">${fmtDate(d.rem)}</td></tr>`).join("")||`<tr><td colspan=3><div class="empty">No monitored dates.</div></td></tr>`}
     </tbody></table></div>`;}
+  else if(S.tab==="jobchg"){content=`<div class="hint" style="margin-bottom:14px">${I.info}<span>Employment lifecycle actions — department moves, probation, transfers, promotions, salary adjustments, termination and offboarding. Value lists are maintained under Configuration.</span></div>`+
+    LC_ORDER.map((k,i)=>lifecycleSection(k,S.pernr)+(i<LC_ORDER.length-1?`<div style="height:16px"></div>`:"")).join("");}
 
   app.innerHTML=`
   <div class="page-head">
@@ -1410,7 +1501,7 @@ function renderDetail(){
     ${tab("personal","Personal Data","person")}${tab("org","Org Assignment","org")}
     ${tab("address","Address","addr")}${tab("comm","Communication","addr")}${tab("family","Family","people")}
     ${tab("edu","Education & Experience","education")}${tab("pay","Working Time & Pay","money")}
-    ${tab("contract","Contract","doc")}${tab("time","Time & Leave","cal")}
+    ${tab("contract","Contract","doc")}${tab("time","Time & Leave","cal")}${tab("jobchg","Job Changes","move")}
     <div class="tab-more-wrap" style="display:none"><button class="tab-morebtn" data-tabmore>${I.doc} More ▾</button><div class="tab-more-menu" id="tabMoreMenu"></div></div>
   </div>
   ${content}`;
@@ -1734,7 +1825,15 @@ const CFG_SCHEMA={
   anred:{h:"Forms of address (ANRED)",store:"dom",path:"ANRED",keyL:"Key",fields:[{k:"text",l:"Form of address"}]},
   addrtype:{h:"Address types (ANSSA)",store:"dom",path:"ANSSA",keyL:"Key",fields:[{k:"text",l:"Address type"}]},
   commtype:{h:"Communication types (USRTY)",store:"dom",path:"USRTY",keyL:"Key",fields:[{k:"text",l:"Communication type"}]},
-  famtype:{h:"Family / relationship types (FAMSA)",store:"dom",path:"FAMSA",keyL:"Key",fields:[{k:"text",l:"Relationship"}]}
+  famtype:{h:"Family / relationship types (FAMSA)",store:"dom",path:"FAMSA",keyL:"Key",fields:[{k:"text",l:"Relationship"}]},
+  dept:{h:"Departments",store:"omap",path:"departments",keyL:"Department id",
+    fields:[{k:"name",l:"Name"},{k:"bukrs",l:"Company code",src:"T001"},{k:"parent",l:"Parent department",src:"departments"}]},
+  probst:{h:"Probation statuses (PROBST)",store:"dom",path:"PROBST",keyL:"Key",fields:[{k:"text",l:"Status"}]},
+  transreason:{h:"Transfer reasons (TRFREA)",store:"dom",path:"TRFREA",keyL:"Key",fields:[{k:"text",l:"Reason"}]},
+  promoreason:{h:"Promotion reasons (PROMOR)",store:"dom",path:"PROMOR",keyL:"Key",fields:[{k:"text",l:"Reason"}]},
+  termreason:{h:"Termination reasons (TERMRE)",store:"dom",path:"TERMRE",keyL:"Key",fields:[{k:"text",l:"Reason"}]},
+  offchk:{h:"Offboarding checklist items (OFFCHK)",store:"dom",path:"OFFCHK",keyL:"Key",fields:[{k:"text",l:"Checklist item"}]},
+  salreason:{h:"Salary adjustment reasons (SALREA)",store:"dom",path:"SALREA",keyL:"Key",fields:[{k:"text",l:"Reason"}]}
 };
 function cfgStore(def){return def.store==="dom"?db.dom[def.path]:db[def.path];}
 function cfgRows(def){const s=cfgStore(def);
@@ -1819,7 +1918,7 @@ function renderConfig(){
   else if(S.cfgTab==="org")body=cfgOrgTable();
   else if(CFG_SCHEMA[S.cfgTab])body=cfgTable(S.cfgTab);
   app.innerHTML=pageHead(t("Configuration"),t("System configuration"))+
-    `<div class="toolbar" style="gap:6px;flex-wrap:wrap">${T("company","Company codes")}${T("parea","Personnel areas")}${T("groups","Employee groups")}${T("subgroups","Employee subgroups")}${T("cost","Cost centers")}${T("org","Organizational units")}${T("lang","Languages")}${T("nat","Countries")}${T("currency","Currencies")}${T("exchange","Exchange rates")}${T("region","Regions")}${T("city","Cities")}${T("anred","Forms of address")}${T("titles","Titles")}${T("addrtype","Address types")}${T("commtype","Comm. types")}${T("famtype","Family types")}${T("syslang","System languages")}${T("numrange","Number ranges")}${T("roles","Roles")}${T("users","Users & roles")}${T("auth","Authorizations")}</div>${body}`;
+    `<div class="toolbar" style="gap:6px;flex-wrap:wrap">${T("company","Company codes")}${T("parea","Personnel areas")}${T("groups","Employee groups")}${T("subgroups","Employee subgroups")}${T("cost","Cost centers")}${T("org","Organizational units")}${T("lang","Languages")}${T("nat","Countries")}${T("currency","Currencies")}${T("exchange","Exchange rates")}${T("region","Regions")}${T("city","Cities")}${T("anred","Forms of address")}${T("titles","Titles")}${T("addrtype","Address types")}${T("commtype","Comm. types")}${T("famtype","Family types")}${T("dept","Departments")}${T("probst","Probation statuses")}${T("transreason","Transfer reasons")}${T("promoreason","Promotion reasons")}${T("termreason","Termination reasons")}${T("offchk","Offboarding items")}${T("salreason","Salary adj. reasons")}${T("syslang","System languages")}${T("numrange","Number ranges")}${T("roles","Roles")}${T("users","Users & roles")}${T("auth","Authorizations")}</div>${body}`;
 }
 
 /* ============================ MODULE VIEWS ============================ */
@@ -2602,7 +2701,7 @@ document.addEventListener("click",ev=>{
   const comboOpt=ev.target.closest("[data-cityopt]");
   if(comboOpt){const combo=comboOpt.closest(".combo"),inp=combo.querySelector("input");
     inp.value=comboOpt.dataset.cityopt;onAddrCity();combo.querySelector(".combo-list").classList.remove("open");return;}
-  const t=ev.target.closest("[data-nav],[data-open],[data-act],[data-tab],[data-tog],[data-do],[data-close],[data-fill],[data-approve],[data-reject],[data-book],[data-advance],[data-payslip],[data-cfg],[data-authrole],[data-cfgadd],[data-cfgedit],[data-cfgdel],[data-useredit],[data-userdel],[data-orgedit],[data-orgdel],[data-roleadd],[data-roleedit],[data-roledel],[data-posadd],[data-posedit],[data-posdel],[data-attach],[data-attview],[data-attdel],[data-addredit],[data-addrdel],[data-comedit],[data-comdel],[data-famedit],[data-famdel],[data-eduedit],[data-edudel],[data-expedit],[data-expdel],[data-qualedit],[data-qualdel],[data-sort],[data-possort],[data-dtsort],[data-dtcols],[data-dtexport],[data-copycsv],[data-reqadd],[data-reqedit],[data-reqdel],[data-appladd],[data-appledit],[data-appldel],[data-crsadd],[data-crsedit],[data-crsdel],[data-regsave],[data-regtoday],[data-regexport],[data-empatt],[data-more],[data-tabmore],[data-photo]");
+  const t=ev.target.closest("[data-nav],[data-open],[data-act],[data-tab],[data-tog],[data-do],[data-close],[data-fill],[data-approve],[data-reject],[data-book],[data-advance],[data-payslip],[data-cfg],[data-authrole],[data-cfgadd],[data-cfgedit],[data-cfgdel],[data-useredit],[data-userdel],[data-orgedit],[data-orgdel],[data-roleadd],[data-roleedit],[data-roledel],[data-posadd],[data-posedit],[data-posdel],[data-attach],[data-attview],[data-attdel],[data-addredit],[data-addrdel],[data-comedit],[data-comdel],[data-famedit],[data-famdel],[data-eduedit],[data-edudel],[data-expedit],[data-expdel],[data-qualedit],[data-qualdel],[data-sort],[data-possort],[data-dtsort],[data-dtcols],[data-dtexport],[data-copycsv],[data-reqadd],[data-reqedit],[data-reqdel],[data-appladd],[data-appledit],[data-appldel],[data-crsadd],[data-crsedit],[data-crsdel],[data-regsave],[data-regtoday],[data-regexport],[data-empatt],[data-more],[data-tabmore],[data-photo],[data-lcedit],[data-lcdel]");
   if(!t){const mm=$("#moreMenu");if(mm)mm.classList.remove("open");const tm=$("#tabMoreMenu");if(tm)tm.classList.remove("open");return;}
   if(t.hasAttribute("data-more")){const mm=$("#moreMenu");mm.classList.toggle("open");return;}
   if(t.hasAttribute("data-tabmore")){const tm=$("#tabMoreMenu");tm.classList.toggle("open");return;}
@@ -2611,6 +2710,7 @@ document.addEventListener("click",ev=>{
   if(t.dataset.tab){S.tab=t.dataset.tab;renderDetail();return;}
   if(t.dataset.tog){const id=+t.dataset.tog;S.open.has(id)?S.open.delete(id):S.open.add(id);renderOrg();return;}
   if(t.dataset.act){
+    if(t.dataset.act.slice(0,3)==="lc:"){openLifecycle(t.dataset.act.slice(3));return;}
     if(t.dataset.act==="hire")hireDialog();
     else if(t.dataset.act==="edit")editDialog();
     else if(t.dataset.act==="reassign")reassignDialog();
@@ -2698,6 +2798,8 @@ document.addEventListener("click",ev=>{
   if(t.hasAttribute("data-crsadd")){courseDialog(null);return;}
   if(t.dataset.crsedit){courseDialog(t.dataset.crsedit);return;}
   if(t.dataset.crsdel){if(confirm("Delete this course?")){deleteCourse(t.dataset.crsdel);toast("Course deleted.","good");render();}return;}
+  if(t.dataset.lcedit){const r=db.lifecycle.find(x=>x._id===t.dataset.lcedit);if(r)openLifecycle(r.kind,r);return;}
+  if(t.dataset.lcdel){if(confirm("Delete this record?")){db.lifecycle=db.lifecycle.filter(x=>x._id!==t.dataset.lcdel);toast("Record deleted.","good");renderDetail();}return;}
   if(t.hasAttribute("data-close")){
     // Backdrop closes only on a direct click; clicks inside the dialog (e.g. a
     // dropdown or input) must NOT close it. Close buttons always close.
@@ -2804,6 +2906,14 @@ function doAction(kind){
       if(editingRec&&editingRec.type==="exp"){editExperience(editingRec.id,f);toast("Previous employer updated.","good");}
       else{addExperience(S.pernr,f);toast("Previous employer added.","good");}
       editingRec=null;closeModal();S.tab="edu";renderDetail();
+    }else if(kind==="lcSave"){
+      const cfg=LC_KINDS[lcCtx.kind];const data={pernr:S.pernr,kind:lcCtx.kind};
+      cfg.fields.forEach(f=>{const el=document.getElementById("lc_"+f.k);if(!el)return;
+        data[f.k]=f.type==="chk"?el.checked:(f.type==="num"?(el.value===""?"":+el.value):el.value.trim());});
+      if(cfg.fields.some(f=>f.req&&(data[f.k]===""||data[f.k]==null))){toast("Please complete the required field(s).","bad");return;}
+      if(lcCtx.id){const r=db.lifecycle.find(x=>x._id===lcCtx.id);if(r)Object.assign(r,data);toast(cfg.it+" updated.","good");}
+      else{data._id="lc"+_recId++;db.lifecycle.push(data);toast(cfg.it+" added.","good");}
+      lcCtx=null;closeModal();renderDetail();
     }else if(kind==="cfgSave"){
       const def=CFG_SCHEMA[cfgCtx.tab];
       const key=(def.autokey&&cfgCtx.key==null)?null:val("cf_key").trim();
