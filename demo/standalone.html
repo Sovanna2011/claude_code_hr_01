@@ -65,10 +65,30 @@ button{font-family:inherit}
 .shell .brandsep{width:1px;height:20px;background:rgba(255,255,255,.42);flex:0 0 auto}
 .shell nav{flex:1 1 auto;overflow:visible;min-width:0}
 @media (max-width:760px){
-  .shell{gap:8px}
+  .shell{gap:8px;padding:6px 10px}
   .shell .logo .sub{display:none}
-  .shell nav button{padding:8px 10px;font-size:12.5px}
+  .shell nav{flex-wrap:wrap;margin-left:0;row-gap:4px}
+  .shell nav button{padding:7px 10px;font-size:12.5px}
   .shell nav button svg{display:none}
+  .shell .owm{font-size:14px;letter-spacing:1.5px}
+  main{padding:14px 12px 48px}
+  .page-head h1{font-size:19px}
+  .obj-head{padding:14px;gap:12px}
+  .obj-head .id{margin-left:0;text-align:left;width:100%;order:3}
+  .obj-head .attrs{gap:12px}
+  .home-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .home-hero{padding:16px}
+  .home-hero h1{font-size:19px}
+  .nav-sub,.action-menu,.palette-menu,.more-menu,.tab-more-menu{max-width:calc(100vw - 20px)}
+  .tbl-wrap{-webkit-overflow-scrolling:touch}
+}
+@media (max-width:520px){
+  .shell .brandsep,.shell .brandtext{display:none}
+  .shell .whoami .wi-txt{display:none}
+  .shell .util select#lang{max-width:66px}
+  .home-grid{grid-template-columns:1fr 1fr}
+  .action-menu,.nav-sub{right:auto;left:0}
+  .modal-bg{padding:8px}
 }
 .shell .logo{display:flex;align-items:center;gap:10px;font-weight:700;
   letter-spacing:.2px;white-space:nowrap}
@@ -423,6 +443,24 @@ a.mail:hover{text-decoration:underline}
 .swatch.sel{border-color:var(--text)}
 .swatch .tick{color:#fff;font-size:15px;font-weight:700;display:none;text-shadow:0 1px 2px rgba(0,0,0,.4)}
 .swatch.sel .tick{display:block}
+/* Home / main screen tiles */
+.home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:4px}
+.home-tile{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px;cursor:pointer;text-align:left;
+  transition:box-shadow .12s ease,transform .12s ease,border-color .12s ease;position:relative}
+.home-tile:hover{box-shadow:var(--shadow);transform:translateY(-2px);border-color:var(--accent)}
+.home-tile .ti{width:40px;height:40px;border-radius:10px;background:var(--accent-soft);color:var(--accent);
+  display:grid;place-items:center}
+.home-tile .ti svg{width:22px;height:22px;fill:currentColor}
+.home-tile .tt{font-weight:700;font-size:15px}
+.home-tile .ts{color:var(--muted);font-size:12.5px}
+.home-tile .tbadge{position:absolute;top:12px;right:12px;background:var(--bad);color:#fff;font-weight:700;
+  font-size:11px;border-radius:20px;padding:2px 8px;min-width:20px;text-align:center}
+.home-hero{background:linear-gradient(120deg,var(--accent),var(--accent-strong));color:#fff;border-radius:var(--radius);
+  padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+.home-hero h1{margin:0 0 4px;font-size:22px;font-weight:800}
+.home-hero p{margin:0;opacity:.9;font-size:13.5px}
+.home-sect{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700;margin:20px 0 8px}
 /* Graphical org / reporting charts (boxed tree) */
 .chart-scroll{overflow-x:auto;padding:24px 16px}
 .orgtree,.orgtree ul{list-style:none;margin:0;padding:0}
@@ -510,7 +548,8 @@ const I = {
   edit:'<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75zM20.7 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75z"/></svg>',
   move:'<svg viewBox="0 0 24 24"><path d="M13 6v5h5V7l4 5-4 5v-4h-7V6zM11 18v-5H6v4l-4-5 4-5v4h7v7z"/></svg>',
   education:'<svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.9V17h2V9zM5 13.2V17c0 1.7 3.1 3 7 3s7-1.3 7-3v-3.8l-7 3.8z"/></svg>',
-  doc:'<svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zm8 1.5V8h4.5zM8 12h8v2H8zm0 4h8v2H8z"/></svg>'
+  doc:'<svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zm8 1.5V8h4.5zM8 12h8v2H8zm0 4h8v2H8z"/></svg>',
+  home:'<svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h5v-6h4v6h5v-8h3z"/></svg>'
 };
 
 /* ============================ DATA (mirrors DB seed) ============================ */
@@ -1084,20 +1123,41 @@ function allowed(it,act){return (SESSION&&SESSION.roles||[]).some(r=>db.auth[r]&
    sub-menu. Single-item modules render as a direct link (the module name). */
 function navGroups(role){
   if(role==="HR_ADMIN")return [
+    {label:"Home",ico:"home",items:[["home","Home"]]},
     {label:"Employee Central",ico:"people",items:[["list","Employee Directory"],["orggraph","Org Chart"],["pos","Positions"]]},
     {label:"Time & Attendance",ico:"cal",items:[["leave","Time Off"],["attreg","Attendance"]]},
     {label:"Talent",ico:"education",items:[["recruit","Recruiting"],["training","Learning"]]},
     {label:"Compensation",ico:"money",items:[["payroll","Payroll"]]},
-    {label:"Reporting",ico:"doc",items:[["reports","Reports"]]},
-    {label:"Admin Center",ico:"doc",items:[["config","Configuration"]]}
+    {label:"Reporting",ico:"doc",items:[
+      ["reports","Overtime",{rep:"ot"}],
+      ["reports","Attendances",{rep:"att"}],
+      ["reports","Employee Attendance",{rep:"empatt"}],
+      ["reports","Daily Attendance",{rep:"matrix"}]
+    ]},
+    {label:"Admin Center",ico:"doc",items:[
+      ["config","Configuration"],
+      ["config","Actions · IT0000",{cfg:"action"}],
+      ["config","Enterprise Structure",{cfg:"company"}],
+      ["config","Personnel Structure",{cfg:"groups"}],
+      ["config","Organizational Units",{cfg:"org"}],
+      ["config","Users & Roles",{cfg:"users"}],
+      ["config","Authorizations",{cfg:"auth"}]
+    ]}
   ];
   if(role==="HR_MANAGER")return [
+    {label:"Home",ico:"home",items:[["home","Home"]]},
     {label:"My Team",ico:"people",items:[["mss","Team Overview"],["orggraph","Org Chart"]]},
     {label:"Time & Attendance",ico:"cal",items:[["leave","Approvals"],["attreg","Attendance"]]},
     {label:"Learning",ico:"education",items:[["training","Learning"]]},
-    {label:"Reporting",ico:"doc",items:[["reports","Reports"]]}
+    {label:"Reporting",ico:"doc",items:[
+      ["reports","Overtime",{rep:"ot"}],
+      ["reports","Attendances",{rep:"att"}],
+      ["reports","Employee Attendance",{rep:"empatt"}],
+      ["reports","Daily Attendance",{rep:"matrix"}]
+    ]}
   ];
   return [
+    {label:"Home",ico:"home",items:[["home","Home"]]},
     {label:"My Profile",ico:"person",items:[["ess","My Profile"]]},
     {label:"Time Off",ico:"cal",items:[["myleave","Time Off"]]},
     {label:"Learning",ico:"education",items:[["training","Learning"]]}
@@ -1107,12 +1167,14 @@ function navBar(){
   if(!SESSION){$("#nav").innerHTML="";return;}
   const groups=navGroups(SESSION.role);
   const va=v=>S.view===v||(S.view==="detail"&&v==="list");
+  // active state for an item, honouring an optional sub-selection (config tab or report)
+  const ia=(v,o)=>{o=o||{};return o.cfg?(S.view==="config"&&S.cfgTab===o.cfg):o.rep?(S.view==="reports"&&(S.rep||"ot")===o.rep):va(v);};
   $("#nav").innerHTML=groups.map((g,gi)=>{
     if(g.items.length===1){const v=g.items[0][0];
       return `<button data-nav="${v}" class="navitem ${va(v)?'active':''}">${I[g.ico]}${esc(t(g.label))}</button>`;}
-    const ga=g.items.some(([v])=>va(v));
+    const ga=g.items.some(([v,,o])=>ia(v,o));
     return `<div class="navgroup"><button class="navitem navtop ${ga?'active':''}" data-navmenu="${gi}">${I[g.ico]}${esc(t(g.label))} ▾</button>`+
-      `<div class="nav-sub" id="navSub${gi}">${g.items.map(([v,l])=>`<button class="nav-subitem ${va(v)?'active':''}" data-nav="${v}">${esc(t(l))}</button>`).join("")}</div></div>`;
+      `<div class="nav-sub" id="navSub${gi}">${g.items.map(([v,l,o])=>{o=o||{};return `<button class="nav-subitem ${ia(v,o)?'active':''}" data-nav="${v}"${o.cfg?` data-cfgtab="${o.cfg}"`:""}${o.rep?` data-rep="${o.rep}"`:""}>${esc(t(l))}</button>`;}).join("")}</div></div>`;
   }).join("");
   requestAnimationFrame(syncShellH);
 }
@@ -1192,7 +1254,8 @@ function render(){
   if(!SESSION){navBar();renderLogin();return;}
   navBar();
   requestAnimationFrame(syncShellH);
-  if(S.view==="list")renderList();
+  if(S.view==="home")renderHome();
+  else if(S.view==="list")renderList();
   else if(S.view==="detail")renderDetail();
   else if(S.view==="org")renderOrg();
   else if(S.view==="pos")renderPositions();
@@ -1341,9 +1404,15 @@ const LC_KINDS={
     cols:[{k:"date",l:"Last working day",date:true},{k:"reason",l:"Reason",dom:"TERMRE"},{k:"rehire",l:"Rehire?",bool:true},{k:"note",l:"Note"}]},
   offboard:{label:"Offboarding checklist",ico:"check",it:"Offboarding",
     fields:[{k:"item",l:"Checklist item",src:"OFFCHK",req:true},{k:"due",l:"Due date",type:"date"},{k:"done",l:"Completed",type:"chk"},{k:"note",l:"Note"}],
-    cols:[{k:"item",l:"Item",dom:"OFFCHK"},{k:"due",l:"Due",date:true},{k:"done",l:"Status",done:true},{k:"note",l:"Note"}]}
+    cols:[{k:"item",l:"Item",dom:"OFFCHK"},{k:"due",l:"Due",date:true},{k:"done",l:"Status",done:true},{k:"note",l:"Note"}]},
+  orgassign:{label:"Org assignment change",ico:"org",it:"Org Assignment Change",
+    fields:[{k:"date",l:"Effective date",type:"date",req:true},{k:"bukrs",l:"Company code",src:"T001"},{k:"werks",l:"Personnel area",src:"T500P"},{k:"orgeh",l:"Organizational unit",src:"departments"},{k:"position",l:"Position"},{k:"kostl",l:"Cost center"},{k:"reason",l:"Reason",src:"TRFREA"},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Effective date",date:true},{k:"bukrs",l:"Company",lbl:"T001"},{k:"werks",l:"Pers. area",lbl:"T500P"},{k:"orgeh",l:"Org unit",lbl:"departments"},{k:"position",l:"Position"},{k:"reason",l:"Reason",dom:"TRFREA"}]},
+  jobchange:{label:"Job change",ico:"move",it:"Job Change",
+    fields:[{k:"date",l:"Effective date",type:"date",req:true},{k:"fromPos",l:"Current job title"},{k:"toPos",l:"New job title",req:true},{k:"toDept",l:"New department",src:"departments"},{k:"manager",l:"New manager"},{k:"grade",l:"New pay grade"},{k:"reason",l:"Reason",src:"PROMOR"},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Effective date",date:true},{k:"fromPos",l:"From"},{k:"toPos",l:"To"},{k:"toDept",l:"Department",lbl:"departments"},{k:"manager",l:"New manager"},{k:"reason",l:"Reason",dom:"PROMOR"}]}
 };
-const LC_ORDER=["dept","probation","transfer","promotion","salary","termination","offboard"];
+const LC_ORDER=["orgassign","jobchange","dept","probation","transfer","promotion","salary","termination","offboard"];
 let lcCtx=null;
 function lcCanEdit(){return isAdmin()||isManager();}
 function lcSrc(src){return db[src]||db.dom[src]||{};}
@@ -1529,15 +1598,18 @@ function renderDetail(){
   <div class="page-head">
     <div><div class="crumb">${isEmployee()?"Employee Self-Service / My profile":`<a href="#" data-nav="${isManager()?'mss':'list'}" style="color:inherit;text-decoration:none">← ${isManager()?'My team':'Employees'}</a> / Master data`}</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${(allowed("0002","update")||allowed("0006","update")||allowed("0105","add")||allowed("0021","add")||allowed("0001","update")||allowed("2001","add")||allowed("2002","add"))?`<div class="action-wrap">
+      ${(allowed("0002","update")||allowed("0006","update")||allowed("0105","add")||allowed("0021","add")||allowed("0001","update")||allowed("2001","add")||allowed("2002","add")||lcCanEdit())?`<div class="action-wrap">
         <button class="btn primary" data-actionmenu>${I.edit} Take Action ▾</button>
         <div class="action-menu" id="actionMenu">
           ${allowed("0002","update")?`<button class="btn" data-act="edit">${I.edit} Edit personal data</button>`:""}
           ${allowed("0006","update")?`<button class="btn" data-act="address">${I.addr} Edit address</button>`:""}
           ${allowed("0105","add")?`<button class="btn" data-act="comm">${I.addr} Add communication</button>`:""}
           ${allowed("0021","add")?`<button class="btn" data-act="family">${I.people} Add family member</button>`:""}
-          ${(allowed("0001","update")||allowed("2001","add")||allowed("2002","add"))?`<div class="act-sep"></div>`:""}
-          ${allowed("0001","update")?`<button class="btn" data-act="reassign">${I.move} Job / organization change</button>`:""}
+          ${(allowed("0001","update")||lcCanEdit())?`<div class="act-sep"></div>`:""}
+          ${lcCanEdit()?`<button class="btn" data-act="lc:jobchange">${I.move} Job Change</button>`:""}
+          ${lcCanEdit()?`<button class="btn" data-act="lc:orgassign">${I.org} Org Assignment Change</button>`:""}
+          ${allowed("0001","update")?`<button class="btn" data-act="reassign">${I.move} Reassign (IT0001)</button>`:""}
+          ${(allowed("2001","add")||allowed("2002","add"))?`<div class="act-sep"></div>`:""}
           ${allowed("2001","add")?`<button class="btn" data-act="absence">${I.cal} Record time off</button>`:""}
           ${allowed("2002","add")?`<button class="btn" data-act="attendance">${I.cal} Record attendance</button>`:""}
         </div></div>`:""}
@@ -2139,79 +2211,128 @@ function exportAttReg(){
 }
 
 /* ---- Reports (overtime + attendance, date range) ---- */
+/* ---- Main screen / Home (SuccessFactors-style landing with tiles) ---- */
+function renderHome(){
+  const pendingLeave=(db.leaveRequests||[]).filter(r=>r.status==="Pending").length;
+  const empCount=(db.emp||[]).length;
+  const openReq=(db.reqData||[]).filter(r=>(r.status||"Open")==="Open").length;
+  const deptCount=Object.keys(db.departments||{}).length;
+  let stats=[],tiles=[];
+  if(isAdmin()){
+    stats=[["Employees",empCount],["Pending leave",pendingLeave],["Open requisitions",openReq],["Departments",deptCount]];
+    tiles=[
+      ["people","Employee Directory","Browse & maintain employees",'data-nav="list"',""],
+      ["org","Org Chart","Structure & reporting lines",'data-nav="orggraph"',""],
+      ["cal","Time Off Approvals","Review leave requests",'data-nav="leave"',pendingLeave||""],
+      ["person","Recruiting","Requisitions & candidates",'data-nav="recruit"',""],
+      ["education","Learning","Courses & bookings",'data-nav="training"',""],
+      ["doc","Reports","Overtime, attendance & more",'data-nav="reports" data-rep="ot"',""],
+      ["money","Payroll","Run & review payroll",'data-nav="payroll"',""],
+      ["doc","Admin Center","Configuration & security",'data-nav="config"',""]
+    ];
+  }else if(isManager()){
+    stats=[["Pending approvals",pendingLeave],["Team size",empCount]];
+    tiles=[
+      ["people","My Team","Team overview & profiles",'data-nav="mss"',""],
+      ["cal","Approvals","Approve leave requests",'data-nav="leave"',pendingLeave||""],
+      ["org","Org Chart","Structure",'data-nav="orggraph"',""],
+      ["education","Learning","Courses",'data-nav="training"',""],
+      ["doc","Reports","Team analytics",'data-nav="reports" data-rep="ot"',""]
+    ];
+  }else{
+    const myPending=(db.leaveRequests||[]).filter(r=>r.pernr===SESSION.pernr&&r.status==="Pending").length;
+    stats=[["My pending requests",myPending],["My record",SESSION.pernr||"—"]];
+    tiles=[
+      ["person","My Profile","View & edit my data",'data-nav="ess"',""],
+      ["cal","Time Off","Request & track leave",'data-nav="myleave"',myPending||""],
+      ["education","Learning","My courses",'data-nav="training"',""]
+    ];
+  }
+  app.innerHTML=`
+    <div class="home-hero"><h1>Welcome, ${esc(SESSION.name)}</h1><p>${esc(db.roleNames[SESSION.role]||SESSION.role)} — your SuccessFactors home. Pick up where you left off.</p></div>
+    <div class="stat-row">${stats.map(([l,v])=>`<div class="stat"><div class="v num">${v}</div><div class="l">${esc(l)}</div></div>`).join("")}</div>
+    <div class="home-sect">Quick links</div>
+    <div class="home-grid">${tiles.map(([ico,tt,ts,attrs,badge])=>`<button class="home-tile" ${attrs}>${badge?`<span class="tbadge">${badge}</span>`:""}<div class="ti">${I[ico]||I.doc}</div><div class="tt">${esc(tt)}</div><div class="ts">${esc(ts)}</div></button>`).join("")}</div>`;
+}
+/* Reports split into separate reports selectable by the Reporting sub-menu
+   (and a sub-nav bar on the page). S.rep chooses which one renders. */
+const REPORTS=[["ot","Overtime"],["att","Attendances"],["empatt","Employee Attendance"],["matrix","Daily Attendance"]];
 function renderReports(){
+  if(!S.rep)S.rep="ot";
   if(!S.rFrom)S.rFrom="2026-01-01"; if(!S.rTo)S.rTo="2026-12-31";
   if(!S.mFrom)S.mFrom="2026-05-01"; if(!S.mTo)S.mTo="2026-05-14";
   if(!S.eaFrom)S.eaFrom="2026-08-01"; if(!S.eaTo)S.eaTo="2026-08-14";
   if(S.attEmp==null&&db.emp.length)S.attEmp=db.emp[0].pernr;
-  const ot=overtimeReport(S.rFrom,S.rTo), att=attendanceReport(S.rFrom,S.rTo);
-  // Per-employee attendance from date to date
-  const ea=employeeAttendance(S.attEmp,S.eaFrom,S.eaTo);
-  const eaOpts=db.emp.slice().sort((a,b)=>a.pernr-b.pernr).map(e=>`<option value="${e.pernr}" ${e.pernr===S.attEmp?"selected":""}>${e.pernr} – ${esc(empName(e.pernr))}</option>`).join("");
-  const eaCode=c=>({P:"m-pre",A:"m-abs",T:"m-att",H:"m-hol","·":"m-off"}[c]||"m-att");
-  const eaHtml=`<div class="card list-card"><div class="card-head"><h2>Employee attendance — ${esc(empName(S.attEmp))} · ${fmtDate(S.eaFrom)} – ${fmtDate(S.eaTo)}</h2><span class="count">${ea.days.length}</span><div class="spacer"></div>
-    <div class="dt-search"><select id="eaEmp">${eaOpts}</select></div>
-    <div class="dt-search"><input id="eaFrom" type="date" value="${S.eaFrom}"></div><div class="dt-search"><input id="eaTo" type="date" value="${S.eaTo}"></div>
-    <button class="btn sm" data-dtexport="empatt" title="Export to Excel (CSV)">${I.doc} Excel</button></div>
-    <div class="stat-row">
-      <div class="stat"><div class="v num">${ea.sum.present}</div><div class="l">Present</div></div>
-      <div class="stat"><div class="v num">${ea.sum.absent}</div><div class="l">Absent</div></div>
-      <div class="stat"><div class="v num">${ea.sum.event}</div><div class="l">Attendance/Event</div></div>
-      <div class="stat"><div class="v num">${ea.sum.holiday+ea.sum.off}</div><div class="l">Non-working</div></div>
-      <div class="stat"><div class="v num">${ea.sum.hours.toFixed(1)}</div><div class="l">Total hours</div></div>
-    </div>
-    <div class="tbl-wrap dt-grid dt-grid-1"><table class="dt"><thead><tr><th>Date</th><th>Day</th><th>Status</th><th>Hours</th><th>Note</th></tr></thead>
-    <tbody>${ea.days.map(d=>`<tr><td class="num">${fmtDate(d.iso)}</td><td>${d.wd}</td><td><span class="pill ${eaCode(d.code)}">${esc(d.label)}</span></td><td class="num">${d.hours!=null?d.hours:"—"}</td><td>${esc(d.note||"")}</td></tr>`).join("")||`<tr><td colspan="5"><div class="empty">No days in range.</div></td></tr>`}</tbody></table></div></div>`;
-  _dtReg.empatt={title:"Employee attendance "+empName(S.attEmp)+" "+S.eaFrom+"_"+S.eaTo,
-    cols:[{k:"iso",l:"Date"},{k:"wd",l:"Day"},{k:"label",l:"Status"},{k:"hours",l:"Hours"},{k:"note",l:"Note"}],rows:ea.days};
-  const sum=k=>ot.reduce((a,e)=>a+e[k],0);
-  // Daily attendance matrix (capped at 31 columns)
-  let mTo=S.mTo; if(daysBetween(S.mFrom,S.mTo)>31){const d=new Date(S.mFrom+"T00:00:00");d.setDate(d.getDate()+30);mTo=d.toISOString().slice(0,10);}
-  const mtx=attendanceMatrix(S.mFrom,mTo);
-  const matrixHtml=`<div class="card list-card"><div class="card-head"><h2>Daily attendance — all employees · ${fmtDate(S.mFrom)} – ${fmtDate(mTo)}</h2><span class="count">${mtx.rows.length}</span><div class="spacer"></div>
-    <div class="dt-search"><input id="mFrom" type="date" value="${S.mFrom}"></div><div class="dt-search"><input id="mTo" type="date" value="${S.mTo}"></div></div>
-    <div class="mtx-legend"><span class="pill m-pre">P Present</span><span class="pill m-abs">A Absence</span><span class="pill m-att">T Attendance</span><span class="pill m-hol">H Holiday</span><span class="pill m-off">· Non-working</span></div>
-    <div class="tbl-wrap"><table class="mtx"><thead><tr><th class="mtx-emp">Employee</th>${mtx.days.map(d=>`<th class="mtx-day ${d.weekend||d.holiday?'we':''}">${d.dom}<br><span class="muted">${d.wd}</span></th>`).join("")}</tr></thead>
-    <tbody>${mtx.rows.map(r=>`<tr><td class="mtx-emp"><span class="num">${r.pernr}</span> ${esc(r.name)}</td>${r.cells.map(c=>`<td class="mtx-cell ${c.cls}" title="${esc(c.title)}">${c.code}</td>`).join("")}</tr>`).join("")||`<tr><td colspan="${mtx.days.length+1}"><div class="empty">No employees.</div></td></tr>`}</tbody></table></div></div>`;
-  app.innerHTML=pageHead("Reports","Working time & overtime")+`
-  <div class="toolbar">
+  const rep=REPORTS.some(r=>r[0]===S.rep)?S.rep:"ot";
+  const repName=(REPORTS.find(r=>r[0]===rep)||REPORTS[0])[1];
+  const dateBar=`<div class="toolbar">
     <div class="field"><label>From date</label><input type="date" id="rFrom" value="${S.rFrom}"></div>
     <div class="field"><label>To date</label><input type="date" id="rTo" value="${S.rTo}"></div>
-  </div>
-  <div class="stat-row">
-    <div class="stat"><div class="v num">${sum("normal").toFixed(1)}</div><div class="l">Normal OT hours</div></div>
-    <div class="stat"><div class="v num">${sum("sunday").toFixed(1)}</div><div class="l">Sunday OT hours</div></div>
-    <div class="stat"><div class="v num">${sum("holiday").toFixed(1)}</div><div class="l">Public-holiday OT hours</div></div>
-    <div class="stat"><div class="v num">${sum("total").toFixed(1)}</div><div class="l">Total OT hours</div></div>
-  </div>
-  ${dtTable("otrep","Overtime by employee · "+fmtDate(S.rFrom)+" – "+fmtDate(S.rTo),[
-    {k:"pernr",l:"Pers.No.",always:true,html:e=>`<span class="pernr num">${e.pernr}</span>`},
-    {k:"name",l:"Employee",always:true},
-    {k:"normal",l:"Normal OT",v:e=>e.normal,html:e=>`<span class="num">${e.normal.toFixed(1)}</span>`},
-    {k:"sunday",l:"Sunday OT",v:e=>e.sunday,html:e=>`<span class="num">${e.sunday.toFixed(1)}</span>`},
-    {k:"holiday",l:"Holiday OT",v:e=>e.holiday,html:e=>`<span class="num">${e.holiday.toFixed(1)}</span>`},
-    {k:"total",l:"Total",v:e=>e.total,html:e=>`<b class="num">${e.total.toFixed(1)}</b>`}
-  ],ot)}
-  <div style="height:14px"></div>
-  ${dtTable("attrep","Attendances · "+fmtDate(S.rFrom)+" – "+fmtDate(S.rTo),[
-    {k:"pernr",l:"Pers.No.",always:true,html:a=>`<span class="pernr num">${a.pernr}</span>`},
-    {k:"name",l:"Employee",always:true},
-    {k:"type",l:"Type"},
-    {k:"period",l:"From – To",v:a=>a.begda,html:a=>`<span class="num">${fmtDate(a.begda)} – ${fmtDate(a.endda)}</span>`},
-    {k:"days",l:"Days",v:a=>a.days!=null?a.days:"",html:a=>`<span class="num">${a.days!=null?a.days:"—"}</span>`},
-    {k:"hours",l:"Hours",v:a=>a.hours!=null?a.hours:"",html:a=>`<span class="num">${a.hours!=null?a.hours:"—"}</span>`}
-  ],att)}
-  <div style="height:14px"></div>
-  ${eaHtml}
-  <div style="height:14px"></div>
-  ${matrixHtml}`;
-  $("#rFrom").addEventListener("change",e=>{S.rFrom=e.target.value;renderReports();});
-  $("#rTo").addEventListener("change",e=>{S.rTo=e.target.value;renderReports();});
-  $("#mFrom").addEventListener("change",e=>{S.mFrom=e.target.value;renderReports();});
-  $("#mTo").addEventListener("change",e=>{S.mTo=e.target.value;renderReports();});
-  const eaEmp=$("#eaEmp");if(eaEmp)eaEmp.addEventListener("change",e=>{S.attEmp=+e.target.value;renderReports();});
-  const eaF=$("#eaFrom");if(eaF)eaF.addEventListener("change",e=>{S.eaFrom=e.target.value;renderReports();});
-  const eaT=$("#eaTo");if(eaT)eaT.addEventListener("change",e=>{S.eaTo=e.target.value;renderReports();});
+  </div>`;
+  let body="";
+  if(rep==="ot"){
+    const ot=overtimeReport(S.rFrom,S.rTo);const sum=k=>ot.reduce((a,e)=>a+e[k],0);
+    body=dateBar+`<div class="stat-row">
+      <div class="stat"><div class="v num">${sum("normal").toFixed(1)}</div><div class="l">Normal OT hours</div></div>
+      <div class="stat"><div class="v num">${sum("sunday").toFixed(1)}</div><div class="l">Sunday OT hours</div></div>
+      <div class="stat"><div class="v num">${sum("holiday").toFixed(1)}</div><div class="l">Public-holiday OT hours</div></div>
+      <div class="stat"><div class="v num">${sum("total").toFixed(1)}</div><div class="l">Total OT hours</div></div>
+    </div>`+dtTable("otrep","Overtime by employee · "+fmtDate(S.rFrom)+" – "+fmtDate(S.rTo),[
+      {k:"pernr",l:"Pers.No.",always:true,html:e=>`<span class="pernr num">${e.pernr}</span>`},
+      {k:"name",l:"Employee",always:true},
+      {k:"normal",l:"Normal OT",v:e=>e.normal,html:e=>`<span class="num">${e.normal.toFixed(1)}</span>`},
+      {k:"sunday",l:"Sunday OT",v:e=>e.sunday,html:e=>`<span class="num">${e.sunday.toFixed(1)}</span>`},
+      {k:"holiday",l:"Holiday OT",v:e=>e.holiday,html:e=>`<span class="num">${e.holiday.toFixed(1)}</span>`},
+      {k:"total",l:"Total",v:e=>e.total,html:e=>`<b class="num">${e.total.toFixed(1)}</b>`}
+    ],ot);
+  }else if(rep==="att"){
+    const att=attendanceReport(S.rFrom,S.rTo);
+    body=dateBar+dtTable("attrep","Attendances · "+fmtDate(S.rFrom)+" – "+fmtDate(S.rTo),[
+      {k:"pernr",l:"Pers.No.",always:true,html:a=>`<span class="pernr num">${a.pernr}</span>`},
+      {k:"name",l:"Employee",always:true},
+      {k:"type",l:"Type"},
+      {k:"period",l:"From – To",v:a=>a.begda,html:a=>`<span class="num">${fmtDate(a.begda)} – ${fmtDate(a.endda)}</span>`},
+      {k:"days",l:"Days",v:a=>a.days!=null?a.days:"",html:a=>`<span class="num">${a.days!=null?a.days:"—"}</span>`},
+      {k:"hours",l:"Hours",v:a=>a.hours!=null?a.hours:"",html:a=>`<span class="num">${a.hours!=null?a.hours:"—"}</span>`}
+    ],att);
+  }else if(rep==="empatt"){
+    const ea=employeeAttendance(S.attEmp,S.eaFrom,S.eaTo);
+    const eaOpts=db.emp.slice().sort((a,b)=>a.pernr-b.pernr).map(e=>`<option value="${e.pernr}" ${e.pernr===S.attEmp?"selected":""}>${e.pernr} – ${esc(empName(e.pernr))}</option>`).join("");
+    const eaCode=c=>({P:"m-pre",A:"m-abs",T:"m-att",H:"m-hol","·":"m-off"}[c]||"m-att");
+    _dtReg.empatt={title:"Employee attendance "+empName(S.attEmp)+" "+S.eaFrom+"_"+S.eaTo,
+      cols:[{k:"iso",l:"Date"},{k:"wd",l:"Day"},{k:"label",l:"Status"},{k:"hours",l:"Hours"},{k:"note",l:"Note"}],rows:ea.days};
+    body=`<div class="card list-card"><div class="card-head"><h2>Employee attendance — ${esc(empName(S.attEmp))} · ${fmtDate(S.eaFrom)} – ${fmtDate(S.eaTo)}</h2><span class="count">${ea.days.length}</span><div class="spacer"></div>
+      <div class="dt-search"><select id="eaEmp">${eaOpts}</select></div>
+      <div class="dt-search"><input id="eaFrom" type="date" value="${S.eaFrom}"></div><div class="dt-search"><input id="eaTo" type="date" value="${S.eaTo}"></div>
+      <button class="btn sm" data-dtexport="empatt" title="Export to Excel (CSV)">${I.doc} Excel</button></div>
+      <div class="stat-row">
+        <div class="stat"><div class="v num">${ea.sum.present}</div><div class="l">Present</div></div>
+        <div class="stat"><div class="v num">${ea.sum.absent}</div><div class="l">Absent</div></div>
+        <div class="stat"><div class="v num">${ea.sum.event}</div><div class="l">Attendance/Event</div></div>
+        <div class="stat"><div class="v num">${ea.sum.holiday+ea.sum.off}</div><div class="l">Non-working</div></div>
+        <div class="stat"><div class="v num">${ea.sum.hours.toFixed(1)}</div><div class="l">Total hours</div></div>
+      </div>
+      <div class="tbl-wrap dt-grid dt-grid-1"><table class="dt"><thead><tr><th>Date</th><th>Day</th><th>Status</th><th>Hours</th><th>Note</th></tr></thead>
+      <tbody>${ea.days.map(d=>`<tr><td class="num">${fmtDate(d.iso)}</td><td>${d.wd}</td><td><span class="pill ${eaCode(d.code)}">${esc(d.label)}</span></td><td class="num">${d.hours!=null?d.hours:"—"}</td><td>${esc(d.note||"")}</td></tr>`).join("")||`<tr><td colspan="5"><div class="empty">No days in range.</div></td></tr>`}</tbody></table></div></div>`;
+  }else{
+    let mTo=S.mTo; if(daysBetween(S.mFrom,S.mTo)>31){const d=new Date(S.mFrom+"T00:00:00");d.setDate(d.getDate()+30);mTo=d.toISOString().slice(0,10);}
+    const mtx=attendanceMatrix(S.mFrom,mTo);
+    body=`<div class="card list-card"><div class="card-head"><h2>Daily attendance — all employees · ${fmtDate(S.mFrom)} – ${fmtDate(mTo)}</h2><span class="count">${mtx.rows.length}</span><div class="spacer"></div>
+      <div class="dt-search"><input id="mFrom" type="date" value="${S.mFrom}"></div><div class="dt-search"><input id="mTo" type="date" value="${S.mTo}"></div></div>
+      <div class="mtx-legend"><span class="pill m-pre">P Present</span><span class="pill m-abs">A Absence</span><span class="pill m-att">T Attendance</span><span class="pill m-hol">H Holiday</span><span class="pill m-off">· Non-working</span></div>
+      <div class="tbl-wrap"><table class="mtx"><thead><tr><th class="mtx-emp">Employee</th>${mtx.days.map(d=>`<th class="mtx-day ${d.weekend||d.holiday?'we':''}">${d.dom}<br><span class="muted">${d.wd}</span></th>`).join("")}</tr></thead>
+      <tbody>${mtx.rows.map(r=>`<tr><td class="mtx-emp"><span class="num">${r.pernr}</span> ${esc(r.name)}</td>${r.cells.map(c=>`<td class="mtx-cell ${c.cls}" title="${esc(c.title)}">${c.code}</td>`).join("")}</tr>`).join("")||`<tr><td colspan="${mtx.days.length+1}"><div class="empty">No employees.</div></td></tr>`}</tbody></table></div></div>`;
+  }
+  const subnav=`<div class="toolbar" style="gap:6px;flex-wrap:wrap">${REPORTS.map(([k,l])=>`<button class="btn sm ${rep===k?'primary':''}" data-nav="reports" data-rep="${k}">${esc(l)}</button>`).join("")}</div>`;
+  app.innerHTML=pageHead("Reports",repName)+subnav+body;
+  const bind=(id,fn)=>{const el=$("#"+id);if(el)el.addEventListener("change",fn);};
+  bind("rFrom",e=>{S.rFrom=e.target.value;renderReports();});
+  bind("rTo",e=>{S.rTo=e.target.value;renderReports();});
+  bind("mFrom",e=>{S.mFrom=e.target.value;renderReports();});
+  bind("mTo",e=>{S.mTo=e.target.value;renderReports();});
+  bind("eaEmp",e=>{S.attEmp=+e.target.value;renderReports();});
+  bind("eaFrom",e=>{S.eaFrom=e.target.value;renderReports();});
+  bind("eaTo",e=>{S.eaTo=e.target.value;renderReports();});
 }
 
 /* ---- Graphical org chart (boxed tree) ---- */
@@ -2773,7 +2894,7 @@ document.addEventListener("click",ev=>{
   if(t.hasAttribute("data-actionmenu")){const am=$("#actionMenu");if(am)am.classList.toggle("open");return;}
   if(t.hasAttribute("data-more")){const mm=$("#moreMenu");mm.classList.toggle("open");return;}
   if(t.hasAttribute("data-tabmore")){const tm=$("#tabMoreMenu");tm.classList.toggle("open");return;}
-  if(t.dataset.nav){ev.preventDefault();S.view=t.dataset.nav;S.tab="personal";render();return;}
+  if(t.dataset.nav){ev.preventDefault();if(t.dataset.cfgtab)S.cfgTab=t.dataset.cfgtab;if(t.dataset.rep)S.rep=t.dataset.rep;S.view=t.dataset.nav;S.tab="personal";render();return;}
   if(t.dataset.open){S.view="detail";S.pernr=+t.dataset.open;S.tab="personal";render();return;}
   if(t.dataset.tab){S.tab=t.dataset.tab;renderDetail();return;}
   if(t.dataset.tog){const id=+t.dataset.tog;S.open.has(id)?S.open.delete(id):S.open.add(id);renderOrg();return;}
@@ -3052,7 +3173,7 @@ function doAction(kind){
       const primary=roles.includes("HR_ADMIN")?"HR_ADMIN":roles.includes("HR_MANAGER")?"HR_MANAGER":roles[0];
       SESSION={username:found.username,name:found.name,roles:roles,role:primary,pernr:found.pernr,email:found.email};
       if(found.theme){document.documentElement.setAttribute("data-theme",found.theme);}
-      S.view=primary==="HR_ADMIN"?"list":primary==="HR_MANAGER"?"mss":(found.pernr?"ess":"list");
+      S.view="home";
       toast("Welcome, "+found.name+".","good");render();
     }else if(kind==="reqleave"){
       const f={pernr:SESSION.pernr,type:val("rl_type"),begda:val("rl_begda"),endda:val("rl_endda"),note:val("rl_note").trim()};
@@ -3065,7 +3186,7 @@ function doAction(kind){
 
 /* ---- utility buttons ---- */
 $("#logout").addEventListener("click",()=>{SESSION=null;S.view="list";S.pernr=null;render();toast("Signed out.","good");});
-$("#reset").addEventListener("click",()=>{db=seed();S.view=SESSION?(isEmployee()?"ess":isManager()?"mss":"list"):"list";S.pernr=null;S.search="";S.open=new Set([50000001]);render();toast("Demo data reset to seed.","good");});
+$("#reset").addEventListener("click",()=>{db=seed();S.view=SESSION?"home":"list";S.pernr=null;S.search="";S.open=new Set([50000001]);render();toast("Demo data reset to seed.","good");});
 /* ---- Multiple colour themes (SuccessFactors-style theme picker) ----
    Each theme supplies a light and a dark accent set; the neutral surfaces come
    from the base stylesheet, so every theme works in both light and dark. */
