@@ -103,6 +103,26 @@ button{font-family:inherit}
 .more-menu .navitem:hover{background:var(--surface-2)}
 .more-menu .navitem.active{background:var(--accent-soft);color:var(--accent)}
 .more-menu .navitem svg{fill:currentColor}
+/* SuccessFactors-style grouped module navigation (menu -> sub-menu) */
+.navgroup{position:relative;display:inline-flex}
+.navtop{gap:5px}
+.nav-sub{position:absolute;top:calc(100% + 5px);left:0;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;box-shadow:var(--shadow);min-width:216px;display:none;flex-direction:column;padding:6px;z-index:45}
+.nav-sub.open{display:flex}
+.nav-sub .nav-subitem{background:transparent;border:0;color:var(--text);opacity:1;text-align:left;justify-content:flex-start;
+  width:100%;padding:9px 12px;border-radius:7px;cursor:pointer;font-size:13.5px;font-weight:600;display:flex;gap:8px}
+.nav-sub .nav-subitem:hover{background:var(--surface-2)}
+.nav-sub .nav-subitem.active{background:var(--accent-soft);color:var(--accent)}
+/* SuccessFactors "Take Action" menu on the People profile */
+.action-wrap{position:relative}
+.action-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;box-shadow:var(--shadow);min-width:232px;display:none;flex-direction:column;padding:6px;z-index:45}
+.action-menu.open{display:flex}
+.action-menu .btn{border:0;background:transparent;color:var(--text);justify-content:flex-start;text-align:left;width:100%;font-weight:600}
+.action-menu .btn:hover{background:var(--surface-2);border-color:transparent}
+.action-menu .btn.primary{background:transparent;color:var(--accent)}
+.action-menu .btn.primary:hover{background:var(--accent-soft)}
+.action-menu .act-sep{height:1px;background:var(--border);margin:5px 4px}
 
 /* ---- Layout ---- */
 main{max-width:1200px;margin:0 auto;padding:18px 16px 60px}
@@ -1047,19 +1067,41 @@ const can=(...roles)=>roles.some(hasRole);
 /* Infotype-level authorization: does any of the user's roles allow the
    activity (display/add/update/delete) on this infotype? */
 function allowed(it,act){return (SESSION&&SESSION.roles||[]).some(r=>db.auth[r]&&db.auth[r][it]&&db.auth[r][it][act]);}
-function navFor(role){
-  if(role==="HR_ADMIN")return [["list","People","people"],["orggraph","Org Chart","org"],["pos","Positions","pos"],["payroll","Payroll","money"],["attreg","Attendance","cal"],["leave","Leave","cal"],["recruit","Recruitment","person"],["training","Training","education"],["config","Config","doc"],["reports","Reports","doc"]];
-  if(role==="HR_MANAGER")return [["mss","My Team","people"],["attreg","Attendance","cal"],["leave","Approvals","cal"],["orggraph","Org Chart","org"],["training","Training","education"],["reports","Reports","doc"]];
-  return [["ess","My Profile","person"],["myleave","My Leave","cal"],["training","Training","education"]];
+/* SuccessFactors-style navigation: a few module groups, each opening a
+   sub-menu. Single-item modules render as a direct link (the module name). */
+function navGroups(role){
+  if(role==="HR_ADMIN")return [
+    {label:"Employee Central",ico:"people",items:[["list","Employee Directory"],["orggraph","Org Chart"],["pos","Positions"]]},
+    {label:"Time & Attendance",ico:"cal",items:[["leave","Time Off"],["attreg","Attendance"]]},
+    {label:"Talent",ico:"education",items:[["recruit","Recruiting"],["training","Learning"]]},
+    {label:"Compensation",ico:"money",items:[["payroll","Payroll"]]},
+    {label:"Reporting",ico:"doc",items:[["reports","Reports"]]},
+    {label:"Admin Center",ico:"doc",items:[["config","Configuration"]]}
+  ];
+  if(role==="HR_MANAGER")return [
+    {label:"My Team",ico:"people",items:[["mss","Team Overview"],["orggraph","Org Chart"]]},
+    {label:"Time & Attendance",ico:"cal",items:[["leave","Approvals"],["attreg","Attendance"]]},
+    {label:"Learning",ico:"education",items:[["training","Learning"]]},
+    {label:"Reporting",ico:"doc",items:[["reports","Reports"]]}
+  ];
+  return [
+    {label:"My Profile",ico:"person",items:[["ess","My Profile"]]},
+    {label:"Time Off",ico:"cal",items:[["myleave","Time Off"]]},
+    {label:"Learning",ico:"education",items:[["training","Learning"]]}
+  ];
 }
 function navBar(){
   if(!SESSION){$("#nav").innerHTML="";return;}
-  const items=navFor(SESSION.role);
-  const act=v=>S.view===v||(S.view==="detail"&&v==="list");
-  $("#nav").innerHTML=items.map(([v,l,ic])=>
-    `<button data-nav="${v}" class="navitem ${act(v)?'active':''}">${I[ic]}${esc(t(l))}</button>`).join("")
-    +`<div class="more-wrap" style="display:none"><button class="morebtn" data-more>${I.doc} ${esc(t("More"))} ▾</button><div class="more-menu" id="moreMenu"></div></div>`;
-  requestAnimationFrame(fitNav);
+  const groups=navGroups(SESSION.role);
+  const va=v=>S.view===v||(S.view==="detail"&&v==="list");
+  $("#nav").innerHTML=groups.map((g,gi)=>{
+    if(g.items.length===1){const v=g.items[0][0];
+      return `<button data-nav="${v}" class="navitem ${va(v)?'active':''}">${I[g.ico]}${esc(t(g.label))}</button>`;}
+    const ga=g.items.some(([v])=>va(v));
+    return `<div class="navgroup"><button class="navitem navtop ${ga?'active':''}" data-navmenu="${gi}">${I[g.ico]}${esc(t(g.label))} ▾</button>`+
+      `<div class="nav-sub" id="navSub${gi}">${g.items.map(([v,l])=>`<button class="nav-subitem ${va(v)?'active':''}" data-nav="${v}">${esc(t(l))}</button>`).join("")}</div></div>`;
+  }).join("");
+  requestAnimationFrame(syncShellH);
 }
 /* Priority+ nav: move items that don't fit into a "More ▾" dropdown. */
 function fitNav(){
@@ -1474,13 +1516,18 @@ function renderDetail(){
   <div class="page-head">
     <div><div class="crumb">${isEmployee()?"Employee Self-Service / My profile":`<a href="#" data-nav="${isManager()?'mss':'list'}" style="color:inherit;text-decoration:none">← ${isManager()?'My team':'Employees'}</a> / Master data`}</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${allowed("0002","update")?`<button class="btn" data-act="edit">${I.edit} Edit personal</button>`:""}
-      ${allowed("0006","update")?`<button class="btn" data-act="address">${I.addr} Edit address</button>`:""}
-      ${allowed("0105","add")?`<button class="btn" data-act="comm">${I.addr} Add communication</button>`:""}
-      ${allowed("0021","add")?`<button class="btn" data-act="family">${I.people} Add family</button>`:""}
-      ${allowed("0001","update")?`<button class="btn" data-act="reassign">${I.move} Reassign</button>`:""}
-      ${allowed("2002","add")?`<button class="btn" data-act="attendance">${I.cal} Attendance</button>`:""}
-      ${allowed("2001","add")?`<button class="btn primary" data-act="absence">${I.cal} Absence</button>`:""}
+      ${(allowed("0002","update")||allowed("0006","update")||allowed("0105","add")||allowed("0021","add")||allowed("0001","update")||allowed("2001","add")||allowed("2002","add"))?`<div class="action-wrap">
+        <button class="btn primary" data-actionmenu>${I.edit} Take Action ▾</button>
+        <div class="action-menu" id="actionMenu">
+          ${allowed("0002","update")?`<button class="btn" data-act="edit">${I.edit} Edit personal data</button>`:""}
+          ${allowed("0006","update")?`<button class="btn" data-act="address">${I.addr} Edit address</button>`:""}
+          ${allowed("0105","add")?`<button class="btn" data-act="comm">${I.addr} Add communication</button>`:""}
+          ${allowed("0021","add")?`<button class="btn" data-act="family">${I.people} Add family member</button>`:""}
+          ${(allowed("0001","update")||allowed("2001","add")||allowed("2002","add"))?`<div class="act-sep"></div>`:""}
+          ${allowed("0001","update")?`<button class="btn" data-act="reassign">${I.move} Job / organization change</button>`:""}
+          ${allowed("2001","add")?`<button class="btn" data-act="absence">${I.cal} Record time off</button>`:""}
+          ${allowed("2002","add")?`<button class="btn" data-act="attendance">${I.cal} Record attendance</button>`:""}
+        </div></div>`:""}
       ${isEmployee()?`<button class="btn" data-act="mypayslip">${I.money} My payslip</button><button class="btn primary" data-nav="myleave">${I.cal} My leave</button>`:""}
       ${isManager()?`<button class="btn" data-payslip="${e.pernr}">${I.money} Payslip</button>`:""}
     </div>
@@ -2267,6 +2314,7 @@ function editModeSel(id){return `<div class="grp"><label>Edit mode</label><selec
   <option value="correct">Correction — overwrite the current record (no new slice)</option></select></div>`;}
 function optName(arr,sel){return `<option value="">—</option>`+arr.map(o=>`<option value="${o.id}" ${String(sel)===String(o.id)?'selected':''}>${esc(o.name)}</option>`).join("");}
 function modal(title,bodyHtml,footHtml){
+  document.querySelectorAll(".nav-sub.open,.action-menu.open").forEach(d=>d.classList.remove("open"));
   $("#modal-root").innerHTML=`<div class="modal-bg" data-close><div class="modal" role="dialog" aria-modal="true">
     <h3>${title}</h3><div class="body">${bodyHtml}</div><div class="foot">${footHtml}</div></div></div>`;
   const first=$("#modal-root input,#modal-root select");if(first)first.focus();
@@ -2701,8 +2749,12 @@ document.addEventListener("click",ev=>{
   const comboOpt=ev.target.closest("[data-cityopt]");
   if(comboOpt){const combo=comboOpt.closest(".combo"),inp=combo.querySelector("input");
     inp.value=comboOpt.dataset.cityopt;onAddrCity();combo.querySelector(".combo-list").classList.remove("open");return;}
-  const t=ev.target.closest("[data-nav],[data-open],[data-act],[data-tab],[data-tog],[data-do],[data-close],[data-fill],[data-approve],[data-reject],[data-book],[data-advance],[data-payslip],[data-cfg],[data-authrole],[data-cfgadd],[data-cfgedit],[data-cfgdel],[data-useredit],[data-userdel],[data-orgedit],[data-orgdel],[data-roleadd],[data-roleedit],[data-roledel],[data-posadd],[data-posedit],[data-posdel],[data-attach],[data-attview],[data-attdel],[data-addredit],[data-addrdel],[data-comedit],[data-comdel],[data-famedit],[data-famdel],[data-eduedit],[data-edudel],[data-expedit],[data-expdel],[data-qualedit],[data-qualdel],[data-sort],[data-possort],[data-dtsort],[data-dtcols],[data-dtexport],[data-copycsv],[data-reqadd],[data-reqedit],[data-reqdel],[data-appladd],[data-appledit],[data-appldel],[data-crsadd],[data-crsedit],[data-crsdel],[data-regsave],[data-regtoday],[data-regexport],[data-empatt],[data-more],[data-tabmore],[data-photo],[data-lcedit],[data-lcdel]");
+  const t=ev.target.closest("[data-nav],[data-open],[data-act],[data-tab],[data-tog],[data-do],[data-close],[data-fill],[data-approve],[data-reject],[data-book],[data-advance],[data-payslip],[data-cfg],[data-authrole],[data-cfgadd],[data-cfgedit],[data-cfgdel],[data-useredit],[data-userdel],[data-orgedit],[data-orgdel],[data-roleadd],[data-roleedit],[data-roledel],[data-posadd],[data-posedit],[data-posdel],[data-attach],[data-attview],[data-attdel],[data-addredit],[data-addrdel],[data-comedit],[data-comdel],[data-famedit],[data-famdel],[data-eduedit],[data-edudel],[data-expedit],[data-expdel],[data-qualedit],[data-qualdel],[data-sort],[data-possort],[data-dtsort],[data-dtcols],[data-dtexport],[data-copycsv],[data-reqadd],[data-reqedit],[data-reqdel],[data-appladd],[data-appledit],[data-appldel],[data-crsadd],[data-crsedit],[data-crsdel],[data-regsave],[data-regtoday],[data-regexport],[data-empatt],[data-more],[data-tabmore],[data-photo],[data-lcedit],[data-lcdel],[data-navmenu],[data-actionmenu]");
+  if(!ev.target.closest(".navgroup"))document.querySelectorAll(".nav-sub.open").forEach(d=>d.classList.remove("open"));
+  if(!ev.target.closest(".action-wrap"))document.querySelectorAll(".action-menu.open").forEach(d=>d.classList.remove("open"));
   if(!t){const mm=$("#moreMenu");if(mm)mm.classList.remove("open");const tm=$("#tabMoreMenu");if(tm)tm.classList.remove("open");return;}
+  if(t.dataset.navmenu!==undefined){const sub=document.getElementById("navSub"+t.dataset.navmenu);const wasOpen=sub&&sub.classList.contains("open");document.querySelectorAll(".nav-sub.open").forEach(d=>d.classList.remove("open"));if(sub&&!wasOpen)sub.classList.add("open");return;}
+  if(t.hasAttribute("data-actionmenu")){const am=$("#actionMenu");if(am)am.classList.toggle("open");return;}
   if(t.hasAttribute("data-more")){const mm=$("#moreMenu");mm.classList.toggle("open");return;}
   if(t.hasAttribute("data-tabmore")){const tm=$("#tabMoreMenu");tm.classList.toggle("open");return;}
   if(t.dataset.nav){ev.preventDefault();S.view=t.dataset.nav;S.tab="personal";render();return;}
