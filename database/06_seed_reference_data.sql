@@ -98,7 +98,7 @@ USING (VALUES
     ('GESCH','1','Male'),('GESCH','2','Female'),('GESCH','3','Undefined'),
     ('FAMST','0','Single'),('FAMST','1','Married'),('FAMST','2','Widowed'),
     ('FAMST','3','Divorced'),('FAMST','4','Separated'),
-    ('ANRED','1',N'Mrs. (អ្នកស្រី)'),('ANRED','2','Mr.'),('ANRED','3','Company'),('ANRED','4','Messrs.'),('ANRED','5',N'Ms. (កញ្ញា)'),
+    ('ANRED','1','Mrs.'),('ANRED','2','Mr.'),('ANRED','3','Company'),('ANRED','4','Messrs.'),('ANRED','5','Ms.'),
     ('STAT2','0','Withdrawn'),('STAT2','1','Inactive'),
     ('STAT2','2','Retiree'),('STAT2','3','Active'),
     ('USRTY','0010','E-Mail'),('USRTY','0020','Telephone'),
