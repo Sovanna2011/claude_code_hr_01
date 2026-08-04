@@ -13,28 +13,12 @@
 
 const { test, before, after, beforeEach, describe } = require("node:test");
 const assert = require("node:assert/strict");
-const { spawn } = require("node:child_process");
-const path = require("node:path");
+const { makeApi, startServer } = require("../testkit");
 
 const PORT = process.env.TEST_PORT || 8123;
-const BASE = `http://127.0.0.1:${PORT}`;
+const api = makeApi(`http://127.0.0.1:${PORT}`);
 let server;
 let adminToken;   // used to reset the in-memory DB between tests
-
-/** Minimal API helper. Returns { status, body } where body is parsed JSON (or null). */
-async function api(method, pathname, { token, body } = {}) {
-    const headers = { "Content-Type": "application/json" };
-    if (token) { headers.Authorization = "Bearer " + token; }
-    const res = await fetch(BASE + pathname, {
-        method,
-        headers,
-        body: body === undefined ? undefined : JSON.stringify(body)
-    });
-    const text = await res.text();
-    let json = null;
-    if (text) { try { json = JSON.parse(text); } catch (e) { json = text; } }
-    return { status: res.status, body: json };
-}
 
 async function login(username, password) {
     const { status, body } = await api("POST", "/api/auth/login", { body: { username, password } });
@@ -44,21 +28,7 @@ async function login(username, password) {
 
 // ---- Server lifecycle ------------------------------------------------------
 before(async () => {
-    server = spawn("node", ["server.js"], {
-        cwd: path.join(__dirname, ".."),
-        env: { ...process.env, PORT: String(PORT) },
-        stdio: ["ignore", "ignore", "inherit"]
-    });
-    // Wait until the server answers its health check.
-    const deadline = Date.now() + 10000;
-    for (;;) {
-        try {
-            const res = await fetch(BASE + "/health");
-            if (res.ok) { break; }
-        } catch (e) { /* not up yet */ }
-        if (Date.now() > deadline) { throw new Error("demo server did not start in time"); }
-        await new Promise(r => setTimeout(r, 150));
-    }
+    server = await startServer(PORT);
     adminToken = (await login("admin", "admin123")).token;
 });
 
