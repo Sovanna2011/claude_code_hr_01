@@ -412,7 +412,17 @@ a.mail:hover{text-decoration:underline}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow-sm)}
 .stat .v{font-size:26px;font-weight:800;color:var(--accent);line-height:1}
 .stat .l{font-size:12px;color:var(--muted);margin-top:4px}
-.shell .util #logout,.shell .util #reset,.shell .util #theme{font-size:16px}
+.shell .util #logout,.shell .util #reset,.shell .util #theme,.shell .util #palette{font-size:16px}
+.palette-wrap{position:relative;display:inline-flex}
+.palette-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;box-shadow:var(--shadow);padding:12px;display:none;grid-template-columns:repeat(4,1fr);gap:9px;z-index:60;width:220px}
+.palette-menu.open{display:grid}
+.palette-title{grid-column:1/-1;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;margin:0 0 2px}
+.swatch{width:40px;height:40px;border-radius:11px;border:2px solid transparent;cursor:pointer;display:grid;place-items:center;padding:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.swatch:hover{transform:translateY(-1px)}
+.swatch.sel{border-color:var(--text)}
+.swatch .tick{color:#fff;font-size:15px;font-weight:700;display:none;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.swatch.sel .tick{display:block}
 /* Graphical org / reporting charts (boxed tree) */
 .chart-scroll{overflow-x:auto;padding:24px 16px}
 .orgtree,.orgtree ul{list-style:none;margin:0;padding:0}
@@ -470,6 +480,7 @@ a.mail:hover{text-decoration:underline}
       <option value="CN">🇨🇳 中文</option>
     </select>
     <button id="reset" title="Reset demo data">↻</button>
+    <div class="palette-wrap"><button id="palette" title="Theme colour">🎨</button><div class="palette-menu" id="paletteMenu"></div></div>
     <button id="theme" title="Toggle light / dark">◐</button>
     <button id="logout" title="Sign out" style="display:none">⎋</button>
   </div>
@@ -642,7 +653,9 @@ function seed(){return{
   T547T:{"01":"Permanent","02":"Fixed-term","03":"Temporary","04":"Internship"},
   dom:{GESCH:{"1":"Male","2":"Female","3":"Undefined"},
        FAMST:{"0":"Single","1":"Married","2":"Widowed","3":"Divorced","4":"Separated"},
-       ANRED:{"1":"Mrs.","2":"Mr.","3":"Unknown"},
+       ANRED:{"1":"Mrs.","2":"Mr.","3":"Company","4":"Messrs.","5":"Ms."},
+       MASSN:{"01":"Hiring","02":"Organizational reassignment","03":"Pay increase","04":"Promotion","10":"Leaving","11":"Retirement"},
+       MASSG:{"01":"New hire","02":"Resignation","03":"Dismissal","04":"Annual review","05":"Restructuring","06":"End of contract"},
        TITEL:{"01":"Dr.","02":"Prof.","03":"Prof. Dr.","04":"B.A.","05":"B.Sc.","06":"M.A.","07":"M.Sc.","08":"MBA","09":"Ph.D.","10":"Eng."},
        STAT2:{"0":"Withdrawn","1":"Inactive","2":"Retiree","3":"Active"},
        USRTY:{"0010":"E-Mail","0020":"Telephone","CELL":"Mobile phone","FAX":"Fax","MAIL":"System user"},
@@ -1880,7 +1893,10 @@ const CFG_SCHEMA={
   promoreason:{h:"Promotion reasons (PROMOR)",store:"dom",path:"PROMOR",keyL:"Key",fields:[{k:"text",l:"Reason"}]},
   termreason:{h:"Termination reasons (TERMRE)",store:"dom",path:"TERMRE",keyL:"Key",fields:[{k:"text",l:"Reason"}]},
   offchk:{h:"Offboarding checklist items (OFFCHK)",store:"dom",path:"OFFCHK",keyL:"Key",fields:[{k:"text",l:"Checklist item"}]},
-  salreason:{h:"Salary adjustment reasons (SALREA)",store:"dom",path:"SALREA",keyL:"Key",fields:[{k:"text",l:"Reason"}]}
+  salreason:{h:"Salary adjustment reasons (SALREA)",store:"dom",path:"SALREA",keyL:"Key",fields:[{k:"text",l:"Reason"}]},
+  action:{h:"Action types (IT0000 · T529A)",store:"dom",path:"MASSN",keyL:"Key",fields:[{k:"text",l:"Action type"}]},
+  actreason:{h:"Action reasons (IT0000 · T530)",store:"dom",path:"MASSG",keyL:"Key",fields:[{k:"text",l:"Reason"}]},
+  empstat:{h:"Employment status (IT0000 · STAT2)",store:"dom",path:"STAT2",keyL:"Key",fields:[{k:"text",l:"Status"}]}
 };
 function cfgStore(def){return def.store==="dom"?db.dom[def.path]:db[def.path];}
 function cfgRows(def){const s=cfgStore(def);
@@ -1965,7 +1981,7 @@ function renderConfig(){
   else if(S.cfgTab==="org")body=cfgOrgTable();
   else if(CFG_SCHEMA[S.cfgTab])body=cfgTable(S.cfgTab);
   app.innerHTML=pageHead(t("Configuration"),t("System configuration"))+
-    `<div class="toolbar" style="gap:6px;flex-wrap:wrap">${T("company","Company codes")}${T("parea","Personnel areas")}${T("groups","Employee groups")}${T("subgroups","Employee subgroups")}${T("cost","Cost centers")}${T("org","Organizational units")}${T("lang","Languages")}${T("nat","Countries")}${T("currency","Currencies")}${T("exchange","Exchange rates")}${T("region","Regions")}${T("city","Cities")}${T("anred","Forms of address")}${T("titles","Titles")}${T("addrtype","Address types")}${T("commtype","Comm. types")}${T("famtype","Family types")}${T("dept","Departments")}${T("probst","Probation statuses")}${T("transreason","Transfer reasons")}${T("promoreason","Promotion reasons")}${T("termreason","Termination reasons")}${T("offchk","Offboarding items")}${T("salreason","Salary adj. reasons")}${T("syslang","System languages")}${T("numrange","Number ranges")}${T("roles","Roles")}${T("users","Users & roles")}${T("auth","Authorizations")}</div>${body}`;
+    `<div class="toolbar" style="gap:6px;flex-wrap:wrap">${T("action","Action types · IT0000")}${T("actreason","Action reasons")}${T("empstat","Employment status")}${T("company","Company codes")}${T("parea","Personnel areas")}${T("groups","Employee groups")}${T("subgroups","Employee subgroups")}${T("cost","Cost centers")}${T("org","Organizational units")}${T("lang","Languages")}${T("nat","Countries")}${T("currency","Currencies")}${T("exchange","Exchange rates")}${T("region","Regions")}${T("city","Cities")}${T("anred","Forms of address")}${T("titles","Titles")}${T("addrtype","Address types")}${T("commtype","Comm. types")}${T("famtype","Family types")}${T("dept","Departments")}${T("probst","Probation statuses")}${T("transreason","Transfer reasons")}${T("promoreason","Promotion reasons")}${T("termreason","Termination reasons")}${T("offchk","Offboarding items")}${T("salreason","Salary adj. reasons")}${T("syslang","System languages")}${T("numrange","Number ranges")}${T("roles","Roles")}${T("users","Users & roles")}${T("auth","Authorizations")}</div>${body}`;
 }
 
 /* ============================ MODULE VIEWS ============================ */
@@ -3050,13 +3066,44 @@ function doAction(kind){
 /* ---- utility buttons ---- */
 $("#logout").addEventListener("click",()=>{SESSION=null;S.view="list";S.pernr=null;render();toast("Signed out.","good");});
 $("#reset").addEventListener("click",()=>{db=seed();S.view=SESSION?(isEmployee()?"ess":isManager()?"mss":"list"):"list";S.pernr=null;S.search="";S.open=new Set([50000001]);render();toast("Demo data reset to seed.","good");});
+/* ---- Multiple colour themes (SuccessFactors-style theme picker) ----
+   Each theme supplies a light and a dark accent set; the neutral surfaces come
+   from the base stylesheet, so every theme works in both light and dark. */
+const THEMES={
+  oracle:{name:"Oracle Red",light:{a:"#c74634",s:"#a3382a",soft:"#f7e8e5",shell:"#c74634"},dark:{a:"#ec6a58",s:"#f2836f",soft:"#3a201b",shell:"#241d19"}},
+  sap:{name:"SAP Blue",light:{a:"#0a6ed1",s:"#085caf",soft:"#e3f0fb",shell:"#0a6ed1"},dark:{a:"#5db1ff",s:"#8ac6ff",soft:"#102a43",shell:"#0d1a26"}},
+  teal:{name:"Teal",light:{a:"#0f7f8c",s:"#0b616b",soft:"#e0f2f4",shell:"#0f7f8c"},dark:{a:"#4fc4d0",s:"#78d4dd",soft:"#0e2b2f",shell:"#0c1e21"}},
+  emerald:{name:"Emerald",light:{a:"#0a7d55",s:"#075c3e",soft:"#e2f4ec",shell:"#0a7d55"},dark:{a:"#4cc38a",s:"#74d3a5",soft:"#0f2c20",shell:"#0d1f18"}},
+  violet:{name:"Violet",light:{a:"#6a3fb5",s:"#552f95",soft:"#efe8fa",shell:"#6a3fb5"},dark:{a:"#a985ec",s:"#c0a6f2",soft:"#241a3a",shell:"#1a1526"}},
+  magenta:{name:"Magenta",light:{a:"#b31d6b",s:"#8f1656",soft:"#fbe4f0",shell:"#b31d6b"},dark:{a:"#ef74af",s:"#f49ac6",soft:"#331228",shell:"#241019"}},
+  amber:{name:"Amber",light:{a:"#a65f00",s:"#824b00",soft:"#fbeed6",shell:"#a65f00"},dark:{a:"#f0a94a",s:"#f4be74",soft:"#33240f",shell:"#251c10"}},
+  slate:{name:"Slate",light:{a:"#3b566a",s:"#2c4150",soft:"#e7edf1",shell:"#33475a"},dark:{a:"#8fb0c6",s:"#aac4d6",soft:"#20303b",shell:"#161f27"}}
+};
+let currentAccent="oracle";
+function accentMode(){return document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");}
+function applyAccent(key){
+  currentAccent=THEMES[key]?key:"oracle";
+  const set=THEMES[currentAccent][accentMode()==="dark"?"dark":"light"],r=document.documentElement.style;
+  r.setProperty("--accent",set.a);r.setProperty("--accent-strong",set.s);
+  r.setProperty("--accent-soft",set.soft);r.setProperty("--shell-bg",set.shell);
+  const pm=$("#paletteMenu");if(pm)pm.querySelectorAll(".swatch").forEach(sw=>sw.classList.toggle("sel",sw.dataset.theme===currentAccent));
+}
 (function themeInit(){
   const btn=$("#theme");
   btn.addEventListener("click",()=>{
     const cur=document.documentElement.getAttribute("data-theme");
     const next=cur==="dark"?"light":cur==="light"?"dark":(matchMedia("(prefers-color-scheme:dark)").matches?"light":"dark");
     document.documentElement.setAttribute("data-theme",next);
+    applyAccent(currentAccent);   // re-pick the accent shade for the new mode
   });
+})();
+(function paletteInit(){
+  const btn=$("#palette"),menu=$("#paletteMenu");if(!btn||!menu)return;
+  menu.innerHTML=`<div class="palette-title">Theme colour</div>`+Object.entries(THEMES).map(([k,v])=>
+    `<button class="swatch${k===currentAccent?" sel":""}" data-theme="${k}" title="${v.name}" style="background:${v.light.a}"><span class="tick">✓</span></button>`).join("");
+  btn.addEventListener("click",e=>{e.stopPropagation();menu.classList.toggle("open");});
+  menu.addEventListener("click",e=>{const sw=e.target.closest(".swatch");if(!sw)return;applyAccent(sw.dataset.theme);menu.classList.remove("open");toast("Theme colour: "+THEMES[currentAccent].name,"good");});
+  document.addEventListener("click",e=>{if(!e.target.closest(".palette-wrap"))menu.classList.remove("open");});
 })();
 (function langInit(){
   const sel=$("#lang");if(!sel)return;
