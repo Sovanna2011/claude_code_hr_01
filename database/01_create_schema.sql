@@ -1,21 +1,21 @@
-SET DEFINE OFF
 /* ============================================================================
    HR Module - Schema Creation Script
-   Platform : Oracle Database (19c / 21c / 23ai)
+   Platform : Microsoft SQL Server (2019 / 2022)
    Reference: SAP ECC 6.0 EHP8 - Human Capital Management (HCM)
 
    This module reproduces the core HCM data model. Tables follow SAP naming
    conventions (PAnnnn = Personnel Administration infotypes, HRPnnnn =
    Organizational Management, Tnnn = Customizing / control tables).
 
-   In Oracle a "schema" is owned by a database user, so the SAP HR application
-   area is modelled as an Oracle user/schema called HR (the SQL Server version
-   used a [HR] schema inside an HRModule database). Run this file as a DBA
-   (SYS or SYSTEM) connected to the target pluggable database; the remaining
-   scripts are run while connected as the HR user.
+   In SQL Server the SAP HR application area is modelled as a schema called
+   [HR] inside a database called [HRModule]. This first script creates the
+   database and the schema; every other object is created as HR.<name>.
+
+   Run with sqlcmd (or SSMS) from a login with rights to CREATE DATABASE,
+   e.g.:  sqlcmd -S localhost -U sa -P <pwd> -i database/run_all.sql
 
    Run order (see run_all.sql):
-     01_create_schema.sql          <- this file  (run as DBA)
+     01_create_schema.sql          <- this file
      02_schema_personnel_admin.sql
      03_schema_org_management.sql
      04_schema_time_management.sql
@@ -28,47 +28,52 @@ SET DEFINE OFF
      11_schema_security.sql
      12_schema_modules.sql
      13_schema_payroll_time.sql
+
+   All scripts are idempotent (re-runnable).
    ============================================================================ */
 
 /* ----------------------------------------------------------------------------
-   HR user / schema. Idempotent: only created when it does not yet exist.
-   Adjust the tablespace and password to your site's standards.
+   Database. Idempotent: only created when it does not yet exist.
    ---------------------------------------------------------------------------- */
-DECLARE
-    v_count INTEGER;
-BEGIN
-    SELECT COUNT(*) INTO v_count FROM dba_users WHERE username = 'HR';
-    IF v_count = 0 THEN
-        EXECUTE IMMEDIATE 'CREATE USER HR IDENTIFIED BY "HrModule#2024" '
-                       || 'DEFAULT TABLESPACE USERS TEMPORARY TABLESPACE TEMP '
-                       || 'QUOTA UNLIMITED ON USERS';
-        EXECUTE IMMEDIATE 'GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE PROCEDURE, '
-                       || 'CREATE SEQUENCE, CREATE TABLE TO HR';
-    END IF;
-END;
-/
+IF DB_ID('HRModule') IS NULL
+    CREATE DATABASE HRModule;
+GO
+
+USE HRModule;
+GO
+
+/* ----------------------------------------------------------------------------
+   HR schema. Idempotent.
+   ---------------------------------------------------------------------------- */
+IF SCHEMA_ID('HR') IS NULL
+    EXEC('CREATE SCHEMA HR');
+GO
+
+/* ----------------------------------------------------------------------------
+   Optional: a dedicated login/user for the application instead of 'sa'.
+   Uncomment and adjust the password for anything but a throwaway dev box, and
+   point ConnectionStrings:HRModule in appsettings.json at it.
+
+   IF SUSER_ID('hr_app') IS NULL
+       CREATE LOGIN hr_app WITH PASSWORD = 'HrModule#2024', DEFAULT_DATABASE = HRModule;
+   IF USER_ID('hr_app') IS NULL
+       CREATE USER hr_app FOR LOGIN hr_app;
+   ALTER ROLE db_datareader ADD MEMBER hr_app;
+   ALTER ROLE db_datawriter ADD MEMBER hr_app;
+   GRANT EXECUTE ON SCHEMA::HR TO hr_app;
+   ---------------------------------------------------------------------------- */
 
 /* ----------------------------------------------------------------------------
    Number range table - emulates SAP number range object RP_PERNR (personnel
    numbers) and the OM object id ranges. In SAP these are maintained via SNRO.
-
-   From here on every object is created in the HR schema. When running the
-   scripts while connected AS HR, the unqualified name resolves to HR.<name>;
-   the explicit HR. qualifier is kept for clarity and so a DBA session can run
-   the scripts too.
    ---------------------------------------------------------------------------- */
-BEGIN
-    EXECUTE IMMEDIATE '
-        CREATE TABLE HR.NumberRange
-        (
-            RangeObject   VARCHAR2(20) NOT NULL,   -- e.g. PERNR, OBJID
-            FromNumber    NUMBER(19)   NOT NULL,
-            ToNumber      NUMBER(19)   NOT NULL,
-            CurrentNumber NUMBER(19)   NOT NULL,
-            CONSTRAINT PK_NumberRange PRIMARY KEY (RangeObject)
-        )';
-EXCEPTION
-    WHEN OTHERS THEN
-        IF SQLCODE != -955 THEN RAISE; END IF;   -- ORA-00955: name already used
-END;
-/
+IF OBJECT_ID('HR.NumberRange','U') IS NULL
+CREATE TABLE HR.NumberRange
+(
+    RangeObject   NVARCHAR(20) NOT NULL,   -- e.g. PERNR, OBJID
+    FromNumber    BIGINT       NOT NULL,
+    ToNumber      BIGINT       NOT NULL,
+    CurrentNumber BIGINT       NOT NULL,
+    CONSTRAINT PK_NumberRange PRIMARY KEY (RangeObject)
+);
+GO

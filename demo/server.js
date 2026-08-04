@@ -11,8 +11,8 @@
      • a stand-in of the REST API under /api/*
 
    This lets you try the complete front end + API contract without installing
-   .NET or Oracle. It is NOT the production backend — that is the C# /
-   ASP.NET Core + EF Core + Oracle project under backend/HRModule.Api,
+   .NET or SQL Server. It is NOT the production backend — that is the C# /
+   ASP.NET Core + EF Core + SQL Server project under backend/HRModule.Api,
    which implements the identical REST contract against a real database.
 
    The stand-in reproduces:

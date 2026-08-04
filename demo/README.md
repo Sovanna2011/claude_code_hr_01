@@ -10,7 +10,7 @@ Two ways to try it:
    no CDN). It mirrors the app rather than running the SAPUI5 build itself.
 
 2. **Local full run** — the **real SAPUI5 web app** + REST API with a **single
-   command and zero dependencies** (no .NET, no Oracle, no build step):
+   command and zero dependencies** (no .NET, no SQL Server, no build step):
 
 ```bash
 node demo/server.js
@@ -56,9 +56,9 @@ This demo lets you explore the complete front end and the exact API contract
 **without** setting up the production stack.
 
 - It is **not** the production backend. The production backend is the
-  **C# / ASP.NET Core + EF Core + Oracle** project under
+  **C# / ASP.NET Core + EF Core + SQL Server** project under
   `backend/HRModule.Api`, which implements the **same REST contract** against a
-  real Oracle database. To run that, see the top-level `README.md`.
+  real SQL Server database. To run that, see the top-level `README.md`.
 - The stand-in faithfully reproduces:
   - the **seed data** from `database/06_seed_reference_data.sql`;
   - the **core business logic** of the C# services — key-date reads, SAP
