@@ -1,0 +1,40 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout.form">
+
+    <Dialog id="requestLeaveDialog" title="{i18n>requestLeaveTitle}" contentWidth="30rem">
+        <content>
+            <MessageStrip text="{i18n>requestLeaveHint}" type="Information" showIcon="true"
+                class="sapUiSmallMargin"/>
+            <l:SimpleForm editable="true" layout="ResponsiveGridLayout"
+                labelSpanXL="4" labelSpanL="4" labelSpanM="4" labelSpanS="12"
+                columnsXL="1" columnsL="1" columnsM="1">
+                <l:content>
+                    <Label text="{i18n>colLeaveType}" required="true"/>
+                    <Select selectedKey="{leave>/leaveType}" items="{leave>/leaveTypes}" width="100%">
+                        <core:Item key="{leave>key}" text="{leave>text}"/>
+                    </Select>
+
+                    <Label text="{i18n>colFrom}" required="true"/>
+                    <DatePicker value="{leave>/begda}" valueFormat="yyyy-MM-dd" displayFormat="dd.MM.yyyy" width="100%"/>
+
+                    <Label text="{i18n>colTo}" required="true"/>
+                    <DatePicker value="{leave>/endda}" valueFormat="yyyy-MM-dd" displayFormat="dd.MM.yyyy" width="100%"/>
+
+                    <Label text="{i18n>fldDays}"/>
+                    <Input value="{leave>/days}" type="Number" placeholder="{i18n>daysPlaceholder}" width="100%"/>
+
+                    <Label text="{i18n>colNote}"/>
+                    <TextArea value="{leave>/note}" rows="2" width="100%"/>
+                </l:content>
+            </l:SimpleForm>
+        </content>
+        <beginButton>
+            <Button type="Emphasized" text="{i18n>btnSubmit}" press=".onRequestConfirm"/>
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>btnCancel}" press=".onRequestCancel"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

@@ -1,0 +1,77 @@
+<mvc:View
+    controllerName="hr.module.controller.Leave"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    height="100%">
+
+    <Page id="leavePage" title="{i18n>leaveTitle}" showNavButton="true" navButtonPress=".onNavBack">
+        <headerContent>
+            <Text text="{auth>/displayName} · {auth>/roleName}" class="sapUiTinyMarginEnd"/>
+            <Button type="Emphasized" icon="sap-icon://add" text="{i18n>requestLeave}"
+                press=".onOpenRequest" visible="{= ${auth>/pernr} !== null }"/>
+            <Button icon="sap-icon://refresh" tooltip="{i18n>refresh}" press=".onRefresh"/>
+            <Button icon="sap-icon://log" tooltip="{i18n>signOut}" press=".onLogout"/>
+        </headerContent>
+
+        <subHeader>
+            <OverflowToolbar>
+                <Label text="{i18n>filterStatus}" labelFor="statusFilter"/>
+                <Select id="statusFilter" selectedKey="{view>/statusFilter}" change=".onStatusFilterChange" width="12rem">
+                    <core:Item key="" text="{i18n>statusAll}"/>
+                    <core:Item key="Pending" text="{i18n>statusPending}"/>
+                    <core:Item key="Approved" text="{i18n>statusApproved}"/>
+                    <core:Item key="Rejected" text="{i18n>statusRejected}"/>
+                </Select>
+                <ToolbarSpacer/>
+            </OverflowToolbar>
+        </subHeader>
+
+        <content>
+            <Table id="leaveTable" items="{/requests}" growing="true" growingThreshold="25">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="{i18n>leaveRequests}" level="H2"/>
+                        <ObjectStatus text="{= ${/requests}.length }" class="sapUiTinyMarginBegin"/>
+                        <ToolbarSpacer/>
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column width="6rem"><Text text="{i18n>colRequestId}"/></Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>colName}"/></Column>
+                    <Column><Text text="{i18n>colLeaveType}"/></Column>
+                    <Column width="7rem"><Text text="{i18n>colFrom}"/></Column>
+                    <Column width="7rem"><Text text="{i18n>colTo}"/></Column>
+                    <Column width="5rem" hAlign="End"><Text text="{i18n>colDays}"/></Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>colNote}"/></Column>
+                    <Column width="8rem" hAlign="End"><Text text="{i18n>colStatus}"/></Column>
+                    <Column width="11rem" hAlign="End"
+                        visible="{= ${auth>/isAdmin} || ${auth>/isManager} }"><Text text="{i18n>colActions}"/></Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <ObjectIdentifier title="{requestId}"/>
+                            <Text text="{employeeName}"/>
+                            <Text text="{= ${leaveType} || ${leaveTypeKey} }"/>
+                            <Text text="{path: 'begda', formatter: '.formatter.date'}"/>
+                            <Text text="{path: 'endda', formatter: '.formatter.date'}"/>
+                            <ObjectNumber number="{days}"/>
+                            <Text text="{note}"/>
+                            <ObjectStatus text="{status}"
+                                state="{path: 'status', formatter: '.formatter.leaveState'}"/>
+                            <HBox justifyContent="End">
+                                <Button icon="sap-icon://accept" type="Accept" text="{i18n>approve}"
+                                    press=".onApprove" class="sapUiTinyMarginEnd"
+                                    visible="{= ${status} === 'Pending' &amp;&amp; (${auth>/isAdmin} || ${auth>/isManager}) }"/>
+                                <Button icon="sap-icon://decline" type="Reject" text="{i18n>reject}"
+                                    press=".onReject"
+                                    visible="{= ${status} === 'Pending' &amp;&amp; (${auth>/isAdmin} || ${auth>/isManager}) }"/>
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+    </Page>
+</mvc:View>

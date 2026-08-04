@@ -1,0 +1,355 @@
+-- ============================================================================
+--  HR Module - Seed reference & demo data (Oracle edition)
+--  Clean-install: plain INSERTs (tables are empty after 01_schema.sql).
+--  Company: THE PREMIER AGRICULTURE CO., LTD. (Phnom Penh, KH, USD).
+-- ============================================================================
+SET DEFINE OFF
+ALTER SESSION SET CURRENT_SCHEMA = HR;
+ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD';
+
+-- ---- Number ranges ---------------------------------------------------------
+INSERT INTO HR.NumberRange (RangeObject,FromNumber,ToNumber,CurrentNumber) VALUES ('PERNR',1,99999999,1000);
+INSERT INTO HR.NumberRange (RangeObject,FromNumber,ToNumber,CurrentNumber) VALUES ('OBJID',50000000,59999999,50000000);
+
+-- ---- Countries -------------------------------------------------------------
+INSERT ALL
+  INTO HR.T005 (LAND1,LANDX,WAERS) VALUES ('DE','Germany','EUR')
+  INTO HR.T005 (LAND1,LANDX,WAERS) VALUES ('US','United States','USD')
+  INTO HR.T005 (LAND1,LANDX,WAERS) VALUES ('FR','France','EUR')
+  INTO HR.T005 (LAND1,LANDX,WAERS) VALUES ('GB','United Kingdom','GBP')
+  INTO HR.T005 (LAND1,LANDX,WAERS) VALUES ('KH','Cambodia','KHR')
+  INTO HR.T005 (LAND1,LANDX,WAERS) VALUES ('SG','Singapore','SGD')
+SELECT 1 FROM DUAL;
+
+-- ---- Company code / personnel structure ------------------------------------
+INSERT INTO HR.T001 (BUKRS,BUTXT,LAND1,WAERS) VALUES ('1000','THE PREMIER AGRICULTURE CO., LTD.','KH','USD');
+
+INSERT ALL
+  INTO HR.T500P (WERKS,NAME1,BUKRS,MOLGA) VALUES ('1000','Head Office','1000','01')
+  INTO HR.T500P (WERKS,NAME1,BUKRS,MOLGA) VALUES ('2000','Branch Office','1000','01')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.T001P (WERKS,BTRTL,BTEXT) VALUES ('1000','0001','Administration')
+  INTO HR.T001P (WERKS,BTRTL,BTEXT) VALUES ('1000','0002','Production')
+  INTO HR.T001P (WERKS,BTRTL,BTEXT) VALUES ('2000','0001','Sales')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.T501 (PERSG,PTEXT) VALUES ('1','Active employees')
+  INTO HR.T501 (PERSG,PTEXT) VALUES ('2','Pensioners')
+  INTO HR.T501 (PERSG,PTEXT) VALUES ('9','External staff')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.T503K (PERSK,PTEXT) VALUES ('DU','Salaried staff')
+  INTO HR.T503K (PERSK,PTEXT) VALUES ('DW','Industrial workers')
+  INTO HR.T503K (PERSK,PTEXT) VALUES ('DT','Trainees')
+SELECT 1 FROM DUAL;
+
+-- ---- Action types & reasons ------------------------------------------------
+INSERT ALL
+  INTO HR.T529A (MASSN,MNTXT) VALUES ('01','Hiring')
+  INTO HR.T529A (MASSN,MNTXT) VALUES ('02','Organizational reassignment')
+  INTO HR.T529A (MASSN,MNTXT) VALUES ('03','Pay increase')
+  INTO HR.T529A (MASSN,MNTXT) VALUES ('10','Leaving')
+  INTO HR.T529A (MASSN,MNTXT) VALUES ('11','Retirement')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.T530 (MASSN,MASSG,MGTXT) VALUES ('01','01','New hire')
+  INTO HR.T530 (MASSN,MASSG,MGTXT) VALUES ('10','01','Resignation')
+  INTO HR.T530 (MASSN,MASSG,MGTXT) VALUES ('10','02','Dismissal')
+  INTO HR.T530 (MASSN,MASSG,MGTXT) VALUES ('03','01','Annual review')
+SELECT 1 FROM DUAL;
+
+-- ---- Absence / attendance types --------------------------------------------
+INSERT ALL
+  INTO HR.T554S (MOABW,AWART,ATEXT,KENNZ) VALUES ('01','0100','Annual leave','A')
+  INTO HR.T554S (MOABW,AWART,ATEXT,KENNZ) VALUES ('01','0200','Sick leave','A')
+  INTO HR.T554S (MOABW,AWART,ATEXT,KENNZ) VALUES ('01','0300','Unpaid leave','A')
+  INTO HR.T554S (MOABW,AWART,ATEXT,KENNZ) VALUES ('01','1000','Overtime','P')
+  INTO HR.T554S (MOABW,AWART,ATEXT,KENNZ) VALUES ('01','0400','Business trip','P')
+  INTO HR.T554S (MOABW,AWART,ATEXT,KENNZ) VALUES ('01','0500','Training','P')
+  INTO HR.T554S (MOABW,AWART,ATEXT,KENNZ) VALUES ('01','0600','Conference','P')
+SELECT 1 FROM DUAL;
+
+-- ---- Wage type texts -------------------------------------------------------
+INSERT ALL
+  INTO HR.T512T (LGART,LGTXT) VALUES ('1000','Standard salary')
+  INTO HR.T512T (LGART,LGTXT) VALUES ('1010','Base pay')
+  INTO HR.T512T (LGART,LGTXT) VALUES ('2000','Overtime pay')
+  INTO HR.T512T (LGART,LGTXT) VALUES ('3000','Bonus')
+  INTO HR.T512T (LGART,LGTXT) VALUES ('5000','Allowance')
+SELECT 1 FROM DUAL;
+
+-- ---- Contract types (T547T) ------------------------------------------------
+INSERT ALL
+  INTO HR.T547T (CTTYP,CTTXT) VALUES ('01','Permanent')
+  INTO HR.T547T (CTTYP,CTTXT) VALUES ('02','Fixed-term')
+  INTO HR.T547T (CTTYP,CTTXT) VALUES ('03','Temporary')
+  INTO HR.T547T (CTTYP,CTTXT) VALUES ('04','Internship')
+SELECT 1 FROM DUAL;
+
+-- ---- Domain fixed values ---------------------------------------------------
+INSERT ALL
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('GESCH','1','Male')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('GESCH','2','Female')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('GESCH','3','Undefined')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('FAMST','0','Single')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('FAMST','1','Married')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('FAMST','2','Widowed')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('FAMST','3','Divorced')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('FAMST','4','Separated')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('ANRED','1','Mrs.')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('ANRED','2','Mr.')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('ANRED','3','Company')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('ANRED','4','Messrs.')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('ANRED','5','Ms.')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('STAT2','0','Withdrawn')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('STAT2','1','Inactive')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('STAT2','2','Retiree')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('STAT2','3','Active')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('USRTY','0010','E-Mail')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('USRTY','0020','Telephone')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('USRTY','CELL','Mobile phone')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('USRTY','FAX','Fax')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('USRTY','MAIL','System user')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('FAMSA','1','Spouse')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('FAMSA','2','Child')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('FAMSA','6','Emergency contact')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('FAMSA','11','Father')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('FAMSA','12','Mother')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('SLART','10','University')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('SLART','20','Secondary school')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('SLART','30','Vocational training')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('SLART','40','Doctorate')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('TMART','01','Expiry of probation')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('TMART','02','Work permit expiry')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('TMART','03','Contract end')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('TMART','04','Next appraisal')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('QUALG','01','Technical')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('QUALG','02','Language')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('QUALG','03','Leadership')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('ANSSA','1','Permanent residence')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('ANSSA','2','Temporary residence')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('ANSSA','3','Home address')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('ANSSA','4','Mailing address')
+  INTO HR.DomainValue (Domain,ValueKey,ValueTxt) VALUES ('ANSSA','5','Emergency address')
+SELECT 1 FROM DUAL;
+
+-- ---- Organizational Management (objects & relationships) -------------------
+INSERT ALL
+  INTO HR.HRP1000 (OTYPE,OBJID,BEGDA,ENDDA,SHORT,STEXT) VALUES ('O',50000001,'2020-01-01','9999-12-31','EXEC','Executive Board')
+  INTO HR.HRP1000 (OTYPE,OBJID,BEGDA,ENDDA,SHORT,STEXT) VALUES ('O',50000010,'2020-01-01','9999-12-31','HR','Human Resources')
+  INTO HR.HRP1000 (OTYPE,OBJID,BEGDA,ENDDA,SHORT,STEXT) VALUES ('O',50000020,'2020-01-01','9999-12-31','FIN','Finance')
+  INTO HR.HRP1000 (OTYPE,OBJID,BEGDA,ENDDA,SHORT,STEXT) VALUES ('C',50000900,'2020-01-01','9999-12-31','HRSPEC','HR Specialist (Job)')
+  INTO HR.HRP1000 (OTYPE,OBJID,BEGDA,ENDDA,SHORT,STEXT) VALUES ('S',50000100,'2020-01-01','9999-12-31','HEADHR','Head of Human Resources')
+  INTO HR.HRP1000 (OTYPE,OBJID,BEGDA,ENDDA,SHORT,STEXT) VALUES ('S',50000101,'2020-01-01','9999-12-31','HRSPEC1','HR Specialist')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.HRP1001 (OTYPE,OBJID,BEGDA,ENDDA,RSIGN,RELAT,SCLAS,SOBID) VALUES ('O',50000010,'2020-01-01','9999-12-31','A','002','O','50000001')
+  INTO HR.HRP1001 (OTYPE,OBJID,BEGDA,ENDDA,RSIGN,RELAT,SCLAS,SOBID) VALUES ('O',50000020,'2020-01-01','9999-12-31','A','002','O','50000001')
+  INTO HR.HRP1001 (OTYPE,OBJID,BEGDA,ENDDA,RSIGN,RELAT,SCLAS,SOBID) VALUES ('S',50000100,'2020-01-01','9999-12-31','A','003','O','50000010')
+  INTO HR.HRP1001 (OTYPE,OBJID,BEGDA,ENDDA,RSIGN,RELAT,SCLAS,SOBID) VALUES ('O',50000010,'2020-01-01','9999-12-31','B','012','S','50000100')
+  INTO HR.HRP1001 (OTYPE,OBJID,BEGDA,ENDDA,RSIGN,RELAT,SCLAS,SOBID) VALUES ('S',50000101,'2020-01-01','9999-12-31','A','003','O','50000010')
+  INTO HR.HRP1001 (OTYPE,OBJID,BEGDA,ENDDA,RSIGN,RELAT,SCLAS,SOBID) VALUES ('S',50000101,'2020-01-01','9999-12-31','A','007','C','50000900')
+  INTO HR.HRP1001 (OTYPE,OBJID,BEGDA,ENDDA,RSIGN,RELAT,SCLAS,SOBID) VALUES ('S',50000101,'2020-01-01','9999-12-31','A','002','S','50000100')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.T528T (PLANS,PLSTX) VALUES (50000100,'Head of Human Resources')
+  INTO HR.T528T (PLANS,PLSTX) VALUES (50000101,'HR Specialist')
+SELECT 1 FROM DUAL;
+
+-- ---- Demo employees 1000 (Head of HR) and 1001 (HR Specialist) -------------
+INSERT ALL
+  INTO HR.EmployeeMaster (PERNR,HireDate,IsActive) VALUES (1000,'2020-03-01',1)
+  INTO HR.EmployeeMaster (PERNR,HireDate,IsActive) VALUES (1001,'2021-06-15',1)
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0000 (PERNR,BEGDA,ENDDA,MASSN,MASSG,STAT2,AEDTM,UNAME) VALUES (1000,'2020-03-01','9999-12-31','01','01','3','2020-03-01','ADMIN')
+  INTO HR.PA0000 (PERNR,BEGDA,ENDDA,MASSN,MASSG,STAT2,AEDTM,UNAME) VALUES (1001,'2021-06-15','9999-12-31','01','01','3','2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0001 (PERNR,BEGDA,ENDDA,BUKRS,WERKS,BTRTL,PERSG,PERSK,ORGEH,PLANS,STELL,KOSTL,AEDTM,UNAME)
+       VALUES (1000,'2020-03-01','9999-12-31','1000','1000','0001','1','DU',50000010,50000100,50000900,'HR-1000','2020-03-01','ADMIN')
+  INTO HR.PA0001 (PERNR,BEGDA,ENDDA,BUKRS,WERKS,BTRTL,PERSG,PERSK,ORGEH,PLANS,STELL,KOSTL,AEDTM,UNAME)
+       VALUES (1001,'2021-06-15','9999-12-31','1000','1000','0001','1','DU',50000010,50000101,50000900,'HR-1000','2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0002 (PERNR,BEGDA,ENDDA,ANRED,NACHN,VORNA,GBDAT,GESCH,NATIO,FAMST,SPRSL,AEDTM,UNAME)
+       VALUES (1000,'2020-03-01','9999-12-31','2','Schmidt','Andreas','1982-07-12','1','DE','1','E','2020-03-01','ADMIN')
+  INTO HR.PA0002 (PERNR,BEGDA,ENDDA,ANRED,NACHN,VORNA,GBDAT,GESCH,NATIO,FAMST,SPRSL,AEDTM,UNAME)
+       VALUES (1001,'2021-06-15','9999-12-31','1','Nguyen','Linda','1990-11-03','2','US','0','E','2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0006 (PERNR,SUBTY,BEGDA,ENDDA,STRAS,ORT01,PSTLZ,LAND1,AEDTM,UNAME)
+       VALUES (1000,'1','2020-03-01','9999-12-31','Hauptstrasse 12','Berlin','10115','DE','2020-03-01','ADMIN')
+  INTO HR.PA0006 (PERNR,SUBTY,BEGDA,ENDDA,STRAS,ORT01,PSTLZ,LAND1,AEDTM,UNAME)
+       VALUES (1001,'1','2021-06-15','9999-12-31','5th Avenue 200','New York','10001','US','2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0007 (PERNR,BEGDA,ENDDA,SCHKZ,EMPCT,WOSTD,AEDTM,UNAME) VALUES (1000,'2020-03-01','9999-12-31','FLEX',100.00,40.00,'2020-03-01','ADMIN')
+  INTO HR.PA0007 (PERNR,BEGDA,ENDDA,SCHKZ,EMPCT,WOSTD,AEDTM,UNAME) VALUES (1001,'2021-06-15','9999-12-31','FLEX',100.00,40.00,'2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0008 (PERNR,BEGDA,ENDDA,TRFAR,TRFGB,TRFGR,BSGRD,WAERS,ANSAL,AEDTM,UNAME)
+       VALUES (1000,'2020-03-01','9999-12-31','01','01','E4',100.00,'EUR',96000.00,'2020-03-01','ADMIN')
+  INTO HR.PA0008 (PERNR,BEGDA,ENDDA,TRFAR,TRFGB,TRFGR,BSGRD,WAERS,ANSAL,AEDTM,UNAME)
+       VALUES (1001,'2021-06-15','9999-12-31','01','01','E2',100.00,'EUR',60000.00,'2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0008_WageType (PERNR,ENDDA,SEQNR,LineNo,LGART,BETRG,WAERS) VALUES (1000,'9999-12-31',1,1,'1010',8000.00,'EUR')
+  INTO HR.PA0008_WageType (PERNR,ENDDA,SEQNR,LineNo,LGART,BETRG,WAERS) VALUES (1001,'9999-12-31',1,1,'1010',5000.00,'EUR')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0009 (PERNR,SUBTY,BEGDA,ENDDA,BANKS,BANKL,BANKN,ZLSCH,WAERS,AEDTM,UNAME)
+       VALUES (1000,'0','2020-03-01','9999-12-31','DE','10070000','DE89370400440532013000','U','EUR','2020-03-01','ADMIN')
+  INTO HR.PA0009 (PERNR,SUBTY,BEGDA,ENDDA,BANKS,BANKL,BANKN,ZLSCH,WAERS,AEDTM,UNAME)
+       VALUES (1001,'0','2021-06-15','9999-12-31','US','021000021','US64SVBKUS6S3300958879','U','EUR','2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0105 (PERNR,SUBTY,BEGDA,ENDDA,USRID,USRID_LONG,AEDTM,UNAME)
+       VALUES (1000,'0010','2020-03-01','9999-12-31','a.schmidt','a.schmidt@premieragri.com','2020-03-01','ADMIN')
+  INTO HR.PA0105 (PERNR,SUBTY,BEGDA,ENDDA,USRID,USRID_LONG,AEDTM,UNAME)
+       VALUES (1001,'0010','2021-06-15','9999-12-31','l.nguyen','l.nguyen@premieragri.com','2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA2006 (PERNR,SUBTY,BEGDA,ENDDA,KTART,ANZHL,KVERB,AEDTM,UNAME) VALUES (1000,'0100','2026-01-01','2026-12-31','0100',30.00,5.00,'2026-01-01','ADMIN')
+  INTO HR.PA2006 (PERNR,SUBTY,BEGDA,ENDDA,KTART,ANZHL,KVERB,AEDTM,UNAME) VALUES (1001,'0100','2026-01-01','2026-12-31','0100',25.00,0.00,'2026-01-01','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT INTO HR.PA2001 (PERNR,SUBTY,BEGDA,ENDDA,AWART,ABWTG,APPROVED,AEDTM,UNAME)
+  VALUES (1000,'0100','2026-07-01','2026-07-05','0100',5.00,1,'2026-06-01','ADMIN');
+
+-- ---- Extended infotype demo records ----------------------------------------
+INSERT ALL
+  INTO HR.PA0016 (PERNR,BEGDA,ENDDA,CTTYP,PRBEZ,KDGFB,KDGF2,AEDTM,UNAME) VALUES (1000,'2020-03-01','9999-12-31','01',6.0,3.0,3.0,'2020-03-01','ADMIN')
+  INTO HR.PA0016 (PERNR,BEGDA,ENDDA,CTTYP,PRBEZ,KDGFB,KDGF2,AEDTM,UNAME) VALUES (1001,'2021-06-15','9999-12-31','02',3.0,1.0,1.0,'2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0019 (PERNR,SUBTY,BEGDA,ENDDA,TERMN,MNDAT,AEDTM,UNAME) VALUES (1001,'01','2021-06-15','9999-12-31','2021-09-15','2021-09-01','2021-06-15','ADMIN')
+  INTO HR.PA0019 (PERNR,SUBTY,BEGDA,ENDDA,TERMN,MNDAT,AEDTM,UNAME) VALUES (1001,'04','2021-06-15','9999-12-31','2026-06-15','2026-06-01','2021-06-15','ADMIN')
+  INTO HR.PA0019 (PERNR,SUBTY,BEGDA,ENDDA,TERMN,MNDAT,AEDTM,UNAME) VALUES (1000,'04','2020-03-01','9999-12-31','2026-03-01','2026-02-15','2020-03-01','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0021 (PERNR,SUBTY,OBJPS,BEGDA,ENDDA,FANAM,FAVOR,FGBDT,FASEX,FGBLD,AEDTM,UNAME) VALUES (1000,'1','01','2010-06-20','9999-12-31','Schmidt','Julia','1984-02-18','2','DE','2020-03-01','ADMIN')
+  INTO HR.PA0021 (PERNR,SUBTY,OBJPS,BEGDA,ENDDA,FANAM,FAVOR,FGBDT,FASEX,FGBLD,AEDTM,UNAME) VALUES (1000,'2','01','2012-04-11','9999-12-31','Schmidt','Max','2012-04-11','1','DE','2020-03-01','ADMIN')
+  INTO HR.PA0021 (PERNR,SUBTY,OBJPS,BEGDA,ENDDA,FANAM,FAVOR,FGBDT,FASEX,FGBLD,AEDTM,UNAME) VALUES (1000,'2','02','2015-09-30','9999-12-31','Schmidt','Emma','2015-09-30','2','DE','2020-03-01','ADMIN')
+  INTO HR.PA0021 (PERNR,SUBTY,OBJPS,BEGDA,ENDDA,FANAM,FAVOR,FGBDT,FASEX,FGBLD,AEDTM,UNAME) VALUES (1001,'6','01','2021-06-15','9999-12-31','Nguyen','Peter','1988-01-05','1','US','2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0022 (PERNR,SUBTY,BEGDA,ENDDA,SLABS,INSTI,SLAND,SFACH,SLGRA,AEDTM,UNAME) VALUES (1000,'10','2001-10-01','2006-07-31','Diplom (Master)','TU Berlin','DE','Business Administration','1.7','2020-03-01','ADMIN')
+  INTO HR.PA0022 (PERNR,SUBTY,BEGDA,ENDDA,SLABS,INSTI,SLAND,SFACH,SLGRA,AEDTM,UNAME) VALUES (1001,'10','2009-09-01','2013-05-31','B.Sc.','NYU','US','Human Resources Mgmt','3.8 GPA','2021-06-15','ADMIN')
+  INTO HR.PA0022 (PERNR,SUBTY,BEGDA,ENDDA,SLABS,INSTI,SLAND,SFACH,SLGRA,AEDTM,UNAME) VALUES (1001,'40','2013-09-01','2017-06-30','Ph.D.','Columbia University','US','Organizational Psychology',NULL,'2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0023 (PERNR,BEGDA,ENDDA,ARBGB,ORT01,LAND1,TASK,BRANC,AEDTM,UNAME) VALUES (1000,'2006-08-01','2020-02-29','Muster GmbH','Munich','DE','HR Business Partner','Manufacturing','2020-03-01','ADMIN')
+  INTO HR.PA0023 (PERNR,BEGDA,ENDDA,ARBGB,ORT01,LAND1,TASK,BRANC,AEDTM,UNAME) VALUES (1001,'2017-07-01','2021-05-31','Acme Corp','Boston','US','HR Analyst','Technology','2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA0024 (PERNR,SUBTY,BEGDA,ENDDA,QUALI,AUSPR,AEDTM,UNAME) VALUES (1000,'03','2020-03-01','9999-12-31','People leadership',8,'2020-03-01','ADMIN')
+  INTO HR.PA0024 (PERNR,SUBTY,BEGDA,ENDDA,QUALI,AUSPR,AEDTM,UNAME) VALUES (1000,'02','2020-03-01','9999-12-31','English (fluent)',7,'2020-03-01','ADMIN')
+  INTO HR.PA0024 (PERNR,SUBTY,BEGDA,ENDDA,QUALI,AUSPR,AEDTM,UNAME) VALUES (1000,'01','2020-03-01','9999-12-31','SAP SuccessFactors',6,'2020-03-01','ADMIN')
+  INTO HR.PA0024 (PERNR,SUBTY,BEGDA,ENDDA,QUALI,AUSPR,AEDTM,UNAME) VALUES (1001,'01','2021-06-15','9999-12-31','HR Analytics',8,'2021-06-15','ADMIN')
+  INTO HR.PA0024 (PERNR,SUBTY,BEGDA,ENDDA,QUALI,AUSPR,AEDTM,UNAME) VALUES (1001,'02','2021-06-15','9999-12-31','Spanish (intermediate)',5,'2021-06-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PA2002 (PERNR,SUBTY,BEGDA,ENDDA,AWART,ABWTG,STDAZ,AEDTM,UNAME) VALUES (1000,'0500','2026-05-04','2026-05-06','0500',3.00,24.00,'2026-04-20','ADMIN')
+  INTO HR.PA2002 (PERNR,SUBTY,BEGDA,ENDDA,AWART,ABWTG,STDAZ,AEDTM,UNAME) VALUES (1001,'0400','2026-03-10','2026-03-12','0400',3.00,24.00,'2026-03-01','ADMIN')
+  INTO HR.PA2002 (PERNR,SUBTY,BEGDA,ENDDA,AWART,ABWTG,STDAZ,AEDTM,UNAME) VALUES (1001,'1000','2026-04-15','2026-04-15','1000',NULL,3.50,'2026-04-15','ADMIN')
+SELECT 1 FROM DUAL;
+
+-- ---- Security: roles & demo users ------------------------------------------
+--   admin/admin123 (HR_ADMIN), manager/manager123 (HR_MANAGER, PERNR 1000),
+--   linda/linda123 (EMPLOYEE, PERNR 1001). PBKDF2-HMAC-SHA256 hashes.
+INSERT ALL
+  INTO HR.AppRole (RoleKey,RoleName) VALUES ('HR_ADMIN','HR Administrator')
+  INTO HR.AppRole (RoleKey,RoleName) VALUES ('HR_MANAGER','HR Manager')
+  INTO HR.AppRole (RoleKey,RoleName) VALUES ('EMPLOYEE','Employee (Self-Service)')
+SELECT 1 FROM DUAL;
+
+INSERT INTO HR.AppUser (Username,DisplayName,PasswordHash,PasswordSalt,RoleKey,PERNR)
+  VALUES ('admin','Alex Admin','E6XgKGqx24SZqw40twpIvY46z0dMf7+fLZkYNlaAdA0=','SFJNT0RVTEVfU0FMVF8wMQ==','HR_ADMIN',NULL);
+INSERT INTO HR.AppUser (Username,DisplayName,PasswordHash,PasswordSalt,RoleKey,PERNR)
+  VALUES ('manager','Andreas Schmidt','QHJsLcA2odYIeK4Xqo8O/xUKhI4vI1OU+nYEdL+Z1rI=','SFJNT0RVTEVfU0FMVF8wMg==','HR_MANAGER',1000);
+INSERT INTO HR.AppUser (Username,DisplayName,PasswordHash,PasswordSalt,RoleKey,PERNR)
+  VALUES ('linda','Linda Nguyen','u8tja7bSHpvd9sdXgrnk78HQofSZ0MgOzK05tFN5x8U=','SFJNT0RVTEVfU0FMVF8wMw==','EMPLOYEE',1001);
+
+-- ---- Modules: recruitment, training, leave ---------------------------------
+INSERT ALL
+  INTO HR.JobRequisition (ReqId,Title,ORGEH,Openings,Status,PostedOn) VALUES (50001,'HR Business Partner',50000010,1,'Open','2026-06-01')
+  INTO HR.JobRequisition (ReqId,Title,ORGEH,Openings,Status,PostedOn) VALUES (50002,'Financial Analyst',50000020,2,'Open','2026-07-01')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.Applicant (ReqId,Name,Email,Stage,AppliedOn) VALUES (50001,'Sophie Turner','s.turner@mail.com','Interview','2026-06-10')
+  INTO HR.Applicant (ReqId,Name,Email,Stage,AppliedOn) VALUES (50001,'Mark Lee','m.lee@mail.com','Screening','2026-06-15')
+  INTO HR.Applicant (ReqId,Name,Email,Stage,AppliedOn) VALUES (50002,'Ana Silva','a.silva@mail.com','Offer','2026-07-08')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.TrainingCourse (CourseId,Title,Category,Hours,CourseDate,Seats) VALUES ('D100','Leadership Essentials','Leadership',16,'2026-09-15',12)
+  INTO HR.TrainingCourse (CourseId,Title,Category,Hours,CourseDate,Seats) VALUES ('D200','SAP HCM Fundamentals','Technical',24,'2026-10-06',20)
+  INTO HR.TrainingCourse (CourseId,Title,Category,Hours,CourseDate,Seats) VALUES ('D300','Business English (B2)','Language',40,'2026-11-03',15)
+  INTO HR.TrainingCourse (CourseId,Title,Category,Hours,CourseDate,Seats) VALUES ('D400','Data Privacy & GDPR','Compliance',4,'2026-09-01',50)
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.TrainingBooking (PERNR,CourseId,Status) VALUES (1000,'D100','Confirmed')
+  INTO HR.TrainingBooking (PERNR,CourseId,Status) VALUES (1001,'D200','Confirmed')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.LeaveRequest (PERNR,AWART,BEGDA,ENDDA,Days,Status,Note) VALUES (1001,'0100','2026-08-10','2026-08-14',5,'Pending','Summer holiday')
+  INTO HR.LeaveRequest (PERNR,AWART,BEGDA,ENDDA,Days,Status,Note) VALUES (1001,'0200','2026-05-04','2026-05-04',1,'Approved','Doctor')
+SELECT 1 FROM DUAL;
+
+-- ---- Payroll config & overtime + holidays ----------------------------------
+INSERT ALL
+  INTO HR.PayrollConfig (ConfigKey,NumValue) VALUES ('TAX_RATE',0.15)
+  INTO HR.PayrollConfig (ConfigKey,NumValue) VALUES ('SOCIAL_RATE',0.09)
+  INTO HR.PayrollConfig (ConfigKey,NumValue) VALUES ('OT_MULT_NORMAL',1.25)
+  INTO HR.PayrollConfig (ConfigKey,NumValue) VALUES ('OT_MULT_SUNDAY',1.5)
+  INTO HR.PayrollConfig (ConfigKey,NumValue) VALUES ('OT_MULT_HOLIDAY',2.0)
+  INTO HR.PayrollConfig (ConfigKey,NumValue) VALUES ('MONTHLY_FACTOR',4.33)
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.PublicHoliday (HolDate,HolName) VALUES ('2026-01-01','International New Year')
+  INTO HR.PublicHoliday (HolDate,HolName) VALUES ('2026-04-14','Khmer New Year')
+  INTO HR.PublicHoliday (HolDate,HolName) VALUES ('2026-05-01','Labour Day')
+  INTO HR.PublicHoliday (HolDate,HolName) VALUES ('2026-09-24','Constitution Day')
+  INTO HR.PublicHoliday (HolDate,HolName) VALUES ('2026-11-09','Independence Day')
+  INTO HR.PublicHoliday (HolDate,HolName) VALUES ('2026-12-25','Christmas Day')
+SELECT 1 FROM DUAL;
+
+INSERT ALL
+  INTO HR.OvertimeRecord (PERNR,OtDate,Hours) VALUES (1000,'2026-06-02',2.0)
+  INTO HR.OvertimeRecord (PERNR,OtDate,Hours) VALUES (1000,'2026-06-07',4.0)
+  INTO HR.OvertimeRecord (PERNR,OtDate,Hours) VALUES (1000,'2026-05-01',3.0)
+  INTO HR.OvertimeRecord (PERNR,OtDate,Hours) VALUES (1001,'2026-06-03',1.5)
+  INTO HR.OvertimeRecord (PERNR,OtDate,Hours) VALUES (1001,'2026-06-14',3.0)
+  INTO HR.OvertimeRecord (PERNR,OtDate,Hours) VALUES (1001,'2026-12-25',2.0)
+SELECT 1 FROM DUAL;
+
+COMMIT;
+PROMPT Seed reference and demo data loaded.
