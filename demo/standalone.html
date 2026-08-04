@@ -506,6 +506,53 @@ tbody tr.click:hover{background:var(--accent-soft)}
 /* Read-only detail rows → Odoo form fields (gray label, plain value) */
 .dl .row dt{color:var(--muted);font-weight:400}
 .dl .row dd{font-weight:500}
+
+/* ================= Odoo view objects (list view + form view) ================= */
+/* Control panel (o_control_panel) */
+.o-cp{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:7px 12px;margin-bottom:14px}
+.o-cp-left{display:flex;align-items:center;gap:10px;min-width:0}
+.o-cp-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.o-cp .btn{height:32px}
+/* Breadcrumb (o_breadcrumb) */
+.o-breadcrumb{display:flex;align-items:center;gap:7px;font-size:15px;min-width:0}
+.o-breadcrumb a{color:var(--muted);text-decoration:none;cursor:pointer;white-space:nowrap}
+.o-breadcrumb a:hover{color:var(--accent)}
+.o-breadcrumb .sep{color:var(--faint)}
+.o-breadcrumb .o-bc-cur{color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Search view (o_searchview) */
+.o-searchview{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border-strong);border-radius:4px;padding:5px 9px;min-width:210px}
+.o-searchview svg{width:15px;height:15px;fill:var(--faint)}
+.o-searchview input{border:0;outline:none;background:transparent;padding:0;min-width:110px;flex:1;color:var(--text);font-size:13px}
+/* Pager (o_pager) */
+.o-pager{display:flex;align-items:center;gap:2px;color:var(--muted);font-size:13px;white-space:nowrap}
+.o-pager .cnt{padding:0 4px;font-variant-numeric:tabular-nums}
+.o-pager button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 7px;border-radius:4px}
+.o-pager button:hover:not(:disabled){background:var(--surface-2);color:var(--text)}
+.o-pager button:disabled{opacity:.4;cursor:default}
+/* Statusbar (o_statusbar_status) — connected stage segments */
+.o-statusbar{display:inline-flex;border:1px solid var(--border-strong);border-radius:4px;overflow:hidden}
+.o-statusbar .st{padding:5px 14px;font-size:12px;font-weight:500;color:var(--muted);background:var(--surface);border-right:1px solid var(--border);white-space:nowrap}
+.o-statusbar .st:last-child{border-right:0}
+.o-statusbar .st.current{background:var(--brand);color:var(--brand-ink)}
+/* Form view + sheet (o_form_view / o_form_sheet) */
+.o-form{background:var(--surface-3);border:1px solid var(--border);border-radius:4px;padding:16px}
+.o-form-sheet{background:var(--surface);border:1px solid var(--border);border-radius:4px;max-width:920px;margin:0 auto;padding:18px 22px 8px;box-shadow:var(--shadow-sm)}
+.o-sheet-top{display:flex;justify-content:flex-end;margin-bottom:10px}
+.o-form-sheet .obj-head{border:0;box-shadow:none;padding:0;margin:0 0 14px}
+.o-form-sheet .tabs{margin-top:2px}
+.o-form-sheet .card{box-shadow:none}
+/* Smart buttons (oe_button_box) */
+.o-smart-buttons{display:flex;flex-wrap:wrap;justify-content:flex-end;margin-bottom:12px}
+.o-smart-btn{display:flex;align-items:center;gap:8px;border:1px solid var(--border-strong);background:var(--surface);padding:6px 12px;cursor:pointer;border-right:0}
+.o-smart-btn:first-child{border-top-left-radius:4px;border-bottom-left-radius:4px}
+.o-smart-btn:last-child{border-right:1px solid var(--border-strong);border-top-right-radius:4px;border-bottom-right-radius:4px}
+.o-smart-btn:hover{background:var(--accent-soft)}
+.o-smart-btn .ic{color:var(--accent);display:inline-grid;place-items:center}
+.o-smart-btn .ic svg{width:18px;height:18px;fill:currentColor}
+.o-smart-btn .tx{display:flex;flex-direction:column;line-height:1.15;text-align:left}
+.o-smart-btn .tx b{font-size:14px;font-variant-numeric:tabular-nums;color:var(--text)}
+.o-smart-btn .tx span{font-size:11px;color:var(--muted)}
+@media(max-width:640px){.o-form-sheet{padding:14px}.o-cp-right{width:100%;justify-content:flex-start}}
 </style>
 
 <header class="shell">
@@ -1262,12 +1309,16 @@ function renderList(){
   };
   _dtReg["emplist"]={cols:cols,rows:rows,title:t("Employees")};
   app.innerHTML=`
-  <div class="page-head"><div><div class="crumb">${esc(t("Personnel Administration"))}</div><h1>${esc(t("Employees"))}</h1></div>
-    <div style="display:flex;gap:8px">
-      ${isAdmin()?`<button class="btn primary" data-act="hire">${I.person} ${esc(t("Hire employee"))}</button>`:""}</div></div>
-  <div class="toolbar">
-    <div class="search">${I.search}<input id="q" placeholder="${esc(t("Search all columns…"))}" value="${esc(S.search)}"></div>
-    <div class="field"><label>${esc(t("Key date"))}</label><input type="date" id="kd" value="${S.key}"></div>
+  <div class="o-cp">
+    <div class="o-cp-left">
+      <nav class="o-breadcrumb"><span class="o-bc-cur">${esc(t("Employees"))}</span></nav>
+      ${isAdmin()?`<button class="btn primary sm" data-act="hire">${I.person} New</button>`:""}
+    </div>
+    <div class="o-cp-right">
+      <div class="o-searchview">${I.search}<input id="q" placeholder="${esc(t("Search all columns…"))}" value="${esc(S.search)}"></div>
+      <div class="field" style="flex-direction:row;align-items:center;gap:7px"><label style="margin:0">${esc(t("Key date"))}</label><input type="date" id="kd" value="${S.key}"></div>
+      <div class="o-pager"><span class="cnt">1-${rows.length} / ${rows.length}</span><button disabled aria-label="Previous">‹</button><button disabled aria-label="Next">›</button></div>
+    </div>
   </div>
   <div class="card list-card">
     <div class="card-head"><h2>${esc(t("Employee list"))}</h2><span class="count">${rows.length}</span><div class="spacer"></div>
@@ -1449,41 +1500,58 @@ function renderDetail(){
     ${e.dates.map(d=>`<tr><td>${esc(d.task)}</td><td class="num">${fmtDate(d.date)}</td><td class="num">${fmtDate(d.rem)}</td></tr>`).join("")||`<tr><td colspan=3><div class="empty">No monitored dates.</div></td></tr>`}
     </tbody></table></div>`;}
 
+  const p0s=validOn(db.PA0000,S.pernr,S.key);const statusKey=p0s?p0s.stat2:null;
+  const stages=[["3","Active"],["1","Inactive"],["0","Withdrawn"]];
+  const statusbar=`<div class="o-statusbar">${stages.map(([k,l])=>`<span class="st ${k===statusKey?"current":""}">${esc(l)}</span>`).join("")}</div>`;
+  const bals=leaveBalances(S.pernr);const remDays=bals.reduce((a,b)=>a+(b.rem||0),0);
+  const smart=`<div class="o-smart-buttons">
+      <button class="o-smart-btn" data-tab="time"><span class="ic">${I.cal}</span><span class="tx"><b>${remDays}</b><span>Leave days</span></span></button>
+      <button class="o-smart-btn" data-tab="time"><span class="ic">${I.cal}</span><span class="tx"><b>${e.attend.length}</b><span>Attendances</span></span></button>
+      <button class="o-smart-btn" data-tab="family"><span class="ic">${I.people}</span><span class="tx"><b>${e.family.length}</b><span>Family</span></span></button>
+      <button class="o-smart-btn" data-tab="edu"><span class="ic">${I.education}</span><span class="tx"><b>${e.quals.length}</b><span>Qualifications</span></span></button>
+    </div>`;
+  const bcParent=isEmployee()?["ess","Employee Self-Service"]:isManager()?["mss","My Team"]:["list","Employees"];
   app.innerHTML=`
-  <div class="page-head">
-    <div><div class="crumb">${isEmployee()?"Employee Self-Service / My profile":`<a href="#" data-nav="${isManager()?'mss':'list'}" style="color:inherit;text-decoration:none">← ${isManager()?'My team':'Employees'}</a> / Master data`}</div></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${allowed("0002","update")?`<button class="btn" data-act="edit">${I.edit} Edit personal</button>`:""}
-      ${allowed("0006","update")?`<button class="btn" data-act="address">${I.addr} Edit address</button>`:""}
-      ${allowed("0105","add")?`<button class="btn" data-act="comm">${I.addr} Add communication</button>`:""}
-      ${allowed("0021","add")?`<button class="btn" data-act="family">${I.people} Add family</button>`:""}
-      ${allowed("0001","update")?`<button class="btn" data-act="reassign">${I.move} Reassign</button>`:""}
-      ${allowed("2002","add")?`<button class="btn" data-act="attendance">${I.cal} Attendance</button>`:""}
-      ${allowed("2001","add")?`<button class="btn primary" data-act="absence">${I.cal} Absence</button>`:""}
-      ${isEmployee()?`<button class="btn" data-act="mypayslip">${I.money} My payslip</button><button class="btn primary" data-nav="myleave">${I.cal} My leave</button>`:""}
-      ${isManager()?`<button class="btn" data-payslip="${e.pernr}">${I.money} Payslip</button>`:""}
+  <div class="o-cp">
+    <div class="o-cp-left"><nav class="o-breadcrumb">
+      <a data-nav="${bcParent[0]}">${esc(bcParent[1])}</a><span class="sep">/</span>
+      <span class="o-bc-cur">${esc(p.vorna+" "+p.nachn)}</span></nav></div>
+    <div class="o-cp-right">
+      ${allowed("0002","update")?`<button class="btn sm" data-act="edit">${I.edit} Edit personal</button>`:""}
+      ${allowed("0006","update")?`<button class="btn sm" data-act="address">${I.addr} Address</button>`:""}
+      ${allowed("0105","add")?`<button class="btn sm" data-act="comm">${I.addr} Communication</button>`:""}
+      ${allowed("0021","add")?`<button class="btn sm" data-act="family">${I.people} Family</button>`:""}
+      ${allowed("0001","update")?`<button class="btn sm" data-act="reassign">${I.move} Reassign</button>`:""}
+      ${allowed("2002","add")?`<button class="btn sm" data-act="attendance">${I.cal} Attendance</button>`:""}
+      ${allowed("2001","add")?`<button class="btn sm primary" data-act="absence">${I.cal} Absence</button>`:""}
+      ${isEmployee()?`<button class="btn sm" data-act="mypayslip">${I.money} My payslip</button><button class="btn sm primary" data-nav="myleave">${I.cal} My leave</button>`:""}
+      ${isManager()?`<button class="btn sm" data-payslip="${e.pernr}">${I.money} Payslip</button>`:""}
     </div>
   </div>
-  <div class="obj-head">
-    <div class="avatar"><img src="${empPhoto(e.pernr,p.vorna+" "+p.nachn)}" alt=""/>
-      ${(isAdmin()||(isEmployee()&&SESSION.pernr===e.pernr))?`<button class="av-edit" data-photo="${e.pernr}" title="Upload photo">${I.edit}</button>`:""}</div>
-    <div><h1>${esc(p.vorna)} ${esc(p.nachn)}</h1>
-      <div class="attrs">
-        <span>Org unit: <b>${esc((e.org&&e.org.orgN)||"—")}</b></span>
-        <span>Position: <b>${esc((e.org&&e.org.posN)||"—")}</b></span>
-        <span>Reports to: <b>${esc((e.org&&e.org.reportsTo&&e.org.reportsTo.name)||"—")}</b></span>
-      </div></div>
-    <div class="id"><div class="n num">${e.pernr}</div><div class="l">Personnel no.</div>
-      <div class="l" style="margin-top:6px">Key date ${fmtDate(e.key)}</div></div>
-  </div>
-  <div class="tabs" id="detailTabs">
-    ${tab("personal","Personal Data","person")}${tab("org","Org Assignment","org")}
-    ${tab("address","Address","addr")}${tab("comm","Communication","addr")}${tab("family","Family","people")}
-    ${tab("edu","Education & Experience","education")}${tab("pay","Working Time & Pay","money")}
-    ${tab("contract","Contract","doc")}${tab("time","Time & Leave","cal")}
-    <div class="tab-more-wrap" style="display:none"><button class="tab-morebtn" data-tabmore>${I.doc} More ▾</button><div class="tab-more-menu" id="tabMoreMenu"></div></div>
-  </div>
-  ${content}`;
+  <div class="o-form"><div class="o-form-sheet">
+    <div class="o-sheet-top">${statusbar}</div>
+    ${smart}
+    <div class="obj-head">
+      <div class="avatar"><img src="${empPhoto(e.pernr,p.vorna+" "+p.nachn)}" alt=""/>
+        ${(isAdmin()||(isEmployee()&&SESSION.pernr===e.pernr))?`<button class="av-edit" data-photo="${e.pernr}" title="Upload photo">${I.edit}</button>`:""}</div>
+      <div><h1>${esc(p.vorna)} ${esc(p.nachn)}</h1>
+        <div class="attrs">
+          <span>Org unit: <b>${esc((e.org&&e.org.orgN)||"—")}</b></span>
+          <span>Position: <b>${esc((e.org&&e.org.posN)||"—")}</b></span>
+          <span>Reports to: <b>${esc((e.org&&e.org.reportsTo&&e.org.reportsTo.name)||"—")}</b></span>
+        </div></div>
+      <div class="id"><div class="n num">${e.pernr}</div><div class="l">Personnel no.</div>
+        <div class="l" style="margin-top:6px">Key date ${fmtDate(e.key)}</div></div>
+    </div>
+    <div class="tabs" id="detailTabs">
+      ${tab("personal","Personal Data","person")}${tab("org","Org Assignment","org")}
+      ${tab("address","Address","addr")}${tab("comm","Communication","addr")}${tab("family","Family","people")}
+      ${tab("edu","Education & Experience","education")}${tab("pay","Working Time & Pay","money")}
+      ${tab("contract","Contract","doc")}${tab("time","Time & Leave","cal")}
+      <div class="tab-more-wrap" style="display:none"><button class="tab-morebtn" data-tabmore>${I.doc} More ▾</button><div class="tab-more-menu" id="tabMoreMenu"></div></div>
+    </div>
+    ${content}
+  </div></div>`;
   requestAnimationFrame(fitTabs);
 }
 /* Priority+ detail tabs: overflow tabs collapse into a "More ▾" dropdown. */
