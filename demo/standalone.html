@@ -469,7 +469,7 @@ a.mail:hover{text-decoration:underline}
 /* Home / main screen tiles */
 .home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:4px}
 .home-tile{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px;cursor:pointer;text-align:left;
+  border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px;cursor:pointer;text-align:left;color:var(--text);
   transition:box-shadow .12s ease,transform .12s ease,border-color .12s ease;position:relative}
 .home-tile:hover{box-shadow:var(--shadow);transform:translateY(-2px);border-color:var(--accent)}
 .home-tile .ti{width:40px;height:40px;border-radius:10px;background:var(--accent-soft);color:var(--accent);
@@ -647,9 +647,9 @@ function seed(){return{
    {pernr:1001,begda:"2026-03-10",endda:"2026-03-12",awart:"0400",abwtg:3,stdaz:24},
    {pernr:1001,begda:"2026-04-15",endda:"2026-04-15",awart:"1000",abwtg:null,stdaz:3.5}],
   HRP1000:[
-   {otype:"O",objid:50000001,begda:"2020-01-01",endda:HIGH,short:"EXEC",stext:"Executive Board"},
+   {otype:"O",objid:50000001,begda:"2020-01-01",endda:HIGH,short:"EXEC",stext:"Executive Board",bukrs:"1000"},
    {otype:"O",objid:50000010,begda:"2020-01-01",endda:HIGH,short:"HR",stext:"Human Resources"},
-   {otype:"O",objid:50000020,begda:"2020-01-01",endda:HIGH,short:"FIN",stext:"Finance"},
+   {otype:"O",objid:50000020,begda:"2020-01-01",endda:HIGH,short:"FIN",stext:"Finance",bukrs:"2000"},
    {otype:"O",objid:50000011,begda:"2020-01-01",endda:HIGH,short:"REC",stext:"Recruiting"},
    {otype:"O",objid:50000012,begda:"2020-01-01",endda:HIGH,short:"PAY",stext:"Payroll & Benefits"},
    {otype:"O",objid:50000021,begda:"2020-01-01",endda:HIGH,short:"ACC",stext:"Accounting"},
@@ -675,7 +675,8 @@ function seed(){return{
    {otype:"S",objid:50000101,rsign:"A",relat:"003",sclas:"O",sobid:"50000010",begda:"2020-01-01",endda:HIGH},
    {otype:"S",objid:50000101,rsign:"A",relat:"007",sclas:"C",sobid:"50000900",begda:"2020-01-01",endda:HIGH},
    {otype:"S",objid:50000101,rsign:"A",relat:"002",sclas:"S",sobid:"50000100",begda:"2020-01-01",endda:HIGH}],
-  T001:{"1000":{name:"Global Corp AG",country:"DE",currency:"EUR",city:"Berlin"}},
+  T001:{"1000":{name:"Global Corp AG",country:"DE",currency:"EUR",city:"Berlin"},
+        "2000":{name:"Global Corp Asia Ltd",country:"KH",currency:"USD",city:"Phnom Penh"}},
   T500P:{"1000":{text:"Head Office",bukrs:"1000"},"2000":{text:"Branch Office",bukrs:"1000"}},
   subgroupGroup:{"DU":"1","DW":"1","DT":"1"},
   T002:{"EN":"English","DE":"German","FR":"French","ES":"Spanish","VI":"Vietnamese"},
@@ -1097,6 +1098,19 @@ function orgFlat(key){key=key||today();
   return db.HRP1000.filter(o=>o.otype==="O"&&o.begda<=key&&o.endda>=key).map(o=>{
     const r=db.HRP1001.find(x=>x.otype==="O"&&x.sclas==="O"&&x.rsign==="A"&&x.relat==="002"&&x.objid===o.objid&&x.begda<=key&&x.endda>=key);
     return{id:o.objid,name:o.stext,short:o.short,parent:r?+r.sobid:null,children:[]};}).sort((a,b)=>a.id-b.id);
+}
+/* Effective company code (T001) of an org unit: its own assignment, else inherited
+   from the nearest ancestor up the "reports to" (A/002) chain. Mirrors SAP IT1008. */
+function orgCompany(id,key){key=key||today();
+  let cur=id,guard=0;
+  while(cur&&guard++<50){
+    const o=db.HRP1000.find(x=>x.otype==="O"&&x.objid===cur);
+    if(o&&o.bukrs)return {bukrs:o.bukrs,own:cur===id};
+    const rel=db.HRP1001.find(r=>r.otype==="O"&&r.sclas==="O"&&r.rsign==="A"&&r.relat==="002"&&r.objid===cur&&r.begda<=key&&r.endda>=key);
+    cur=rel?+rel.sobid:null;
+  }
+  const first=Object.keys(db.T001||{})[0]||null;
+  return {bukrs:first,own:false};
 }
 function orgTree(key){key=key||today();
   const flat=orgFlat(key),by={};flat.forEach(u=>by[u.id]=u);
@@ -1698,6 +1712,9 @@ function renderOrg(){
     walk(n.children,depth+1,ancOpen&&open);});})(roots,0,true);
   const grand=roots.reduce((s,n)=>s+total(n),0);
   const canDnd=isAdmin()||allowed("O","update");
+  // Company code (T001) cell — effective code with an "inherited" hint when not set on the unit itself.
+  const ccell=id=>{const c=orgCompany(id,S.key);if(!c.bukrs)return "—";const nm=(db.T001[c.bukrs]||{}).name||"";
+    return `<span class="ccode" title="${esc(c.bukrs+" – "+nm)}">${esc(c.bukrs)}</span> <span class="muted" style="font-size:12px">${esc(nm)}</span>${c.own?"":` <span class="pill" style="font-size:10px;padding:0 5px">inherited</span>`}`;};
   const body=rows.map(r=>{
     if(r.pos){const p=r.pos;
       return `<tr class="orow prow${r.visible?"":" hidden"}"${canDnd?` draggable="true" data-posdrag="${p.id}"`:""}>
@@ -1705,6 +1722,7 @@ function renderOrg(){
         ${canDnd?`<span class="ohandle" title="Drag to move this position to another org unit">${I.drag||"⠿"}</span>`:""}<span class="tog leaf">${I.chev}</span>
         <span class="pic">${I.badge||I.person}</span><span class="nm pnm">${esc(p.name)}</span> <span class="pill ${p.vacant?"warn":"good"}">${p.vacant?"Vacant":"Occupied"}</span></td>
       <td class="num">${p.id}</td>
+      <td class="muted" style="font-size:12px">${p.orgId?esc(orgCompany(p.orgId,S.key).bukrs||"—"):"—"}</td>
       <td>${p.holder?esc(p.holder):"—"}</td>
       <td class="num">—</td>
       <td class="num">—</td>
@@ -1715,6 +1733,7 @@ function renderOrg(){
         ${canDnd?`<span class="ohandle" title="Drag to move this unit">${I.drag||"⠿"}</span>`:""}<span class="tog ${r.leaf?"leaf":""}${r.open?" open":""}">${I.chev}</span>
         <span class="oic">${I.org}</span><span class="nm">${esc(n.name)}</span></td>
       <td class="num">${n.id}</td>
+      <td>${ccell(n.id)}</td>
       <td>${n.mgr?esc(n.mgr):"—"}</td>
       <td class="num"><span class="hc">${I.people}${n.hc||0}</span></td>
       <td class="num"><b>${total(n)}</b></td>
@@ -1728,8 +1747,8 @@ function renderOrg(){
   <div class="card list-card"><div class="card-head"><h2>Organizational units &amp; positions</h2><span class="count">${orgCount}</span><div class="spacer"></div>
     <span class="muted" style="font-size:13px">${posCount} position${posCount===1?"":"s"} · Total employees: <b>${grand}</b></span></div>
     <div class="tbl-wrap dt-grid dt-grid-1"><table class="dt otree-tbl"><thead><tr>
-      <th>Organizational unit / position</th><th>ID</th><th>Manager / holder</th><th title="Employees assigned directly to this unit">Employees</th><th title="Including all sub-units below">Total (incl. sub-units)</th><th>Sub-units</th>
-    </tr></thead><tbody>${body||`<tr><td colspan="6"><div class="empty">No organizational units.</div></td></tr>`}${canDnd&&body?`<tr class="orow otop" data-odroptop="1"><td class="otree" colspan="6" style="padding-left:10px;color:var(--muted)"><span class="oic">${I.org}</span><span class="nm">▲ Top level — drop a unit here to make it a root unit</span></td></tr>`:""}</tbody></table></div></div>`;
+      <th>Organizational unit / position</th><th>ID</th><th>Company code</th><th>Manager / holder</th><th title="Employees assigned directly to this unit">Employees</th><th title="Including all sub-units below">Total (incl. sub-units)</th><th>Sub-units</th>
+    </tr></thead><tbody>${body||`<tr><td colspan="7"><div class="empty">No organizational units.</div></td></tr>`}${canDnd&&body?`<tr class="orow otop" data-odroptop="1"><td class="otree" colspan="7" style="padding-left:10px;color:var(--muted)"><span class="oic">${I.org}</span><span class="nm">▲ Top level — drop a unit here to make it a root unit</span></td></tr>`:""}</tbody></table></div></div>`;
   $("#kd").addEventListener("change",e=>{S.key=e.target.value;renderOrg();});
   if(canDnd)wireOrgDnd();
 }
@@ -1978,10 +1997,12 @@ function addTitle(t){if(!t)throw new Error("Enter a title.");
   db.dom.TITEL[key]=t;return key;}
 function addSubgroup(k,t){if(!k)throw new Error("Enter a subgroup key.");db.T503K[k]=t;}
 function addCostCenter(id,name){if(!id)throw new Error("Enter a cost center id.");if(db.costCenters.find(c=>c.id===id))throw new Error("Cost center already exists.");db.costCenters.push({id,name});}
-function addOrgUnit(name,parent){if(!name)throw new Error("Enter an org unit name.");
+function addOrgUnit(name,parent,bukrs){if(!name)throw new Error("Enter an org unit name.");
   const maxId=Math.max.apply(null,db.HRP1000.filter(o=>o.otype==="O").map(o=>o.objid));
   const objid=maxId+1;
-  db.HRP1000.push({otype:"O",objid,begda:"2020-01-01",endda:HIGH,short:name.slice(0,4).toUpperCase(),stext:name});
+  const rec={otype:"O",objid,begda:"2020-01-01",endda:HIGH,short:name.slice(0,4).toUpperCase(),stext:name};
+  if(bukrs)rec.bukrs=bukrs;
+  db.HRP1000.push(rec);
   if(parent)db.HRP1001.push({otype:"O",objid,rsign:"A",relat:"002",sclas:"O",sobid:String(parent),begda:"2020-01-01",endda:HIGH});
   return objid;}
 function addRole(key,name){key=(key||"").trim().toUpperCase().replace(/[^A-Z0-9_]/g,"_");
@@ -2133,8 +2154,9 @@ function roleDialog(key){const edit=key!=null;cfgCtx={role:edit?key:null};
 function cfgOrgTable(){const orgs=db.HRP1000.filter(o=>o.otype==="O");
   const parentOf=id=>{const rel=db.HRP1001.find(r=>r.otype==="O"&&r.objid===id&&r.relat==="002"&&r.rsign==="A");return rel?+rel.sobid:null;};
   return `<div class="card"><div class="card-head"><h2>Organizational units</h2><span class="count">${orgs.length}</span><div class="spacer"></div><button class="btn sm primary" data-act="cfgOrg">+ Add</button></div>
-    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>Org ID</th><th>Name</th><th>Short</th><th>Reports to</th><th class="th-r">Actions</th></tr></thead><tbody>${orgs.map(o=>{const p=parentOf(o.objid);const pn=p?(db.HRP1000.find(x=>x.otype==="O"&&x.objid===p)||{}).stext:null;
-    return `<tr><td class="num">${o.objid}</td><td>${esc(o.stext)}</td><td>${esc(o.short)}</td><td>${p?esc(p+" "+(pn||"")):"—"}</td>
+    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>Org ID</th><th>Name</th><th>Short</th><th>Company code</th><th>Reports to</th><th class="th-r">Actions</th></tr></thead><tbody>${orgs.map(o=>{const p=parentOf(o.objid);const pn=p?(db.HRP1000.find(x=>x.otype==="O"&&x.objid===p)||{}).stext:null;
+    const cc=orgCompany(o.objid);const ccn=cc.bukrs?(db.T001[cc.bukrs]||{}).name:null;
+    return `<tr><td class="num">${o.objid}</td><td>${esc(o.stext)}</td><td>${esc(o.short)}</td><td>${cc.bukrs?esc(cc.bukrs+" – "+(ccn||""))+(cc.own?"":` <span class="pill" style="font-size:10px;padding:0 5px">inh.</span>`):"—"}</td><td>${p?esc(p+" "+(pn||"")):"—"}</td>
     <td class="td-r nowrap"><button class="btn xs" data-orgedit="${o.objid}">${I.edit} Edit</button> <button class="btn xs ghost" data-orgdel="${o.objid}">Delete</button></td></tr>`;}).join("")}</tbody></table></div></div>`;}
 /* Payroll run configuration (monthly cut-off period + rates & multipliers). */
 function renderPayrollCfg(){
@@ -2986,7 +3008,8 @@ function cfgCostDialog(){modal("Add cost center",`
 function cfgOrgDialog(){const orgs=orgFlat(S.key);
   modal("Add organizational unit",`
   <div class="grp"><label>Name <span class="req">*</span></label><input id="co_name"></div>
-  <div class="grp"><label>Reports to (parent)</label><select id="co_parent"><option value="">— none —</option>${orgs.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join("")}</select></div>`,
+  <div class="grp"><label>Reports to (parent)</label><select id="co_parent"><option value="">— none —</option>${orgs.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join("")}</select></div>
+  <div class="grp"><label>Company code</label><select id="co_bukrs"><option value="">— inherit from parent —</option>${opt(db.T001,"")}</select></div>`,
   `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="cfgOrg">Add</button>`);}
 function cfgTitleDialog(){modal("Add title · IT0002",`
   <div class="grp"><label>Title <span class="req">*</span></label><input id="ct_txt" placeholder="e.g. Dr., Prof., M.Sc."></div>`,
@@ -3061,7 +3084,8 @@ function orgEditDialog(id){const o=db.HRP1000.find(x=>x.otype==="O"&&x.objid===i
   modal("Edit organizational unit",`
   <div class="grp"><label>Name <span class="req">*</span></label><input id="oe_name" value="${esc(o.stext||"")}"></div>
   <div class="grp"><label>Short</label><input id="oe_short" value="${esc(o.short||"")}"></div>
-  <div class="grp"><label>Reports to (parent)</label><select id="oe_parent"><option value="">— none —</option>${orgs.map(x=>`<option value="${x.objid}" ${x.objid===parent?"selected":""}>${esc(x.stext)}</option>`).join("")}</select></div>`,
+  <div class="grp"><label>Reports to (parent)</label><select id="oe_parent"><option value="">— none —</option>${orgs.map(x=>`<option value="${x.objid}" ${x.objid===parent?"selected":""}>${esc(x.stext)}</option>`).join("")}</select></div>
+  <div class="grp"><label>Company code</label><select id="oe_bukrs"><option value="">— inherit from parent —</option>${opt(db.T001,o.bukrs||"")}</select></div>`,
   `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="orgSave">Save</button>`);}
 function attendanceDialog(){
   const att={}; Object.keys(db.T554S).forEach(k=>att[k]=db.T554S[k]);
@@ -3361,10 +3385,10 @@ function doAction(kind){
       if(cfgCtx&&cfgCtx.crsid){editCourse(cfgCtx.crsid,f);toast("Course updated.","good");}else{addCourse(f);toast("Course added.","good");}
       closeModal();render();
     }else if(kind==="cfgOrg"){
-      const id=addOrgUnit(val("co_name").trim(),val("co_parent")?+val("co_parent"):null);closeModal();toast("Organizational unit "+id+" added.","good");renderConfig();
+      const id=addOrgUnit(val("co_name").trim(),val("co_parent")?+val("co_parent"):null,val("co_bukrs")||null);closeModal();toast("Organizational unit "+id+" added.","good");renderConfig();
     }else if(kind==="orgSave"){
       const id=cfgCtx.orgid;const o=db.HRP1000.find(x=>x.otype==="O"&&x.objid===id);
-      if(o){o.stext=val("oe_name").trim();o.short=val("oe_short").trim();}
+      if(o){o.stext=val("oe_name").trim();o.short=val("oe_short").trim();const bk=val("oe_bukrs");if(bk)o.bukrs=bk;else delete o.bukrs;}
       const parent=val("oe_parent")?+val("oe_parent"):null;
       db.HRP1001=db.HRP1001.filter(r=>!(r.otype==="O"&&r.objid===id&&r.relat==="002"&&r.rsign==="A"));
       if(parent)db.HRP1001.push({otype:"O",objid:id,rsign:"A",relat:"002",sclas:"O",sobid:String(parent),begda:"2020-01-01",endda:HIGH});
