@@ -1,51 +1,51 @@
-<title>Oracle Fusion HCM — Demo</title>
+<title>SAP SuccessFactors — HR Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 /* ===================================================================
-   HR Module — self-contained demo (Oracle Redwood / Fusion Applications-inspired)
+   HR Module — self-contained demo (SAP SuccessFactors / HXM-inspired)
    All data + business logic run in the browser; nothing is fetched.
    =================================================================== */
 :root{
-  --accent:#c74634; --accent-strong:#a3382a; --accent-soft:#f7e8e5; --shell-bg:#c74634;
-  --bg:#f2f0ed; --surface:#ffffff; --surface-2:#f8f6f3; --surface-3:#f1ede7;
-  --border:#e3dfd8; --border-strong:#c9c2b8;
-  --text:#1a1613; --muted:#5d564d; --faint:#8b8379;
-  --good:#2e7d32; --good-bg:#e7f2e8; --warn:#a15c00; --warn-bg:#f8ecd9;
-  --bad:#b3261e; --bad-bg:#f9e6e4; --info:#1668b3;
-  --shadow-sm:0 1px 2px rgba(40,30,20,.08);
-  --shadow:0 2px 4px rgba(40,30,20,.08),0 8px 24px rgba(40,30,20,.07);
-  --radius:10px; --radius-sm:8px;
-  --font:"Oracle Sans","Helvetica Neue",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --accent:#0a6ed1; --accent-strong:#085caf; --accent-soft:#e3f0fb; --shell-bg:#0a6ed1;
+  --bg:#eef1f3; --surface:#ffffff; --surface-2:#f5f7f8; --surface-3:#eceff1;
+  --border:#d9dfe3; --border-strong:#bcc4ca;
+  --text:#1c2530; --muted:#5a6872; --faint:#8a97a1;
+  --good:#256f3a; --good-bg:#e5f2e9; --warn:#b3690a; --warn-bg:#fbeed9;
+  --bad:#bb1a1a; --bad-bg:#fbe8e8; --info:#0a6ed1;
+  --shadow-sm:0 1px 2px rgba(20,40,60,.08);
+  --shadow:0 2px 4px rgba(20,40,60,.08),0 8px 24px rgba(20,40,60,.06);
+  --radius:8px; --radius-sm:6px;
+  --font:"72","Helvetica Neue",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
 }
 @media (prefers-color-scheme:dark){
   :root{
-    --accent:#ec6a58; --accent-strong:#f2836f; --accent-soft:#3a201b; --shell-bg:#241d19;
-    --bg:#171310; --surface:#221d19; --surface-2:#2a241f; --surface-3:#322b25;
-    --border:#3a332c; --border-strong:#4c4339;
-    --text:#efe9e2; --muted:#b2a99e; --faint:#807870;
-    --good:#5cb96f; --good-bg:#16261a; --warn:#e0913f; --warn-bg:#2c1e12;
-    --bad:#f28b7d; --bad-bg:#2c1614; --info:#63a6e0;
+    --accent:#5db1ff; --accent-strong:#8ac6ff; --accent-soft:#102a43; --shell-bg:#0d1a26;
+    --bg:#0f151b; --surface:#1b2531; --surface-2:#212d3a; --surface-3:#27333f;
+    --border:#31404e; --border-strong:#435365;
+    --text:#e6ecf1; --muted:#9db0bd; --faint:#6f8090;
+    --good:#4bb97a; --good-bg:#12261a; --warn:#e39a4a; --warn-bg:#2c1e12;
+    --bad:#ff6b6b; --bad-bg:#2c1414; --info:#5db1ff;
     --shadow-sm:0 1px 2px rgba(0,0,0,.5);
     --shadow:0 2px 4px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
   }
 }
 :root[data-theme="light"]{
-  --accent:#c74634; --accent-strong:#a3382a; --accent-soft:#f7e8e5; --shell-bg:#c74634;
-  --bg:#f2f0ed; --surface:#ffffff; --surface-2:#f8f6f3; --surface-3:#f1ede7;
-  --border:#e3dfd8; --border-strong:#c9c2b8;
-  --text:#1a1613; --muted:#5d564d; --faint:#8b8379;
-  --good:#2e7d32; --good-bg:#e7f2e8; --warn:#a15c00; --warn-bg:#f8ecd9;
-  --bad:#b3261e; --bad-bg:#f9e6e4; --info:#1668b3;
-  --shadow-sm:0 1px 2px rgba(40,30,20,.08);
-  --shadow:0 2px 4px rgba(40,30,20,.08),0 8px 24px rgba(40,30,20,.07);
+  --accent:#0a6ed1; --accent-strong:#085caf; --accent-soft:#e3f0fb; --shell-bg:#0a6ed1;
+  --bg:#eef1f3; --surface:#ffffff; --surface-2:#f5f7f8; --surface-3:#eceff1;
+  --border:#d9dfe3; --border-strong:#bcc4ca;
+  --text:#1c2530; --muted:#5a6872; --faint:#8a97a1;
+  --good:#256f3a; --good-bg:#e5f2e9; --warn:#b3690a; --warn-bg:#fbeed9;
+  --bad:#bb1a1a; --bad-bg:#fbe8e8; --info:#0a6ed1;
+  --shadow-sm:0 1px 2px rgba(20,40,60,.08);
+  --shadow:0 2px 4px rgba(20,40,60,.08),0 8px 24px rgba(20,40,60,.06);
 }
 :root[data-theme="dark"]{
-  --accent:#ec6a58; --accent-strong:#f2836f; --accent-soft:#3a201b; --shell-bg:#241d19;
-  --bg:#171310; --surface:#221d19; --surface-2:#2a241f; --surface-3:#322b25;
-  --border:#3a332c; --border-strong:#4c4339;
-  --text:#efe9e2; --muted:#b2a99e; --faint:#807870;
-  --good:#5cb96f; --good-bg:#16261a; --warn:#e0913f; --warn-bg:#2c1e12;
-  --bad:#f28b7d; --bad-bg:#2c1614; --info:#63a6e0;
+  --accent:#5db1ff; --accent-strong:#8ac6ff; --accent-soft:#102a43; --shell-bg:#0d1a26;
+  --bg:#0f151b; --surface:#1b2531; --surface-2:#212d3a; --surface-3:#27333f;
+  --border:#31404e; --border-strong:#435365;
+  --text:#e6ecf1; --muted:#9db0bd; --faint:#6f8090;
+  --good:#4bb97a; --good-bg:#12261a; --warn:#e39a4a; --warn-bg:#2c1e12;
+  --bad:#ff6b6b; --bad-bg:#2c1414; --info:#5db1ff;
   --shadow-sm:0 1px 2px rgba(0,0,0,.5);
   --shadow:0 2px 4px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
 }
@@ -469,7 +469,7 @@ a.mail:hover{text-decoration:underline}
 </style>
 
 <header class="shell">
-  <div class="logo"><span class="owm">ORACLE</span><span class="brandsep"></span><span class="brandtext">Fusion HCM</span></div>
+  <div class="logo"><span class="owm">SAP</span><span class="brandsep"></span><span class="brandtext">SuccessFactors</span></div>
   <span id="whoami" class="whoami" style="display:none"></span>
   <nav id="nav"></nav>
   <div class="spacer"></div>
@@ -1215,8 +1215,8 @@ function render(){
 
 function renderLogin(){
   app.innerHTML=`<div class="login-wrap"><div class="login">
-    <div class="brandrow"><span class="mark">O</span><div><h1>${esc(t("Sign in"))}</h1></div></div>
-    <div class="tag">Oracle Fusion Cloud HCM — Human Resources</div>
+    <div class="brandrow"><span class="mark">SF</span><div><h1>${esc(t("Sign in"))}</h1></div></div>
+    <div class="tag">SAP SuccessFactors HXM — Human Resources</div>
     <div class="err" id="loginErr"></div>
     <div class="grp"><label>${esc(t("Username"))}</label><input id="lu" autocomplete="username" placeholder="e.g. admin"></div>
     <div class="grp"><label>${esc(t("Password"))}</label><input id="lp" type="password" autocomplete="current-password" placeholder="${esc(t("Password"))}"></div>
@@ -3079,7 +3079,7 @@ const THEMES={
   amber:{name:"Amber",light:{a:"#a65f00",s:"#824b00",soft:"#fbeed6",shell:"#a65f00"},dark:{a:"#f0a94a",s:"#f4be74",soft:"#33240f",shell:"#251c10"}},
   slate:{name:"Slate",light:{a:"#3b566a",s:"#2c4150",soft:"#e7edf1",shell:"#33475a"},dark:{a:"#8fb0c6",s:"#aac4d6",soft:"#20303b",shell:"#161f27"}}
 };
-let currentAccent="oracle";
+let currentAccent="sap";
 function accentMode(){return document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");}
 function applyAccent(key){
   currentAccent=THEMES[key]?key:"oracle";
