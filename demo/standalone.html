@@ -7,8 +7,8 @@
    =================================================================== */
 :root{
   /* Brand (constant across themes — Odoo plum): used by primary buttons + navbar */
-  --brand:#714b67; --brand-strong:#5b3c53; --brand-ink:#ffffff;
-  --accent:#714b67; --accent-strong:#5b3c53; --accent-soft:#f2ecf0; --shell-bg:#714b67;
+  --brand:#00a09d; --brand-strong:#017e7b; --brand-ink:#ffffff;
+  --accent:#00a09d; --accent-strong:#017e7b; --accent-soft:#e2f3f2; --shell-bg:#714b67;
   --bg:#f0eeee; --surface:#ffffff; --surface-2:#f8f8fa; --surface-3:#eef0f2;
   --border:#dfe2e7; --border-strong:#c4cad2;
   --text:#2b2b33; --muted:#6c757d; --faint:#8a919b;
@@ -21,7 +21,7 @@
 }
 @media (prefers-color-scheme:dark){
   :root{
-    --accent:#c9a3bd; --accent-strong:#dcc0d3; --accent-soft:#2b2130; --shell-bg:#2a2733;
+    --accent:#4fc3bf; --accent-strong:#6fd2ce; --accent-soft:#123230; --shell-bg:#2a2733;
     --bg:#1b1a21; --surface:#26252e; --surface-2:#2c2b36; --surface-3:#343341;
     --border:#3a3947; --border-strong:#4c4b5d;
     --text:#e7e7ec; --muted:#a2a2b0; --faint:#7a7a89;
@@ -32,7 +32,7 @@
   }
 }
 :root[data-theme="light"]{
-  --accent:#714b67; --accent-strong:#5b3c53; --accent-soft:#f2ecf0; --shell-bg:#714b67;
+  --accent:#00a09d; --accent-strong:#017e7b; --accent-soft:#e2f3f2; --shell-bg:#714b67;
   --bg:#f0eeee; --surface:#fff; --surface-2:#f8f8fa; --surface-3:#eef0f2;
   --border:#dfe2e7; --border-strong:#c4cad2;
   --text:#2b2b33; --muted:#6c757d; --faint:#8a919b;
@@ -490,6 +490,22 @@ tbody tr.click:hover{background:var(--accent-soft)}
 .login .btn.primary{background:var(--brand);border-color:var(--brand)}
 /* Org / reporting chart accents */
 .gorg{border-top-color:var(--brand)}
+
+/* ---- Odoo form view fidelity (per reference: underline-only fields) ---- */
+/* Dialog = form: label (gray) + underlined input; teal underline on focus. */
+.modal .grp label{color:var(--muted);font-weight:400;font-size:12px}
+.modal .grp input,.modal .grp select,.modal .grp textarea{
+  border:0;border-bottom:1px solid var(--border-strong);border-radius:0;background:transparent;
+  padding:6px 2px;transition:border-color .12s}
+.modal .grp input:focus,.modal .grp select:focus,.modal .grp textarea:focus{
+  border-bottom:2px solid var(--accent);box-shadow:none;outline:none;padding-bottom:5px}
+.modal .grp input[type=checkbox]{border-bottom:0;width:auto}
+.modal .foot{background:var(--surface);border-top:1px solid var(--border)}
+/* Breadcrumb (Model / Record), Odoo-style */
+.page-head .crumb{text-transform:none;letter-spacing:0;font-weight:400;font-size:13px;color:var(--muted)}
+/* Read-only detail rows → Odoo form fields (gray label, plain value) */
+.dl .row dt{color:var(--muted);font-weight:400}
+.dl .row dd{font-weight:500}
 </style>
 
 <header class="shell">

@@ -1,31 +1,32 @@
 /* ============================================================================
    HR Module — Odoo Enterprise-inspired theme, layered over SAP Horizon.
 
-   The SAPUI5 Horizon theme is driven by CSS theming variables (the --sapXxx
-   custom properties). Re-skinning to an Odoo look is therefore mostly a matter
-   of overriding those variables — Odoo plum brand, a plum "app navbar" (the page
-   header), squared corners, a Roboto stack and a light warm-gray canvas — plus a
-   few control-level tweaks. No control markup changes are needed.
+   Matches the Odoo form UX (teal actions, plum app navbar, underlined form
+   fields, squared surfaces, Roboto, light warm-gray canvas) by overriding the
+   Horizon theming variables (--sapXxx) plus a few control-level tweaks. No
+   control markup changes are required.
+
+   Palette: Odoo plum #714B67 (chrome / navbar) + Odoo teal #00A09D (actions,
+   links, focus) — the two brand colours shown in the Odoo backend.
    ============================================================================ */
 
 :root,
 .sapUiBody {
-    /* ---- Brand / accent (Odoo plum #714B67) -------------------------------- */
-    --sapBrandColor: #714B67;
-    --sapHighlightColor: #714B67;
-    --sapLinkColor: #714B67;
-    --sapActiveColor: #5b3c53;
-    --sapSelectedColor: #714B67;
-    --sapContent_IconColor: #714B67;
-    --sapContent_FocusColor: #714B67;
+    /* ---- Accent / actions (Odoo teal #00A09D) ----------------------------- */
+    --sapBrandColor: #00A09D;
+    --sapHighlightColor: #00A09D;
+    --sapLinkColor: #00A09D;
+    --sapActiveColor: #017E7B;
+    --sapSelectedColor: #00A09D;
+    --sapContent_FocusColor: #00A09D;
 
-    /* ---- Emphasized (primary) buttons ------------------------------------- */
-    --sapButton_Emphasized_Background: #714B67;
-    --sapButton_Emphasized_BorderColor: #714B67;
+    /* ---- Emphasized (primary) buttons — Odoo teal "SAVE" ------------------ */
+    --sapButton_Emphasized_Background: #00A09D;
+    --sapButton_Emphasized_BorderColor: #00A09D;
     --sapButton_Emphasized_TextColor: #ffffff;
-    --sapButton_Emphasized_Hover_Background: #5b3c53;
-    --sapButton_Emphasized_Hover_BorderColor: #5b3c53;
-    --sapButton_Emphasized_Active_Background: #4e3448;
+    --sapButton_Emphasized_Hover_Background: #017E7B;
+    --sapButton_Emphasized_Hover_BorderColor: #017E7B;
+    --sapButton_Emphasized_Active_Background: #016360;
 
     /* ---- The page header acts as the Odoo app navbar (plum, white text) ---- */
     --sapPageHeader_Background: #714B67;
@@ -55,27 +56,45 @@
 }
 
 /* On the plum page-header bar, an Emphasized button (e.g. "Hire") would be
-   plum-on-plum; render it as a white chip with plum text so it stays legible. */
+   teal-on-plum with low contrast; render it as a white chip with teal text. */
 .sapMPage > header.sapMBar .sapMBtnEmphasized .sapMBtnInner {
     background: #ffffff !important;
     border-color: #ffffff !important;
-    color: #714B67 !important;
+    color: #00A09D !important;
 }
 .sapMPage > header.sapMBar .sapMBtnTransparent:hover .sapMBtnInner {
     background: rgba(255, 255, 255, .14) !important;
 }
 
-/* List view: Odoo-style plain header text and a soft plum row hover. */
+/* ---- Odoo form fields: underline only, teal underline on focus ----------
+   Scoped to Forms/SimpleForms (the edit dialogs) so toolbars/search keep their
+   boxed look, exactly as in the Odoo form view. */
+.sapUiForm .sapMInputBaseContentWrapper,
+.sapUiForm .sapMComboBoxBase .sapMInputBaseContentWrapper,
+.sapUiForm .sapMDPInnerInput,
+.sapUiForm .sapMSltInner {
+    border-width: 0 0 1px 0;
+    border-radius: 0;
+    background: transparent;
+}
+.sapUiForm .sapMInputBaseContentWrapper.sapMFocus,
+.sapUiForm .sapMInputBaseContentWrapperState,
+.sapUiForm .sapMInputBaseContentWrapper:focus-within {
+    border-bottom: 2px solid #00A09D;
+    box-shadow: none;
+}
+
+/* List view: Odoo-style plain header text and a soft teal row hover. */
 .sapMListTblHeaderCell {
     text-transform: none;
 }
 .sapMLIB.sapMLIBHoverable:hover {
-    background: #f2ecf0;
+    background: #e2f3f2;
 }
 
-/* IconTabBar → Odoo "notebook": plum text + underline on the selected tab. */
+/* IconTabBar → Odoo "notebook": teal text + underline on the selected tab. */
 .sapMITBSelected .sapMITBText {
-    color: #714B67;
+    color: #00A09D;
 }
 
 /* Object header rendered as a white Odoo form "sheet". */
