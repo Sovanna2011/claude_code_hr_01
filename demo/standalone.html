@@ -17,7 +17,7 @@
   --bad:#bb0000; --bad-bg:#fbe8e8; --info:#0070f2;
   --shadow-sm:0 0 0 1px rgba(34,54,84,.03),0 1px 2px rgba(34,54,84,.10);
   --shadow:0 0 0 1px rgba(34,54,84,.04),0 8px 20px rgba(34,54,84,.18);
-  --radius:12px; --radius-sm:8px; --f-h:1.7rem;
+  --radius:12px; --radius-sm:8px; --f-h:2.5rem;
   --font:"72","72full","Helvetica Neue",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
 }
 @media (prefers-color-scheme:dark){
@@ -527,7 +527,8 @@ a.mail:hover{text-decoration:underline}
 .modal .grp{display:flex;flex-direction:column;gap:6px}
 .modal .grp label{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.1px}
 .modal .grp label .req{color:var(--bad);margin-left:2px}
-.modal .grp input,.modal .grp select,.modal .grp textarea{width:100%;min-height:42px}
+.modal .grp input,.modal .grp select{width:100%;height:var(--f-h)}
+.modal .grp textarea{width:100%;min-height:calc(var(--f-h) * 2)}
 .modal .grp textarea{min-height:78px;resize:vertical;line-height:1.45}
 .modal .grp input[type=checkbox]{width:auto;flex:0 0 auto;margin:0;min-height:auto;height:auto;accent-color:var(--accent)}
 .modal .grp label.chk{flex-direction:row;align-items:center;gap:8px;cursor:pointer;margin-top:26px}
