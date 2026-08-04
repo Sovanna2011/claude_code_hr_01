@@ -6,47 +6,54 @@
    All data + business logic run in the browser; nothing is fetched.
    =================================================================== */
 :root{
-  --accent:#0a6ed1; --accent-strong:#085caf; --accent-soft:#e3f0fb; --shell-bg:#0a6ed1;
-  --bg:#eef1f3; --surface:#ffffff; --surface-2:#f5f7f8; --surface-3:#eceff1;
-  --border:#d9dfe3; --border-strong:#bcc4ca;
-  --text:#1c2530; --muted:#5a6872; --faint:#8a97a1;
-  --good:#256f3a; --good-bg:#e5f2e9; --warn:#b3690a; --warn-bg:#fbeed9;
-  --bad:#bb1a1a; --bad-bg:#fbe8e8; --info:#0a6ed1;
-  --shadow-sm:0 1px 2px rgba(20,40,60,.08);
-  --shadow:0 2px 4px rgba(20,40,60,.08),0 8px 24px rgba(20,40,60,.06);
-  --radius:8px; --radius-sm:6px;
-  --font:"72","Helvetica Neue",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  /* SAP Fiori 3 "Horizon" theme — Morning Horizon (light). Neutral white shell,
+     brand accent #0070f2. Matches the Accounting System web interface. */
+  --accent:#0070f2; --accent-strong:#0064d9; --accent-soft:#e3f0ff;
+  --shell-bg:#ffffff; --shell-text:#1d2d3e; --shell-hover:rgba(29,45,62,.07); --shell-border:#e5e5e5;
+  --bg:#f5f6f7; --surface:#ffffff; --surface-2:#f5f6f7; --surface-3:#eceff1;
+  --border:#d9d9d9; --border-strong:#89919a;
+  --text:#1d2d3e; --muted:#556b82; --faint:#8a97a1;
+  --good:#256f3a; --good-bg:#e5f2e9; --warn:#e76500; --warn-bg:#fbeadd;
+  --bad:#bb0000; --bad-bg:#fbe8e8; --info:#0070f2;
+  --shadow-sm:0 0 0 1px rgba(34,54,84,.03),0 1px 2px rgba(34,54,84,.10);
+  --shadow:0 0 0 1px rgba(34,54,84,.04),0 8px 20px rgba(34,54,84,.18);
+  --radius:12px; --radius-sm:8px;
+  --font:"72","72full","Helvetica Neue",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
 }
 @media (prefers-color-scheme:dark){
   :root{
-    --accent:#5db1ff; --accent-strong:#8ac6ff; --accent-soft:#102a43; --shell-bg:#0d1a26;
-    --bg:#0f151b; --surface:#1b2531; --surface-2:#212d3a; --surface-3:#27333f;
-    --border:#31404e; --border-strong:#435365;
-    --text:#e6ecf1; --muted:#9db0bd; --faint:#6f8090;
-    --good:#4bb97a; --good-bg:#12261a; --warn:#e39a4a; --warn-bg:#2c1e12;
-    --bad:#ff6b6b; --bad-bg:#2c1414; --info:#5db1ff;
-    --shadow-sm:0 1px 2px rgba(0,0,0,.5);
-    --shadow:0 2px 4px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    /* Evening Horizon (dark). */
+    --accent:#4dabf7; --accent-strong:#74c0fc; --accent-soft:#1d3547;
+    --shell-bg:#1b232b; --shell-text:#eaecee; --shell-hover:rgba(255,255,255,.08); --shell-border:#2a353f;
+    --bg:#101418; --surface:#1b232b; --surface-2:#222c35; --surface-3:#27333f;
+    --border:#33414d; --border-strong:#5b6b7b;
+    --text:#eaecee; --muted:#a9b4be; --faint:#6f8090;
+    --good:#4bbf73; --good-bg:#12261a; --warn:#ffab5e; --warn-bg:#2c1e12;
+    --bad:#ff8a80; --bad-bg:#2c1414; --info:#4dabf7;
+    --shadow-sm:0 0 0 1px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.35);
+    --shadow:0 0 0 1px rgba(0,0,0,.3),0 8px 20px rgba(0,0,0,.5);
   }
 }
 :root[data-theme="light"]{
-  --accent:#0a6ed1; --accent-strong:#085caf; --accent-soft:#e3f0fb; --shell-bg:#0a6ed1;
-  --bg:#eef1f3; --surface:#ffffff; --surface-2:#f5f7f8; --surface-3:#eceff1;
-  --border:#d9dfe3; --border-strong:#bcc4ca;
-  --text:#1c2530; --muted:#5a6872; --faint:#8a97a1;
-  --good:#256f3a; --good-bg:#e5f2e9; --warn:#b3690a; --warn-bg:#fbeed9;
-  --bad:#bb1a1a; --bad-bg:#fbe8e8; --info:#0a6ed1;
-  --shadow-sm:0 1px 2px rgba(20,40,60,.08);
-  --shadow:0 2px 4px rgba(20,40,60,.08),0 8px 24px rgba(20,40,60,.06);
+  --accent:#0070f2; --accent-strong:#0064d9; --accent-soft:#e3f0ff;
+  --shell-bg:#ffffff; --shell-text:#1d2d3e; --shell-hover:rgba(29,45,62,.07); --shell-border:#e5e5e5;
+  --bg:#f5f6f7; --surface:#ffffff; --surface-2:#f5f6f7; --surface-3:#eceff1;
+  --border:#d9d9d9; --border-strong:#89919a;
+  --text:#1d2d3e; --muted:#556b82; --faint:#8a97a1;
+  --good:#256f3a; --good-bg:#e5f2e9; --warn:#e76500; --warn-bg:#fbeadd;
+  --bad:#bb0000; --bad-bg:#fbe8e8; --info:#0070f2;
+  --shadow-sm:0 0 0 1px rgba(34,54,84,.03),0 1px 2px rgba(34,54,84,.10);
+  --shadow:0 0 0 1px rgba(34,54,84,.04),0 8px 20px rgba(34,54,84,.18);
 }
 :root[data-theme="dark"]{
-  --accent:#5db1ff; --accent-strong:#8ac6ff; --accent-soft:#102a43; --shell-bg:#0d1a26;
-  --bg:#0f151b; --surface:#1b2531; --surface-2:#212d3a; --surface-3:#27333f;
-  --border:#31404e; --border-strong:#435365;
-  --text:#e6ecf1; --muted:#9db0bd; --faint:#6f8090;
-  --good:#4bb97a; --good-bg:#12261a; --warn:#e39a4a; --warn-bg:#2c1e12;
-  --bad:#ff6b6b; --bad-bg:#2c1414; --info:#5db1ff;
-  --shadow-sm:0 1px 2px rgba(0,0,0,.5);
+  --accent:#4dabf7; --accent-strong:#74c0fc; --accent-soft:#1d3547;
+  --shell-bg:#1b232b; --shell-text:#eaecee; --shell-hover:rgba(255,255,255,.08); --shell-border:#2a353f;
+  --bg:#101418; --surface:#1b232b; --surface-2:#222c35; --surface-3:#27333f;
+  --border:#33414d; --border-strong:#5b6b7b;
+  --text:#eaecee; --muted:#a9b4be; --faint:#6f8090;
+  --good:#4bbf73; --good-bg:#12261a; --warn:#ffab5e; --warn-bg:#2c1e12;
+  --bad:#ff8a80; --bad-bg:#2c1414; --info:#4dabf7;
+  --shadow-sm:0 0 0 1px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.35);
   --shadow:0 2px 4px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
@@ -62,11 +69,11 @@ button{font-family:inherit}
 
 /* ---- ShellBar ---- */
 .shell{flex:0 0 auto;position:relative;z-index:20;background:var(--shell-bg);
-  color:#fff;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-  padding:6px 16px;min-height:52px;box-shadow:var(--shadow-sm)}
-.shell .brandtext{white-space:nowrap;font-weight:600;font-size:14px;opacity:.95}
-.shell .owm{font-weight:800;letter-spacing:2.5px;font-size:16px;color:#fff}
-.shell .brandsep{width:1px;height:20px;background:rgba(255,255,255,.42);flex:0 0 auto}
+  color:var(--shell-text);display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:6px 16px;min-height:52px;border-bottom:1px solid var(--shell-border);box-shadow:0 1px 2px rgba(34,54,84,.06)}
+.shell .brandtext{white-space:nowrap;font-weight:700;font-size:14px;color:var(--shell-text)}
+.shell .owm{font-weight:800;letter-spacing:2.5px;font-size:16px;color:var(--accent)}
+.shell .brandsep{width:1px;height:20px;background:var(--border);flex:0 0 auto}
 .shell nav{flex:1 1 auto;overflow:visible;min-width:0}
 @media (max-width:760px){
   .shell{gap:8px;padding:6px 10px}
@@ -96,29 +103,29 @@ button{font-family:inherit}
 }
 .shell .logo{display:flex;align-items:center;gap:10px;font-weight:700;
   letter-spacing:.2px;white-space:nowrap}
-.shell .logo .mark{width:26px;height:26px;border-radius:6px;background:#fff;
-  color:var(--accent-strong);display:grid;place-items:center;font-weight:800;font-size:13px}
-.shell .sub{font-weight:400;opacity:.8;font-size:12px;border-left:1px solid rgba(255,255,255,.3);
+.shell .logo .mark{width:26px;height:26px;border-radius:7px;background:var(--accent);
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+.shell .sub{font-weight:400;color:var(--muted);font-size:12px;border-left:1px solid var(--border);
   padding-left:12px;margin-left:2px}
 .shell nav{display:flex;gap:2px;margin-left:8px}
-.shell nav button{background:transparent;border:0;color:#fff;opacity:.82;
-  padding:8px 14px;border-radius:7px;cursor:pointer;font-size:13.5px;font-weight:600;
+.shell nav button{background:transparent;border:0;color:var(--shell-text);
+  padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:600;
   display:flex;align-items:center;gap:7px}
-.shell nav button:hover{opacity:1;background:rgba(255,255,255,.12)}
-.shell nav button.active{opacity:1;background:rgba(255,255,255,.18)}
+.shell nav button:hover{background:var(--shell-hover)}
+.shell nav button.active{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent)}
 .shell .spacer{flex:1}
 .shell .util{display:flex;gap:6px;align-items:center}
-.shell .util button{background:rgba(255,255,255,.12);border:0;color:#fff;width:34px;height:34px;
-  border-radius:8px;cursor:pointer;display:grid;place-items:center;font-size:15px}
-.shell .util button:hover{background:rgba(255,255,255,.22)}
-.shell .util select#lang{background:rgba(255,255,255,.12);border:0;color:#fff;height:34px;border-radius:8px;
+.shell .util button{background:transparent;border:0;color:var(--muted);width:34px;height:34px;
+  border-radius:50%;cursor:pointer;display:grid;place-items:center;font-size:15px}
+.shell .util button:hover{background:var(--shell-hover);color:var(--accent)}
+.shell .util select#lang{background:var(--surface);border:1px solid var(--border-strong);color:var(--text);height:32px;border-radius:var(--radius-sm);
   cursor:pointer;font-size:13px;padding:0 6px;font-weight:600}
-.shell .util select#lang option{color:#111}
+.shell .util select#lang option{color:var(--text);background:var(--surface)}
 .shell nav svg,.shell .util svg{width:16px;height:16px;fill:currentColor}
 .more-wrap{position:relative;flex:0 0 auto}
-.morebtn{background:transparent;border:0;color:#fff;opacity:.9;padding:8px 12px;border-radius:7px;
+.morebtn{background:transparent;border:0;color:var(--shell-text);padding:8px 12px;border-radius:8px;
   cursor:pointer;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap}
-.morebtn:hover{background:rgba(255,255,255,.14)}
+.morebtn:hover{background:var(--shell-hover)}
 .morebtn svg{width:15px;height:15px;fill:currentColor}
 .more-menu{position:absolute;top:120%;right:0;background:var(--surface);border:1px solid var(--border);
   border-radius:10px;box-shadow:var(--shadow);min-width:190px;display:none;flex-direction:column;padding:6px;z-index:40}
@@ -298,8 +305,8 @@ a.mail:hover{text-decoration:underline}
 .avatar .av-edit{position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;
   border:2px solid var(--surface);background:var(--accent);color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
 .avatar .av-edit svg{width:12px;height:12px;fill:#fff}
-.whoami-av{width:30px;height:30px;border-radius:50%;object-fit:cover;cursor:pointer;border:1px solid rgba(255,255,255,.4)}
-.whoami-wrap{display:flex;align-items:center;gap:8px;padding-left:12px;border-left:1px solid rgba(255,255,255,.3)}
+.whoami-av{width:30px;height:30px;border-radius:50%;object-fit:cover;cursor:pointer;border:1px solid var(--border)}
+.whoami-wrap{display:flex;align-items:center;gap:8px;padding-left:12px;border-left:1px solid var(--border)}
 .obj-head .id{margin-left:auto;text-align:right}
 .obj-head .id .n{font-size:24px;font-weight:800;color:var(--accent)}
 .obj-head .id .l{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
@@ -431,7 +438,7 @@ a.mail:hover{text-decoration:underline}
 .banner svg{width:16px;height:16px;fill:currentColor;flex:0 0 auto}
 .empty{padding:40px;text-align:center;color:var(--muted)}
 .whoami{display:flex;flex-direction:row;align-items:center;gap:9px;line-height:1.15;text-align:left;
-  padding-left:12px;border-left:1px solid rgba(255,255,255,.3);white-space:nowrap}
+  padding-left:12px;border-left:1px solid var(--border);white-space:nowrap}
 .whoami .wi-txt{display:flex;flex-direction:column}
 .whoami b{font-size:12.5px}.whoami span{font-size:11px;opacity:.8}
 .rolebadge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--accent-soft);color:var(--accent)}
@@ -487,7 +494,8 @@ a.mail:hover{text-decoration:underline}
   padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
 .home-hero h1{margin:0 0 4px;font-size:22px;font-weight:800}
 .home-hero p{margin:0;opacity:.9;font-size:13.5px}
-.home-sect{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);font-weight:700;margin:20px 0 8px}
+.home-sect{font-size:13px;letter-spacing:.2px;color:var(--text);font-weight:700;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.home-sect::before{content:"";width:4px;height:15px;border-radius:8px;background:var(--accent);display:inline-block}
 /* Grouped Admin Center configuration launcher */
 .cfg-groups{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--border);
   border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
@@ -3493,7 +3501,7 @@ $("#reset").addEventListener("click",()=>{db=seed();S.view=SESSION?"home":"list"
    from the base stylesheet, so every theme works in both light and dark. */
 const THEMES={
   oracle:{name:"Oracle Red",light:{a:"#c74634",s:"#a3382a",soft:"#f7e8e5",shell:"#c74634"},dark:{a:"#ec6a58",s:"#f2836f",soft:"#3a201b",shell:"#241d19"}},
-  sap:{name:"SAP Blue",light:{a:"#0a6ed1",s:"#085caf",soft:"#e3f0fb",shell:"#0a6ed1"},dark:{a:"#5db1ff",s:"#8ac6ff",soft:"#102a43",shell:"#0d1a26"}},
+  sap:{name:"Fiori Blue",light:{a:"#0070f2",s:"#0064d9",soft:"#e3f0ff",shell:"#ffffff"},dark:{a:"#4dabf7",s:"#74c0fc",soft:"#1d3547",shell:"#1b232b"}},
   teal:{name:"Teal",light:{a:"#0f7f8c",s:"#0b616b",soft:"#e0f2f4",shell:"#0f7f8c"},dark:{a:"#4fc4d0",s:"#78d4dd",soft:"#0e2b2f",shell:"#0c1e21"}},
   emerald:{name:"Emerald",light:{a:"#0a7d55",s:"#075c3e",soft:"#e2f4ec",shell:"#0a7d55"},dark:{a:"#4cc38a",s:"#74d3a5",soft:"#0f2c20",shell:"#0d1f18"}},
   violet:{name:"Violet",light:{a:"#6a3fb5",s:"#552f95",soft:"#efe8fa",shell:"#6a3fb5"},dark:{a:"#a985ec",s:"#c0a6f2",soft:"#241a3a",shell:"#1a1526"}},
@@ -3507,7 +3515,9 @@ function applyAccent(key){
   currentAccent=THEMES[key]?key:"oracle";
   const set=THEMES[currentAccent][accentMode()==="dark"?"dark":"light"],r=document.documentElement.style;
   r.setProperty("--accent",set.a);r.setProperty("--accent-strong",set.s);
-  r.setProperty("--accent-soft",set.soft);r.setProperty("--shell-bg",set.shell);
+  r.setProperty("--accent-soft",set.soft);
+  // Fiori Horizon keeps a neutral shell bar — the palette only re-tints the
+  // brand accent, not the shell (so --shell-bg stays white / dark content).
   const pm=$("#paletteMenu");if(pm)pm.querySelectorAll(".swatch").forEach(sw=>sw.classList.toggle("sel",sw.dataset.theme===currentAccent));
 }
 (function themeInit(){
