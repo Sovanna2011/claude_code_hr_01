@@ -82,7 +82,26 @@ PL/SQL procedures and reporting views. You can also open the files individually
 in SQL Developer / SQLcl. Adjust the service name (`XEPDB1`, `FREEPDB1`, …) to
 match your instance.
 
-## 2. Backend API
+## Separated architecture: API-only backend + standalone front end
+
+The backend and the front end are **two independent applications** with no
+shared process:
+
+- **Backend** (`backend/HRModule.Api`) is a **pure REST API** — it returns JSON
+  only and serves **no** front-end assets. Its root (`/`) returns API metadata,
+  `/swagger` the API docs, `/health` a health check, and everything else lives
+  under `/api/*`.
+- **Front end** (`frontend`) is a **standalone SAPUI5 app** served on its own
+  origin. It bundles no server; it only makes HTTP calls to the backend REST
+  API. The backend URL is configured in one place —
+  `webapp/index.html → window["hr-module-config"].apiBase` (default
+  `http://localhost:5000/api`) — and read by `Component.js`/`HRService`.
+
+Cross-origin calls from the front end to the API are permitted by the backend
+CORS policy (`Cors:AllowedOrigins` in `appsettings.json`, default
+`http://localhost:8080`).
+
+## 2. Backend API (REST only)
 
 Set the connection string in `backend/HRModule.Api/appsettings.json`
 (`ConnectionStrings:HRModule`) if it differs from the local default, then:
@@ -94,16 +113,17 @@ dotnet run
 ```
 
 The API starts on `http://localhost:5000` (Swagger UI at `/swagger` in
-Development). Health check: `GET /health`.
+Development). Health check: `GET /health`. It serves no UI.
 
 Quick smoke test:
 
 ```bash
+curl http://localhost:5000/                # API metadata
 curl http://localhost:5000/api/employees
 curl http://localhost:5000/api/orgunits/50000001/structure
 ```
 
-## 3. Frontend (SAPUI5)
+## 3. Front end (standalone SAPUI5 app)
 
 ```bash
 cd frontend
@@ -111,8 +131,14 @@ npm install
 npm start
 ```
 
-Opens `http://localhost:8080`. The dev server proxies `/api/*` to the backend on
-port 5000 (see `ui5.yaml`), so no CORS setup is needed for local development.
+Opens `http://localhost:8080` and calls the backend directly at the `apiBase`
+configured in `webapp/index.html` (allowed by the backend CORS policy).
+
+- **To point at a different backend** (stage/prod), edit `apiBase` in
+  `webapp/index.html`.
+- **Alternative — same-origin dev proxy:** set `apiBase` back to `/api` and the
+  UI5 dev server will proxy `/api/*` to `http://localhost:5000` (see
+  `ui5.yaml`), avoiding CORS entirely. Both modes keep the backend API-only.
 
 > The app bootstraps SAPUI5 from the public CDN (`ui5.sap.com`). For an
 > air-gapped setup, point the bootstrap `src` in `webapp/index.html` at a local

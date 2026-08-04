@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HR Module - Human Capital Management</title>
 
+    <!-- Backend REST API location. This front end is a SEPARATE application: it
+         does not bundle any server, it only calls the .NET REST API
+         (backend/HRModule.Api) over HTTP. Point `apiBase` at that backend's
+         origin. Override per environment (dev/stage/prod) by editing this value
+         or injecting it at deploy time. -->
+    <script>
+        window["hr-module-config"] = {
+            // .NET backend REST API base URL (its own origin/application).
+            apiBase: "http://localhost:5000/api"
+        };
+    </script>
+
     <!-- SAPUI5 bootstrap (CDN). For an offline build use the SAP-delivered
          resources or a local UI5 distribution served from the API wwwroot. -->
     <script id="sap-ui-bootstrap"

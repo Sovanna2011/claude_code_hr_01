@@ -603,6 +603,14 @@ function serveStatic(res, pathname) {
     if (!target.startsWith(WEBAPP)) { res.writeHead(403); return res.end("Forbidden"); }
     fs.readFile(target, (err, data) => {
         if (err) { res.writeHead(404, { "Content-Type": "text/plain" }); return res.end("Not found: " + rel); }
+        // This all-in-one demo serves the front end AND a stand-in API on one
+        // origin, so override the front end's backend URL to same-origin "/api".
+        // (The standalone front end defaults to the separate .NET backend on :5000.)
+        if (path.extname(target) === ".html") {
+            data = Buffer.from(String(data).replace(
+                /apiBase:\s*"[^"]*"/,
+                'apiBase: "/api"   /* overridden by demo/server.js (same-origin stand-in API) */'));
+        }
         res.writeHead(200, { "Content-Type": MIME[path.extname(target)] || "application/octet-stream" });
         res.end(data);
     });
