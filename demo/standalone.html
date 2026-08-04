@@ -50,6 +50,7 @@
   --shadow:0 2px 4px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
+html,body{max-width:100%;overflow-x:hidden}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);
   font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
 .num{font-variant-numeric:tabular-nums}
@@ -145,7 +146,13 @@ button{font-family:inherit}
 .action-menu .act-sep{height:1px;background:var(--border);margin:5px 4px}
 
 /* ---- Layout ---- */
-main{max-width:1200px;margin:0 auto;padding:18px 16px 60px}
+main{max-width:1200px;width:100%;margin:0 auto;padding:18px 16px 60px}
+.card,.tbl-wrap,.toolbar,.stat-row,.home-grid{max-width:100%}
+/* Use more width on large / ultrawide monitors */
+@media (min-width:1500px){main{max-width:1360px}}
+@media (min-width:1800px){main{max-width:1600px}}
+@media (min-width:2200px){main{max-width:1880px}}
+@media (min-width:2800px){main{max-width:2200px}}
 .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
 .page-head h1{font-size:22px;margin:0;font-weight:700;letter-spacing:-.2px}
 .page-head .crumb{font-size:12px;color:var(--muted);margin-bottom:3px;
@@ -242,6 +249,9 @@ td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:middle
 .combo-opt{padding:8px 12px;cursor:pointer;font-size:13.5px}
 .combo-opt:hover{background:var(--accent-soft)}
 .combo-empty{padding:8px 12px;color:var(--muted);font-size:13px}
+.pm-combo{position:relative}
+.pm-combo .combo-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:50;box-shadow:var(--shadow);min-width:260px;max-height:260px}
+.pm-combo .combo-opt{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--text)}
 .rolechks{display:flex;flex-direction:column;gap:6px;margin-top:4px}
 .rolechk{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);
   border-radius:8px;background:var(--surface);cursor:pointer;font-size:13.5px}
@@ -798,7 +808,7 @@ function seed(){return{
    {pernr:1001,date:"2026-06-14",hours:3.0},   // Sun - Sunday OT
    {pernr:1001,date:"2026-12-25",hours:2.0}],  // Public holiday OT
   // Payroll: rates & OT multipliers (SAP-style customizing)
-  payroll:{taxRate:0.15,socialRate:0.09,otMult:{normal:1.25,sunday:1.5,holiday:2.0},monthlyFactor:4.33},
+  payroll:{taxRate:0.15,socialRate:0.09,otMult:{normal:1.25,sunday:1.5,holiday:2.0},monthlyFactor:4.33,cutoffDay:26},
   photos:{},  // pernr -> data URI (uploaded photo); default is a generated avatar
   attachments:[],  // {id,kind,pernr,refId,name,mime,size,data,uploaded}
   // Daily attendance register: one row per employee per day
@@ -1137,6 +1147,7 @@ function navGroups(role){
     {label:"Admin Center",ico:"doc",items:[
       ["config","Configuration"],
       ["config","Actions · IT0000",{cfg:"action"}],
+      ["config","Payroll Run",{cfg:"payrollcfg"}],
       ["config","Enterprise Structure",{cfg:"company"}],
       ["config","Personnel Structure",{cfg:"groups"}],
       ["config","Organizational Units",{cfg:"org"}],
@@ -2043,6 +2054,35 @@ function cfgOrgTable(){const orgs=db.HRP1000.filter(o=>o.otype==="O");
     <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>Org ID</th><th>Name</th><th>Short</th><th>Reports to</th><th class="th-r">Actions</th></tr></thead><tbody>${orgs.map(o=>{const p=parentOf(o.objid);const pn=p?(db.HRP1000.find(x=>x.otype==="O"&&x.objid===p)||{}).stext:null;
     return `<tr><td class="num">${o.objid}</td><td>${esc(o.stext)}</td><td>${esc(o.short)}</td><td>${p?esc(p+" "+(pn||"")):"—"}</td>
     <td class="td-r nowrap"><button class="btn xs" data-orgedit="${o.objid}">${I.edit} Edit</button> <button class="btn xs ghost" data-orgdel="${o.objid}">Delete</button></td></tr>`;}).join("")}</tbody></table></div></div>`;}
+/* Payroll run configuration (monthly cut-off period + rates & multipliers). */
+function renderPayrollCfg(){
+  const p=db.payroll;
+  const rows=[
+    ["Period cut-off day","<b>"+p.cutoffDay+"</b> — the payroll month runs from day "+p.cutoffDay+" of the previous month to day "+(p.cutoffDay-1)+" of the month (e.g. 26 May – 25 Jun)"],
+    ["Tax rate",(p.taxRate*100).toFixed(1)+" %"],
+    ["Social security rate",(p.socialRate*100).toFixed(1)+" %"],
+    ["Overtime × normal",p.otMult.normal+"×"],
+    ["Overtime × Sunday",p.otMult.sunday+"×"],
+    ["Overtime × public holiday",p.otMult.holiday+"×"],
+    ["Monthly factor (weeks per month)",p.monthlyFactor]
+  ];
+  return `<div class="card"><div class="card-head"><h2>Payroll run configuration</h2><div class="spacer"></div>${isAdmin()?`<button class="btn sm primary" data-act="payrollcfg">${I.edit} Edit settings</button>`:""}</div>
+    <div class="hint">${I.info}<span>The monthly payroll period is a rolling cut-off (e.g. day 26 → 25). Rates &amp; multipliers drive gross-to-net and overtime pay. Changes apply to the next payroll run.</span></div>
+    <div class="subcard">${dl(rows)}</div></div>`;
+}
+function payrollCfgDialog(){
+  const p=db.payroll;
+  modal("Edit payroll run configuration",`<div class="two">
+    <div class="grp"><label>Period cut-off day (1–28) <span class="req">*</span></label><input type="number" id="pc_cut" min="1" max="28" value="${p.cutoffDay}"></div>
+    <div class="grp"><label>Monthly factor</label><input type="number" step="0.01" id="pc_mf" value="${p.monthlyFactor}"></div>
+    <div class="grp"><label>Tax rate (%)</label><input type="number" step="0.1" id="pc_tax" value="${(p.taxRate*100)}"></div>
+    <div class="grp"><label>Social security rate (%)</label><input type="number" step="0.1" id="pc_soc" value="${(p.socialRate*100)}"></div>
+    <div class="grp sec">Overtime multipliers</div>
+    <div class="grp"><label>OT × normal</label><input type="number" step="0.05" id="pc_otn" value="${p.otMult.normal}"></div>
+    <div class="grp"><label>OT × Sunday</label><input type="number" step="0.05" id="pc_ots" value="${p.otMult.sunday}"></div>
+    <div class="grp"><label>OT × public holiday</label><input type="number" step="0.05" id="pc_oth" value="${p.otMult.holiday}"></div>
+  </div>`,`<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="payrollcfg">Save</button>`);
+}
 function renderConfig(){
   if(!S.cfgTab)S.cfgTab="company";
   const T=(id,l)=>`<button class="btn sm ${S.cfgTab===id?'primary':''}" data-cfg="${id}">${l}</button>`;
@@ -2051,9 +2091,10 @@ function renderConfig(){
   else if(S.cfgTab==="roles")body=cfgRolesTable();
   else if(S.cfgTab==="users")body=cfgUsersTable();
   else if(S.cfgTab==="org")body=cfgOrgTable();
+  else if(S.cfgTab==="payrollcfg")body=renderPayrollCfg();
   else if(CFG_SCHEMA[S.cfgTab])body=cfgTable(S.cfgTab);
   app.innerHTML=pageHead(t("Configuration"),t("System configuration"))+
-    `<div class="toolbar" style="gap:6px;flex-wrap:wrap">${T("action","Action types · IT0000")}${T("actreason","Action reasons")}${T("empstat","Employment status")}${T("company","Company codes")}${T("parea","Personnel areas")}${T("groups","Employee groups")}${T("subgroups","Employee subgroups")}${T("cost","Cost centers")}${T("org","Organizational units")}${T("lang","Languages")}${T("nat","Countries")}${T("currency","Currencies")}${T("exchange","Exchange rates")}${T("region","Regions")}${T("city","Cities")}${T("anred","Forms of address")}${T("titles","Titles")}${T("addrtype","Address types")}${T("commtype","Comm. types")}${T("famtype","Family types")}${T("dept","Departments")}${T("probst","Probation statuses")}${T("transreason","Transfer reasons")}${T("promoreason","Promotion reasons")}${T("termreason","Termination reasons")}${T("offchk","Offboarding items")}${T("salreason","Salary adj. reasons")}${T("syslang","System languages")}${T("numrange","Number ranges")}${T("roles","Roles")}${T("users","Users & roles")}${T("auth","Authorizations")}</div>${body}`;
+    `<div class="toolbar" style="gap:6px;flex-wrap:wrap">${T("action","Action types · IT0000")}${T("actreason","Action reasons")}${T("empstat","Employment status")}${T("payrollcfg","Payroll Run")}${T("company","Company codes")}${T("parea","Personnel areas")}${T("groups","Employee groups")}${T("subgroups","Employee subgroups")}${T("cost","Cost centers")}${T("org","Organizational units")}${T("lang","Languages")}${T("nat","Countries")}${T("currency","Currencies")}${T("exchange","Exchange rates")}${T("region","Regions")}${T("city","Cities")}${T("anred","Forms of address")}${T("titles","Titles")}${T("addrtype","Address types")}${T("commtype","Comm. types")}${T("famtype","Family types")}${T("dept","Departments")}${T("probst","Probation statuses")}${T("transreason","Transfer reasons")}${T("promoreason","Promotion reasons")}${T("termreason","Termination reasons")}${T("offchk","Offboarding items")}${T("salreason","Salary adj. reasons")}${T("syslang","System languages")}${T("numrange","Number ranges")}${T("roles","Roles")}${T("users","Users & roles")}${T("auth","Authorizations")}</div>${body}`;
 }
 
 /* ============================ MODULE VIEWS ============================ */
@@ -2366,8 +2407,27 @@ function renderReportGraph(){
 
 /* ---- Payroll ---- */
 /* First/last calendar day of a YYYY-MM month string. */
-function monthRange(ym){const [y,m]=ym.split("-").map(Number);const from=ym+"-01";
-  const last=new Date(y,m,0).getDate();const to=ym+"-"+String(last).padStart(2,"0");return {from,to};}
+/* A payroll month is identified by its end month (ym = "YYYY-MM"). With a
+   configurable cut-off day D (default 26) the period runs from day D of the
+   previous month to day D-1 of the end month — e.g. 2026-06 -> 26 May–25 Jun.
+   Cut-off 1 keeps a plain calendar month. */
+function monthRange(ym){
+  const [y,m]=ym.split("-").map(Number);
+  const cut=Math.max(1,Math.min(28,(db.payroll&&db.payroll.cutoffDay)||1));
+  const pad=n=>String(n).padStart(2,"0");
+  if(cut<=1){const last=new Date(y,m,0).getDate();return {from:ym+"-01",to:ym+"-"+pad(last)};}
+  const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+  return {from:iso(new Date(y,m-2,cut)), to:iso(new Date(y,m-1,cut-1))};
+}
+/* Build a searchable list of payroll months around the current selection. */
+function payMonths(centerYm){
+  const [cy,cm]=(centerYm||"2026-06").split("-").map(Number);
+  const list=[];
+  for(let i=18;i>=-6;i--){const d=new Date(cy,cm-1-i,1);const ym=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+    const r=monthRange(ym);const lbl=d.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+    list.push({ym,label:lbl,range:fmtDate(r.from)+" – "+fmtDate(r.to)});}
+  return list;
+}
 function renderPayroll(){
   if(!S.payMonth)S.payMonth="2026-06";
   const mr=monthRange(S.payMonth);S.payFrom=mr.from;S.payTo=mr.to;
@@ -2379,11 +2439,18 @@ function renderPayroll(){
   const totGrossDoc=run.reduce((a,r)=>a+fxConvert(r.gross,r.currency,doc),0), totNetDoc=run.reduce((a,r)=>a+fxConvert(r.net,r.currency,doc),0);
   const rate=r=>fxConvert(1,r.currency,doc);
   const monthLbl=new Date(S.payFrom+"T00:00:00").toLocaleDateString("en-US",{month:"long",year:"numeric"});
-  app.innerHTML=pageHead("Payroll","Payroll run — monthly")+`
+  const months=payMonths(S.payMonth);
+  const cur=months.find(x=>x.ym===S.payMonth)||{label:monthLbl,range:fmtDate(S.payFrom)+" – "+fmtDate(S.payTo)};
+  const pmCombo=`<div class="combo pm-combo" id="pmCombo" style="min-width:260px">
+    <input id="pmInput" autocomplete="off" placeholder="Search payroll month…" value="${esc(cur.label+"  ·  "+cur.range)}">
+    <button type="button" class="combo-btn" id="pmToggle" title="Choose payroll month">${I.cal}</button>
+    <div class="combo-list" id="pmList">${months.map(x=>`<div class="combo-opt" data-pmopt="${x.ym}"><b>${esc(x.label)}</b> <span class="muted">·  ${esc(x.range)}</span></div>`).join("")}</div>
+  </div>`;
+  app.innerHTML=pageHead("Payroll","Payroll run — monthly · period cut-off day "+((db.payroll&&db.payroll.cutoffDay)||1))+`
   <div class="toolbar">
-    <div class="field"><label>Payroll month</label><input type="month" id="payMonth" value="${S.payMonth}"></div>
+    <div class="field"><label>Payroll month <span class="muted" style="font-weight:400;text-transform:none;letter-spacing:0">(search)</span></label>${pmCombo}</div>
     <div class="field"><label>Document currency</label><select id="payCurr">${opt(db.currencies,doc)}</select></div>
-    <div class="field"><label>Period</label><input type="text" value="${fmtDate(S.payFrom)} – ${fmtDate(S.payTo)}" readonly style="min-width:190px"></div>
+    <div class="field"><label>Period (date to date)</label><input type="text" value="${fmtDate(S.payFrom)} – ${fmtDate(S.payTo)}" readonly style="min-width:190px"></div>
   </div>
   <div class="stat-row">
     <div class="stat"><div class="v num">${run.length}</div><div class="l">Employees</div></div>
@@ -2406,8 +2473,19 @@ function renderPayroll(){
     {k:"netfx",l:"Net ("+doc+")",v:r=>fxConvert(r.net,r.currency,doc),html:r=>`<b class="num">${fmtC(fxConvert(r.net,r.currency,doc),doc)}</b>`},
     {k:"act",l:"Actions",always:true,html:r=>`<button class="btn sm" data-payslip="${r.pernr}">Payslip</button>`}
   ],run)}`;
-  $("#payMonth").addEventListener("change",e=>{S.payMonth=e.target.value||S.payMonth;renderPayroll();});
   $("#payCurr").addEventListener("change",e=>{S.payCurr=e.target.value;renderPayroll();});
+  // Payroll Month search-list (combobox): focus/type to filter, click to pick.
+  const pmInput=$("#pmInput"),pmList=$("#pmList");
+  if(pmInput&&pmList){
+    const openList=()=>pmList.classList.add("open");
+    pmInput.addEventListener("focus",()=>{pmInput.select();openList();});
+    pmInput.addEventListener("input",()=>{const q=pmInput.value.toLowerCase();openList();
+      let any=false;pmList.querySelectorAll(".combo-opt").forEach(o=>{const m=o.textContent.toLowerCase().includes(q);o.style.display=m?"":"none";if(m)any=true;});
+      let e=pmList.querySelector(".combo-empty");if(!any){if(!e){e=document.createElement("div");e.className="combo-empty";e.textContent="No matching month.";pmList.appendChild(e);}}else if(e)e.remove();});
+    pmList.addEventListener("click",e=>{const o=e.target.closest("[data-pmopt]");if(o){S.payMonth=o.dataset.pmopt;renderPayroll();}});
+  }
+  const pmToggle=$("#pmToggle");
+  if(pmToggle)pmToggle.addEventListener("click",e=>{e.stopPropagation();pmList.classList.toggle("open");if(pmList.classList.contains("open"))pmInput.focus();});
 }
 function payslipContent(pernr){
   const s=payslip(pernr,S.payFrom||"2026-06-01",S.payTo||"2026-06-30");const c=s.currency;
@@ -2926,6 +3004,7 @@ document.addEventListener("click",ev=>{
     else if(t.dataset.act==="cfgUser")cfgUserDialog();
     else if(t.dataset.act==="attendance")attendanceDialog();
     else if(t.dataset.act==="reqleave")reqLeaveDialog();
+    else if(t.dataset.act==="payrollcfg")payrollCfgDialog();
     else if(t.dataset.act==="cols"){S.showCols=!S.showCols;renderList();}
     else if(t.dataset.act==="mypayslip")payslipDialog(SESSION.pernr);
     return;
@@ -3180,6 +3259,16 @@ function doAction(kind){
       if(!f.begda||!f.endda){toast("Enter start and end dates.","bad");return;}
       if(f.endda<f.begda){toast("End date must not be before start date.","bad");return;}
       const d=requestLeave(f);closeModal();toast("Leave request submitted ("+d+" day(s)).","good");render();
+    }else if(kind==="payrollcfg"){
+      const cut=Math.round(+val("pc_cut"));
+      if(!(cut>=1&&cut<=28)){toast("Cut-off day must be between 1 and 28.","bad");return;}
+      const num=(id,d)=>{const v=parseFloat(val(id));return isNaN(v)?d:v;};
+      db.payroll.cutoffDay=cut;
+      db.payroll.monthlyFactor=num("pc_mf",db.payroll.monthlyFactor);
+      db.payroll.taxRate=num("pc_tax",db.payroll.taxRate*100)/100;
+      db.payroll.socialRate=num("pc_soc",db.payroll.socialRate*100)/100;
+      db.payroll.otMult={normal:num("pc_otn",db.payroll.otMult.normal),sunday:num("pc_ots",db.payroll.otMult.sunday),holiday:num("pc_oth",db.payroll.otMult.holiday)};
+      closeModal();toast("Payroll configuration saved.","good");renderConfig();
     }
   }catch(err){toast(err.message,"bad");}
 }
