@@ -2158,10 +2158,11 @@ function addOrgUnit(name,parent,bukrs){if(!name)throw new Error("Enter an org un
   db.HRP1000.push(rec);
   if(parent)db.HRP1001.push({otype:"O",objid,rsign:"A",relat:"002",sclas:"O",sobid:String(parent),begda:"2020-01-01",endda:HIGH});
   return objid;}
-function addRole(key,name){key=(key||"").trim().toUpperCase().replace(/[^A-Z0-9_]/g,"_");
+function addRole(key,name,type,desc){key=(key||"").trim().toUpperCase().replace(/[^A-Z0-9_]/g,"_");
   if(!key)throw new Error("Enter a role key.");
   if(db.roleNames[key])throw new Error("Role already exists.");
   db.roleNames[key]=name||key;db.auth[key]={};
+  db.roleMeta=db.roleMeta||{};db.roleMeta[key]={type:type||"S",desc:desc||""};
   db.infotypes.forEach(([c])=>db.auth[key][c]={display:false,add:false,update:false,delete:false});return key;}
 function removeRole(key){delete db.roleNames[key];delete db.auth[key];
   db.users.forEach(u=>{if(u.roles)u.roles=u.roles.filter(r=>r!==key);});}
@@ -2180,7 +2181,8 @@ function removePosition(id){db.HRP1000=db.HRP1000.filter(o=>!(o.otype==="S"&&o.o
 function addUser(u){if(!u.username||!u.password)throw new Error("Enter username and password.");
   if(db.users.find(x=>x.username===u.username))throw new Error("Username already exists.");
   const roles=(u.roles&&u.roles.length)?u.roles:(u.role?[u.role]:["EMPLOYEE"]);
-  db.users.push({username:u.username,password:u.password,name:u.name||u.username,roles,pernr:u.pernr||null,email:u.email||null});}
+  db.users.push({username:u.username,password:u.password,name:u.name||u.username,roles,pernr:u.pernr||null,email:u.email||null,
+    userType:u.userType||"A",userGroup:u.userGroup||"",validFrom:u.validFrom||"2020-01-01",validTo:u.validTo||HIGH,locked:!!u.locked});}
 
 function renderAuthMatrix(){
   const role=S.authRole||"HR_ADMIN";
@@ -2290,19 +2292,46 @@ function cfgDialog(tab,key){const def=CFG_SCHEMA[tab];const edit=key!=null;const
     relField=`<div class="grp"><label>${esc(def.rel.l)}</label><select id="cf_rel"><option value="">—</option>${opt(db[def.rel.src]||{},cur)}</select></div>`;}
   modal((edit?"Edit ":"Add ")+def.h,keyInput+fields+relField,
     `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="cfgSave">Save</button>`);}
-function cfgUsersTable(){return `<div class="card"><div class="card-head"><h2>Users &amp; roles</h2><span class="count">${db.users.length}</span><div class="spacer"></div><button class="btn sm primary" data-act="cfgUser">+ Add user</button></div>
-    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>Username</th><th>Name</th><th>E-mail</th><th>Roles</th><th>Employee</th><th class="th-r">Actions</th></tr></thead><tbody>${db.users.map(u=>`<tr><td><b>${esc(u.username)}</b></td><td>${esc(u.name)}</td><td>${esc(u.email||"—")}</td><td>${(u.roles||[u.role]).map(r=>statusPill(db.roleNames[r])).join(" ")}</td><td class="num">${u.pernr||"—"}</td>
-    <td class="td-r nowrap"><button class="btn xs" data-useredit="${esc(u.username)}">${I.edit} Edit</button> <button class="btn xs ghost" data-userdel="${esc(u.username)}">Delete</button></td></tr>`).join("")}</tbody></table></div></div>`;}
+/* ===== SAP S/4HANA user & role management (SU01 user master / PFCG roles) ===== */
+const USER_TYPES={A:"Dialog",B:"System",C:"Communication",S:"Service",L:"Reference"};
+const USER_GROUPS=["SUPER","HR","PAYROLL","TIME","RECRUIT","TRAIN","EMPLOYEE"];
+const ROLE_TYPES={S:"Single",C:"Composite"};
+function uType(u){return u.userType||"A";}
+function uGroup(u){return u.userGroup||((u.roles&&u.roles[0]||"").split("_")[0])||"";}
+function uValidFrom(u){return u.validFrom||"2020-01-01";}
+function uValidTo(u){return u.validTo||HIGH;}
+function uLocked(u){return !!u.locked;}
+function roleMeta(k){return (db.roleMeta&&db.roleMeta[k])||{type:"S",desc:""};}
+/* Business-user list — modelled on SAP "Maintain Business Users" / SU01. */
+function cfgUsersTable(){return `<div class="card"><div class="card-head"><h2>Users</h2><span class="count">${db.users.length}</span><div class="spacer"></div><span class="muted" style="font-size:13px">Business users · SU01</span> <button class="btn sm primary" data-act="cfgUser">${I.person} New user</button></div>
+    <div class="hint">${I.info}<span>Maintain business users like SAP <b>SU01</b> — user ID, user type, user group, validity period and assigned <b>business roles</b> (PFCG).</span></div>
+    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>User</th><th>User name</th><th>Type</th><th>User group</th><th>Business roles</th><th>Valid to</th><th>Status</th><th>Employee</th><th class="th-r">Actions</th></tr></thead><tbody>${db.users.map(u=>{const roles=u.roles||[u.role];
+    return `<tr><td><b>${esc(u.username)}</b></td><td>${esc(u.name)}</td>
+    <td>${esc(USER_TYPES[uType(u)]||uType(u))}</td>
+    <td>${esc(uGroup(u))||"—"}</td>
+    <td>${roles.map(r=>statusPill(db.roleNames[r]||r)).join(" ")}</td>
+    <td>${uValidTo(u)===HIGH?"Unlimited":fmtDate(uValidTo(u))}</td>
+    <td>${uLocked(u)?`<span class="pill warn">🔒 Locked</span>`:`<span class="pill good">Active</span>`}</td>
+    <td class="num">${u.pernr||"—"}</td>
+    <td class="td-r nowrap"><button class="btn xs" data-useredit="${esc(u.username)}">${I.edit} Edit</button> <button class="btn xs ghost" data-userdel="${esc(u.username)}">Delete</button></td></tr>`;}).join("")}</tbody></table></div></div>`;}
+/* Business-role list — modelled on SAP PFCG (role name, type, description). */
 function cfgRolesTable(){const roles=Object.entries(db.roleNames);
   const cnt=k=>db.users.filter(u=>(u.roles||[]).includes(k)).length;
-  return `<div class="card"><div class="card-head"><h2>Roles</h2><span class="count">${roles.length}</span><div class="spacer"></div><button class="btn sm primary" data-roleadd>+ Add role</button></div>
-    <div class="hint">${I.info}<span>Define any number of roles. Grant each role activities per infotype on the Authorizations tab, then assign roles to users.</span></div>
-    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>Role key</th><th>Name</th><th class="th-r">Users</th><th class="th-r">Actions</th></tr></thead><tbody>${roles.map(([k,v])=>`<tr><td class="num">${esc(k)}</td><td>${esc(v)}</td><td class="td-r num">${cnt(k)}</td>
-    <td class="td-r nowrap"><button class="btn xs" data-roleedit="${esc(k)}">${I.edit} Edit</button> <button class="btn xs ghost" data-roledel="${esc(k)}">Delete</button></td></tr>`).join("")}</tbody></table></div></div>`;}
-function roleDialog(key){const edit=key!=null;cfgCtx={role:edit?key:null};
-  modal(edit?"Edit role":"Add role",`
-  <div class="grp"><label>Role key <span class="req">*</span></label><input id="ro_key" value="${edit?esc(key):""}" ${edit?"disabled":""} placeholder="e.g. PAYROLL_CLERK"></div>
-  <div class="grp"><label>Display name <span class="req">*</span></label><input id="ro_name" value="${edit?esc(db.roleNames[key]||""):""}" placeholder="e.g. Payroll Clerk"></div>`,
+  return `<div class="card"><div class="card-head"><h2>Business roles</h2><span class="count">${roles.length}</span><div class="spacer"></div><span class="muted" style="font-size:13px">PFCG</span> <button class="btn sm primary" data-roleadd>${I.doc} New role</button></div>
+    <div class="hint">${I.info}<span>Roles are maintained like SAP <b>PFCG</b>: a technical <b>role name</b>, a role <b>type</b> (single / composite) and a description. Grant activities per infotype on the Authorizations tab, then assign roles to users.</span></div>
+    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>Role</th><th>Description</th><th>Type</th><th class="th-r">Users</th><th class="th-r">Actions</th></tr></thead><tbody>${roles.map(([k,v])=>{const m=roleMeta(k);
+    return `<tr><td class="num"><b>${esc(k)}</b></td><td>${esc(v)}</td><td><span class="pill ${m.type==="C"?"warn":""}">${esc(ROLE_TYPES[m.type]||"Single")}</span></td><td class="td-r num">${cnt(k)}</td>
+    <td class="td-r nowrap"><button class="btn xs" data-roleedit="${esc(k)}">${I.edit} Edit</button> <button class="btn xs ghost" data-roledel="${esc(k)}">Delete</button></td></tr>`;}).join("")}</tbody></table></div></div>`;}
+/* Role maintenance — modelled on SAP PFCG. */
+function roleDialog(key){const edit=key!=null;cfgCtx={role:edit?key:null};const m=edit?roleMeta(key):{type:"S",desc:""};
+  modal(edit?"Change role · PFCG":"Create role · PFCG",`
+  <div class="grp sec">Role definition</div>
+  <div class="two">
+    <div class="grp"><label>Role (technical name) <span class="req">*</span></label><input id="ro_key" value="${edit?esc(key):""}" ${edit?"disabled":""} placeholder="e.g. Z_PAYROLL_CLERK"></div>
+    <div class="grp"><label>Role type</label><select id="ro_type"><option value="S" ${m.type!=="C"?"selected":""}>Single role</option><option value="C" ${m.type==="C"?"selected":""}>Composite role</option></select></div>
+  </div>
+  <div class="grp"><label>Description <span class="req">*</span></label><input id="ro_name" value="${edit?esc(db.roleNames[key]||""):""}" placeholder="e.g. Payroll Clerk"></div>
+  <div class="grp"><label>Long text</label><textarea id="ro_desc" rows="2" placeholder="Role purpose / notes">${edit?esc(m.desc||""):""}</textarea></div>`,
   `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="roleSave">Save</button>`);}
 function cfgOrgTable(){const orgs=db.HRP1000.filter(o=>o.otype==="O");
   const parentOf=id=>{const rel=db.HRP1001.find(r=>r.otype==="O"&&r.objid===id&&r.relat==="002"&&r.rsign==="A");return rel?+rel.sobid:null;};
@@ -3274,21 +3303,36 @@ function cfgUserDialog(username){
   const edit=username!=null;const u=edit?db.users.find(x=>x.username===username)||{}:{};
   const uRoles=u.roles||(u.role?[u.role]:[]);
   cfgCtx={user:edit?username:null};
-  const roleChecks=Object.entries(db.roleNames).map(([k,v])=>`<label class="rolechk"><input type="checkbox" class="cu_role" value="${k}" ${(edit?uRoles.includes(k):k==="EMPLOYEE")?"checked":""}> ${esc(v)}</label>`).join("");
+  const roleChecks=Object.entries(db.roleNames).map(([k,v])=>`<label class="rolechk"><input type="checkbox" class="cu_role" value="${k}" ${(edit?uRoles.includes(k):k==="EMPLOYEE")?"checked":""}> <b>${esc(k)}</b> — ${esc(v)}</label>`).join("");
   const empOpts=db.emp.map(e=>{const p=validOn(db.PA0002,e.pernr,today());return `<option value="${e.pernr}" ${u.pernr===e.pernr?"selected":""}>${e.pernr} - ${p?esc(p.vorna+" "+p.nachn):""}</option>`;}).join("");
-  modal(edit?"Edit user &amp; roles":"Add user with roles",`
+  const typeOpts=Object.entries(USER_TYPES).map(([k,v])=>`<option value="${k}" ${uType(u)===k?"selected":""}>${k} – ${esc(v)}</option>`).join("");
+  const grpOpts=`<option value="">—</option>`+USER_GROUPS.map(g=>`<option value="${g}" ${uGroup(u)===g?"selected":""}>${g}</option>`).join("");
+  modal(edit?`Change user · ${esc(u.username)}`:"Create user · SU01",`
+  <div class="grp sec">Logon data</div>
   <div class="two">
-    <div class="grp"><label>Username <span class="req">*</span></label><input id="cu_user" value="${esc(u.username||"")}"></div>
-    <div class="grp"><label>Password ${edit?"":`<span class="req">*</span>`}</label><input id="cu_pw" type="password" placeholder="${edit?"leave blank to keep":""}"></div>
+    <div class="grp"><label>User <span class="req">*</span></label><input id="cu_user" value="${esc(u.username||"")}"></div>
+    <div class="grp"><label>User type</label><select id="cu_type">${typeOpts}</select></div>
   </div>
   <div class="two">
-    <div class="grp"><label>Display name</label><input id="cu_name" value="${esc(u.name||"")}"></div>
+    <div class="grp"><label>User group</label><select id="cu_group">${grpOpts}</select></div>
+    <div class="grp"><label>Initial password ${edit?"":`<span class="req">*</span>`}</label><input id="cu_pw" type="password" placeholder="${edit?"leave blank to keep":""}"></div>
+  </div>
+  <div class="two">
+    <div class="grp"><label>Valid from</label><input id="cu_vfrom" type="date" value="${esc(uValidFrom(u))}"></div>
+    <div class="grp"><label>Valid to</label><input id="cu_vto" type="date" value="${uValidTo(u)===HIGH?"":esc(uValidTo(u))}"></div>
+  </div>
+  <div class="grp"><label class="chk" style="margin-top:2px"><input type="checkbox" id="cu_locked" ${uLocked(u)?"checked":""}> Lock user (logon blocked)</label></div>
+  <div class="grp sec">Address</div>
+  <div class="two">
+    <div class="grp"><label>User name (full)</label><input id="cu_name" value="${esc(u.name||"")}"></div>
     <div class="grp"><label>E-mail</label><input id="cu_email" type="email" value="${esc(u.email||"")}"></div>
   </div>
-  <div class="grp"><label>Roles <span class="req">*</span> <span class="muted" style="font-weight:400">(a user can hold several)</span></label>
+  <div class="grp sec">Business roles (PFCG)</div>
+  <div class="grp"><label class="muted" style="font-weight:400">A user can hold several roles — assignment drives menu &amp; authorizations.</label>
     <div class="rolechks">${roleChecks}</div></div>
-  <div class="grp"><label>Linked employee (for self-service)</label><select id="cu_pernr"><option value="">— none —</option>${empOpts}</select></div>`,
-  `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="cfgUser">${edit?"Save":"Add user"}</button>`);}
+  <div class="grp sec">Personnel assignment</div>
+  <div class="grp"><label>Linked employee (ESS / MSS self-service)</label><select id="cu_pernr"><option value="">— none —</option>${empOpts}</select></div>`,
+  `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="cfgUser">${edit?"Save":"Create"}</button>`);}
 function orgEditDialog(id){const o=db.HRP1000.find(x=>x.otype==="O"&&x.objid===id)||{};
   const rel=db.HRP1001.find(r=>r.otype==="O"&&r.objid===id&&r.relat==="002"&&r.rsign==="A");
   const parent=rel?+rel.sobid:null;
@@ -3574,8 +3618,10 @@ function doAction(kind){
       cfgUpsert(def,cfgCtx.key,key,data);closeModal();toast("Saved.","good");renderConfig();
     }else if(kind==="roleSave"){
       const edit=cfgCtx&&cfgCtx.role;const name=val("ro_name").trim();
-      if(!name){toast("Enter a display name.","bad");return;}
-      if(edit){db.roleNames[edit]=name;}else{addRole(val("ro_key"),name);}
+      if(!name){toast("Enter a description.","bad");return;}
+      const type=val("ro_type")||"S",desc=val("ro_desc").trim();
+      db.roleMeta=db.roleMeta||{};
+      if(edit){db.roleNames[edit]=name;db.roleMeta[edit]={type,desc};}else{addRole(val("ro_key"),name,type,desc);}
       closeModal();toast("Role saved.","good");renderConfig();
     }else if(kind==="posSave"){
       const name=val("po_name").trim();if(!name){toast("Enter a position name.","bad");return;}
@@ -3608,15 +3654,18 @@ function doAction(kind){
       closeModal();toast("Organizational unit updated.","good");renderConfig();
     }else if(kind==="cfgUser"){
       const roles=[...document.querySelectorAll(".cu_role:checked")].map(c=>c.value);
-      if(!roles.length){toast("Select at least one role.","bad");return;}
+      if(!roles.length){toast("Assign at least one business role.","bad");return;}
       const edit=cfgCtx&&cfgCtx.user;
+      const common={userType:val("cu_type")||"A",userGroup:val("cu_group")||"",validFrom:val("cu_vfrom")||"2020-01-01",
+        validTo:val("cu_vto")||HIGH,locked:!!($("#cu_locked")&&$("#cu_locked").checked)};
       if(edit){const u=db.users.find(x=>x.username===edit);
         u.username=val("cu_user").trim()||u.username;const pw=val("cu_pw");if(pw)u.password=pw;
         u.name=val("cu_name").trim();u.email=val("cu_email").trim();u.roles=roles;u.pernr=val("cu_pernr")?+val("cu_pernr"):null;
-        closeModal();toast("User updated.","good");renderConfig();
+        Object.assign(u,common);
+        closeModal();toast("User saved.","good");renderConfig();
       }else{
-        addUser({username:val("cu_user").trim(),password:val("cu_pw"),name:val("cu_name").trim(),email:val("cu_email").trim(),roles,pernr:val("cu_pernr")?+val("cu_pernr"):null});
-        closeModal();toast("User added.","good");renderConfig();}
+        addUser({username:val("cu_user").trim(),password:val("cu_pw"),name:val("cu_name").trim(),email:val("cu_email").trim(),roles,pernr:val("cu_pernr")?+val("cu_pernr"):null,...common});
+        closeModal();toast("User created.","good");renderConfig();}
     }else if(kind==="family"){
       const f={relationType:val("fm_rel"),firstName:val("fm_first").trim(),lastName:val("fm_last").trim(),gender:val("fm_gender"),birthDate:val("fm_dob"),phone:val("fm_phone").trim(),email:val("fm_email").trim(),occupation:val("fm_occ").trim(),dependent:val("fm_dep")};
       if(!f.firstName||!f.lastName){toast("Enter first and last name.","bad");return;}
@@ -3631,6 +3680,7 @@ function doAction(kind){
       const u=val("lu").trim(),pw=val("lp");
       const found=db.users.find(x=>x.username===u&&x.password===pw&&pw);
       if(!found){const e=$("#loginErr");e.textContent="Invalid username or password.";e.style.display="block";return;}
+      if(found.locked){const e=$("#loginErr");e.textContent="User is locked. Contact your administrator.";e.style.display="block";return;}
       const roles=found.roles||[found.role];
       const primary=roles.includes("HR_ADMIN")?"HR_ADMIN":roles.includes("HR_MANAGER")?"HR_MANAGER":roles[0];
       SESSION={username:found.username,name:found.name,roles:roles,role:primary,pernr:found.pernr,email:found.email};
