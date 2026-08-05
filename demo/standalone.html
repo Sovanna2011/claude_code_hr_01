@@ -362,6 +362,9 @@ table{width:100%;border-collapse:collapse;font-size:.8rem}
 th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);
   font-weight:700;padding:.6rem .85rem;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface-2)}
 td{padding:.55rem .85rem;border-bottom:1px solid var(--border);vertical-align:middle}
+/* SE16N / SE11 key columns highlighted like the SAP data browser */
+th.se-key{background:var(--accent-soft);color:var(--accent)}
+td.se-key{background:color-mix(in srgb,var(--accent) 7%,transparent);font-weight:600}
 .cols-panel{margin-bottom:14px}
 .colmenu-wrap{position:relative;display:inline-block}
 .colmenu{position:absolute;top:calc(100% + 4px);right:0;left:auto;z-index:40;background:var(--surface);color:var(--text);
@@ -2333,6 +2336,121 @@ function roleDialog(key){const edit=key!=null;cfgCtx={role:edit?key:null};const 
   <div class="grp"><label>Description <span class="req">*</span></label><input id="ro_name" value="${edit?esc(db.roleNames[key]||""):""}" placeholder="e.g. Payroll Clerk"></div>
   <div class="grp"><label>Long text</label><textarea id="ro_desc" rows="2" placeholder="Role purpose / notes">${edit?esc(m.desc||""):""}</textarea></div>`,
   `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="roleSave">Save</button>`);}
+/* ===== SAP ABAP Workbench transactions: SE16N (Data Browser) + SE11 (Dictionary) =====
+   The demo stores SAP-named tables (PA infotypes, HRP1000/1001, T-tables), so we
+   can browse their contents (SE16N) and display their DDIC structure (SE11). */
+const DDIC_FIELDS={
+  PERNR:{de:"PERSNO",type:"NUMC",len:8,text:"Personnel Number"},
+  SUBTY:{de:"SUBTY",type:"CHAR",len:4,text:"Subtype"},
+  OBJPS:{de:"OBJPS",type:"CHAR",len:2,text:"Object Identification"},
+  SPRPS:{de:"SPRPS",type:"CHAR",len:1,text:"Lock Indicator"},
+  BEGDA:{de:"BEGDA",type:"DATS",len:8,text:"Start Date"},
+  ENDDA:{de:"ENDDA",type:"DATS",len:8,text:"End Date"},
+  SEQNR:{de:"SEQNR",type:"NUMC",len:3,text:"Number of Infotype Record with Same Key"},
+  AEDTM:{de:"AEDTM",type:"DATS",len:8,text:"Last Changed On"},
+  UNAME:{de:"UNAME",type:"CHAR",len:12,text:"Name of Person Who Changed Object"},
+  MASSN:{de:"MASSN",type:"CHAR",len:2,text:"Action Type"},MASSG:{de:"MASSG",type:"CHAR",len:2,text:"Reason for Action"},
+  STAT2:{de:"STAT2",type:"CHAR",len:1,text:"Employment Status"},
+  BUKRS:{de:"BUKRS",type:"CHAR",len:4,text:"Company Code"},WERKS:{de:"PERSA",type:"CHAR",len:4,text:"Personnel Area"},
+  BTRTL:{de:"BTRTL",type:"CHAR",len:4,text:"Personnel Subarea"},PERSG:{de:"PERSG",type:"CHAR",len:1,text:"Employee Group"},
+  PERSK:{de:"PERSK",type:"CHAR",len:2,text:"Employee Subgroup"},ORGEH:{de:"ORGEH",type:"NUMC",len:8,text:"Organizational Unit"},
+  PLANS:{de:"PLANS",type:"NUMC",len:8,text:"Position"},STELL:{de:"STELL",type:"NUMC",len:8,text:"Job"},
+  KOSTL:{de:"KOSTL",type:"CHAR",len:10,text:"Cost Center"},
+  NACHN:{de:"NACHN",type:"CHAR",len:40,text:"Last Name"},VORNA:{de:"VORNA",type:"CHAR",len:40,text:"First Name"},
+  GBDAT:{de:"GBDAT",type:"DATS",len:8,text:"Date of Birth"},GESCH:{de:"GESCH",type:"CHAR",len:1,text:"Gender Key"},
+  ANRED:{de:"ANRED",type:"CHAR",len:1,text:"Form-of-Address Key"},NATIO:{de:"NATIO",type:"CHAR",len:3,text:"Nationality"},
+  PLVAR:{de:"PLVAR",type:"CHAR",len:2,text:"Plan Version"},OTYPE:{de:"OTYPE",type:"CHAR",len:2,text:"Object Type"},
+  OBJID:{de:"HROBJID",type:"NUMC",len:8,text:"Object ID"},ISTAT:{de:"ISTAT",type:"NUMC",len:1,text:"Planning Status"},
+  SHORT:{de:"SHORT",type:"CHAR",len:12,text:"Object Abbreviation"},STEXT:{de:"STEXT",type:"CHAR",len:40,text:"Object Name"},
+  RSIGN:{de:"RSIGN",type:"CHAR",len:1,text:"Relationship Specification"},RELAT:{de:"RELAT",type:"CHAR",len:3,text:"Relationship Type"},
+  SCLAS:{de:"SCLAS",type:"CHAR",len:2,text:"Type of Related Object"},SOBID:{de:"SOBID",type:"CHAR",len:8,text:"ID of Related Object"},
+  ANSAL:{de:"ANSAL",type:"CURR",len:"15,2",text:"Annual Salary"},WAERS:{de:"WAERS",type:"CUKY",len:5,text:"Currency Key"},
+  TRFGR:{de:"TRFGR",type:"CHAR",len:8,text:"Pay Scale Group"},AWART:{de:"AWART",type:"CHAR",len:4,text:"Att./Absence Type"},
+  KTART:{de:"KTART",type:"CHAR",len:4,text:"Absence Quota Type"},ANZHL:{de:"ANZHL",type:"DEC",len:"7,2",text:"Number"},
+  LAND1:{de:"LAND1",type:"CHAR",len:3,text:"Country Key"}
+};
+function mapRows(m,keyField){if(!m)return [];if(Array.isArray(m))return m;
+  return Object.entries(m).map(([k,v])=>Object.assign({[keyField]:k},(v&&typeof v==="object")?v:{VALUE:v}));}
+function dbTables(){
+  const IK=["PERNR","SUBTY","OBJPS","SPRPS","ENDDA","SEQNR"];
+  const t=(name,text,rows,keys)=>({name,text,rows:rows||[],keys:keys||IK});
+  return [
+    t("PA0000","HR Master Record: Infotype 0000 (Actions)",db.PA0000),
+    t("PA0001","HR Master Record: Infotype 0001 (Org. Assignment)",db.PA0001),
+    t("PA0002","HR Master Record: Infotype 0002 (Personal Data)",db.PA0002),
+    t("PA0006","HR Master Record: Infotype 0006 (Addresses)",db.PA0006),
+    t("PA0007","HR Master Record: Infotype 0007 (Planned Working Time)",db.PA0007),
+    t("PA0008","HR Master Record: Infotype 0008 (Basic Pay)",db.PA0008),
+    t("PA0009","HR Master Record: Infotype 0009 (Bank Details)",db.PA0009),
+    t("PA0105","HR Master Record: Infotype 0105 (Communication)",db.PA0105),
+    t("PA2001","Absences",db.PA2001),
+    t("PA2006","Absence Quotas",db.PA2006),
+    t("HRP1000","OM: Infotype 1000 (Objects)",db.HRP1000,["PLVAR","OTYPE","OBJID","ISTAT","ENDDA","SEQNR"]),
+    t("HRP1001","OM: Infotype 1001 (Relationships)",db.HRP1001,["PLVAR","OTYPE","OBJID","ISTAT","ENDDA","SEQNR","RSIGN","RELAT","SCLAS","SOBID"]),
+    t("T001","Company Codes",mapRows(db.T001,"BUKRS"),["BUKRS"]),
+    t("T500P","Personnel Areas",mapRows(db.T500P,"WERKS"),["WERKS"])
+  ].filter(x=>x.rows&&x.rows.length>0);
+}
+function inferField(up,raw,rows){
+  if(DDIC_FIELDS[up])return DDIC_FIELDS[up];
+  let type="CHAR",len=10;
+  for(const r of rows){const v=r[raw];if(v==null)continue;
+    if(typeof v==="number"){if(Number.isInteger(v)){type="INT4";len=10;}else{type="DEC";len="15,2";}break;}
+    if(typeof v==="boolean"){type="CHAR";len=1;break;}
+    if(typeof v==="object"){type="STRG";len=0;break;}
+    if(typeof v==="string"){if(/^\d{4}-\d{2}-\d{2}$/.test(v)){type="DATS";len=8;break;}type="CHAR";len=Math.max(len,v.length);}}
+  return {de:up,type,len,text:raw};
+}
+/* Order a table's columns (key fields first, in key order) and expose SAP-upper
+   names while reading values by the raw (lower-case) key used in the demo db. */
+function ddicCols(cur,rows){
+  const raw=[];rows.forEach(r=>Object.keys(r).forEach(k=>{if(!raw.includes(k))raw.push(k);}));
+  const byUp={};raw.forEach(c=>{byUp[c.toUpperCase()]=c;});
+  const ks=new Set((cur.keys||[]).map(k=>k.toUpperCase()));
+  const ordered=[];(cur.keys||[]).forEach(k=>{const u=k.toUpperCase();if(byUp[u]!=null)ordered.push(byUp[u]);});
+  raw.forEach(c=>{if(!ordered.includes(c))ordered.push(c);});
+  return ordered.map(c=>({raw:c,up:c.toUpperCase(),key:ks.has(c.toUpperCase())}));
+}
+/* SE16N — General Table Display (Data Browser). */
+function renderSE16N(){
+  const tabs=dbTables();if(!tabs.length)return `<div class="card"><div class="empty">No tables.</div></div>`;
+  if(!S.se16Table||!tabs.find(t=>t.name===S.se16Table))S.se16Table=tabs[0].name;
+  const cur=tabs.find(t=>t.name===S.se16Table);const max=S.se16Max||500;
+  const opts=tabs.map(t=>`<option value="${t.name}" ${t.name===cur.name?"selected":""}>${t.name} — ${esc(t.text)}</option>`).join("");
+  let body="";
+  if(S.se16Go){
+    const rows=cur.rows.slice(0,max);const cols=ddicCols(cur,rows);
+    const fmt=v=>v==null?"":(typeof v==="object"?esc(JSON.stringify(v)):esc(String(v)));
+    body=`<div class="card"><div class="card-head"><h2>${esc(cur.name)}</h2><span class="count">${cur.rows.length}</span><div class="spacer"></div><span class="muted" style="font-size:13px">${rows.length} of ${cur.rows.length} entries</span></div>
+      <div class="tbl-wrap"><table class="dt"><thead><tr>${cols.map(c=>`<th class="${c.key?"se-key":""}">${esc(c.up)}</th>`).join("")}</tr></thead>
+      <tbody>${rows.length?rows.map(r=>`<tr>${cols.map(c=>`<td class="${c.key?"se-key":""} ${typeof r[c.raw]==="number"?"num":""}">${fmt(r[c.raw])}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${cols.length||1}"><div class="empty">Table contains no entries.</div></td></tr>`}</tbody></table></div></div>`;
+  }
+  return `<div class="card"><div class="card-head"><h2>Data Browser</h2><div class="spacer"></div><span class="muted" style="font-size:13px">SE16N · General Table Display</span></div>
+    <div class="hint">${I.info}<span>Enter a table name and execute to display its contents — like SAP <b>SE16N</b>. (Tip: type <b>SE16N</b> or <b>SE11</b> in the shell command field.)</span></div>
+    <div class="toolbar">
+      <div class="field"><label>Table</label><select id="se16tab">${opts}</select></div>
+      <div class="field"><label>Maximum no. of hits</label><input id="se16max" type="number" min="1" value="${max}"></div>
+      <button class="btn primary" data-act="se16run">▶ Execute</button>
+    </div></div>${body}`;
+}
+/* SE11 — ABAP Dictionary: display table field structure. */
+function renderSE11(){
+  const tabs=dbTables();if(!tabs.length)return `<div class="card"><div class="empty">No tables.</div></div>`;
+  if(!S.se11Table||!tabs.find(t=>t.name===S.se11Table))S.se11Table=tabs[0].name;
+  const cur=tabs.find(t=>t.name===S.se11Table);
+  const opts=tabs.map(t=>`<option value="${t.name}" ${t.name===cur.name?"selected":""}>${t.name} — ${esc(t.text)}</option>`).join("");
+  let body="";
+  if(S.se11Go){
+    const rows=cur.rows;const cols=ddicCols(cur,rows);
+    body=`<div class="card"><div class="card-head"><h2>Dictionary: Table ${esc(cur.name)}</h2><div class="spacer"></div><span class="pill good">Active</span></div>
+      <div class="subcard">${dl([["Short description",cur.text],["Delivery class","A — Application table"],["Table category","Transparent table"],["Key fields",(cur.keys||[]).length],["Fields",cols.length]])}</div>
+      <div class="tbl-wrap" style="margin-top:12px"><table class="dt"><thead><tr><th>Field</th><th class="th-c">Key</th><th>Data element</th><th>Data type</th><th class="th-r">Length</th><th>Short description</th></tr></thead>
+      <tbody>${cols.map(c=>{const f=inferField(c.up,c.raw,rows);return `<tr><td class="${c.key?"se-key":""}"><b>${esc(c.up)}</b></td><td class="td-c">${c.key?"✓":""}</td><td>${esc(f.de)}</td><td>${esc(f.type)}</td><td class="td-r num">${esc(String(f.len))}</td><td>${esc(f.text)}</td></tr>`;}).join("")}</tbody></table></div></div>`;
+  }
+  return `<div class="card"><div class="card-head"><h2>ABAP Dictionary</h2><div class="spacer"></div><span class="muted" style="font-size:13px">SE11 · Display Table/Structure</span></div>
+    <div class="hint">${I.info}<span>Display the field structure (fields, data elements, types, keys) of a database table — like SAP <b>SE11</b>.</span></div>
+    <div class="toolbar"><div class="field"><label>Database table</label><select id="se11tab">${opts}</select></div><button class="btn primary" data-act="se11go">🔍 Display</button></div></div>${body}`;
+}
 function cfgOrgTable(){const orgs=db.HRP1000.filter(o=>o.otype==="O");
   const parentOf=id=>{const rel=db.HRP1001.find(r=>r.otype==="O"&&r.objid===id&&r.relat==="002"&&r.rsign==="A");return rel?+rel.sobid:null;};
   return `<div class="card"><div class="card-head"><h2>Organizational units</h2><span class="count">${orgs.length}</span><div class="spacer"></div><button class="btn sm primary" data-act="cfgOrg">+ Add</button></div>
@@ -2418,7 +2536,8 @@ const CONFIG_GROUPS=[
   {label:"Master Data",tabs:[["nat","Countries"],["region","Regions"],["city","Cities"],["lang","Languages"],["anred","Forms of address"],["titles","Titles"],["addrtype","Address types"],["commtype","Comm. types"],["famtype","Family types"]]},
   {label:"Lifecycle Value Lists",tabs:[["probst","Probation statuses"],["transreason","Transfer reasons"],["promoreason","Promotion reasons"],["termreason","Termination reasons"],["offchk","Offboarding items"],["salreason","Salary adj. reasons"]]},
   {label:"Localization",tabs:[["syslang","System languages"],["numrange","Number ranges"]]},
-  {label:"Security",tabs:[["roles","Roles"],["users","Users & roles"],["auth","Authorizations"]]}
+  {label:"Security",tabs:[["roles","Roles"],["users","Users & roles"],["auth","Authorizations"]]},
+  {label:"Development (ABAP)",tabs:[["se16n","Data Browser · SE16N"],["se11","ABAP Dictionary · SE11"]]}
 ];
 function renderConfig(){
   // Each Admin Center sub-menu item opens one config group; show only that group's tabs.
@@ -2434,6 +2553,8 @@ function renderConfig(){
   else if(S.cfgTab==="org")body=cfgOrgTable();
   else if(S.cfgTab==="payrollcfg")body=renderPayrollCfg();
   else if(S.cfgTab==="payperiod")body=renderPayperiodCfg();
+  else if(S.cfgTab==="se16n")body=renderSE16N();
+  else if(S.cfgTab==="se11")body=renderSE11();
   else if(CFG_SCHEMA[S.cfgTab])body=cfgTable(S.cfgTab);
   const tabsHtml=`<div class="cfg-groups"><div class="cfg-grp"><div class="cfg-grp-l">${esc(grp.label)}</div>
     <div class="cfg-grp-btns">${grp.tabs.map(([id,l])=>T(id,l)).join("")}</div></div></div>`;
@@ -3430,6 +3551,8 @@ document.addEventListener("click",ev=>{
     else if(t.dataset.act==="reqleave")reqLeaveDialog();
     else if(t.dataset.act==="payrollcfg")payrollCfgDialog();
     else if(t.dataset.act==="payperiodcfg")payperiodCfgDialog();
+    else if(t.dataset.act==="se16run"){S.se16Table=val("se16tab");S.se16Max=Math.max(1,+val("se16max")||500);S.se16Go=true;renderConfig();return;}
+    else if(t.dataset.act==="se11go"){S.se11Table=val("se11tab");S.se11Go=true;renderConfig();return;}
     else if(t.dataset.act==="periodOpen"){db.payroll.openPeriod=t.dataset.ym;toast("Payroll period opened.","good");renderConfig();return;}
     else if(t.dataset.act==="periodClose"){const ps=payrollPeriods();const i=ps.findIndex(x=>x.ym===t.dataset.ym);const nx=ps[i+1];db.payroll.openPeriod=nx?nx.ym:t.dataset.ym;toast(nx?"Period closed; next period opened.":"This is the last period.",nx?"good":"warn");renderConfig();return;}
     else if(t.dataset.act==="cols"){S.showCols=!S.showCols;renderList();}
@@ -3724,9 +3847,21 @@ $("#reset").addEventListener("click",()=>{db=seed();S.view=SESSION?"home":"list"
 /* Fiori 4.0 shell actions: notifications, help, and the unified search field. */
 $("#notif").addEventListener("click",()=>{const p=SESSION?(db.leaveRequests||[]).filter(r=>r.status==="Pending").length:0;toast(p?`${p} leave request(s) awaiting approval.`:"No new notifications.",p?"warn":"good");});
 $("#help").addEventListener("click",()=>toast("HR module demo — sign in as admin / manager / linda. Use the search field to jump to People.","good"));
+/* SAP-style command field: transaction codes jump straight to a screen. */
+const TCODES={
+  SE16N:{grp:"Development (ABAP)",tab:"se16n"},SE16:{grp:"Development (ABAP)",tab:"se16n"},
+  SE11:{grp:"Development (ABAP)",tab:"se11"},
+  SU01:{grp:"Security",tab:"users"},SU10:{grp:"Security",tab:"users"},PFCG:{grp:"Security",tab:"roles"},
+  PA20:{view:"list"},PA30:{view:"list"},PPOSE:{view:"org"},PPOME:{view:"org"},PO13:{view:"pos"}
+};
 (function wireSearch(){
   const inp=$("#cmdField"),go=$("#cmdGo"),scope=$("#searchScope");
   const run=()=>{if(!SESSION)return;const q=(inp.value||"").trim();
+    // Transaction code? (accept /n, /o, /i, /nex … prefixes like the SAP command field)
+    const tc=q.replace(/^\/(?:nex|oex|n|o|i)/i,"").trim().toUpperCase();
+    const dest=TCODES[tc];
+    if(dest){if(dest.tab){S.cfgGroup=dest.grp;S.cfgTab=dest.tab;S.view="config";}else{S.view=dest.view;}
+      render();inp.value="";toast("Transaction "+tc,"good");return;}
     const sc=scope?scope.value:"Apps";
     if(sc==="Configuration"){S.view="config";render();inp.value="";return;}
     // People / Apps / All → employee directory filtered by the query.
