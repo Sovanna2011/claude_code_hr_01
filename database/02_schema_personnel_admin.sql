@@ -36,7 +36,9 @@ CREATE TABLE HR.EmployeeMaster
     HireDate    DATE         NULL,                        -- First hiring date
     IsActive    BIT          DEFAULT 1 NOT NULL,
     CreatedOn   DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn   DATETIME2(0) NULL,                            -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_EmployeeMaster PRIMARY KEY (PERNR)
 );
 GO
@@ -61,7 +63,9 @@ CREATE TABLE HR.PA0000
     AEDTM   DATE         NULL,
     UNAME   NVARCHAR(12) NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_PA0000 PRIMARY KEY (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, SEQNR),
     CONSTRAINT FK_PA0000_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR)
 );
@@ -95,7 +99,9 @@ CREATE TABLE HR.PA0001
     AEDTM   DATE         NULL,
     UNAME   NVARCHAR(12) NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_PA0001 PRIMARY KEY (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, SEQNR),
     CONSTRAINT FK_PA0001_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR)
 );
@@ -129,7 +135,9 @@ CREATE TABLE HR.PA0002
     AEDTM   DATE          NULL,
     UNAME   NVARCHAR(12)  NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_PA0002 PRIMARY KEY (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, SEQNR),
     CONSTRAINT FK_PA0002_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR)
 );
@@ -158,7 +166,9 @@ CREATE TABLE HR.PA0006
     AEDTM   DATE          NULL,
     UNAME   NVARCHAR(12)  NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_PA0006 PRIMARY KEY (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, SEQNR),
     CONSTRAINT FK_PA0006_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR)
 );
@@ -186,7 +196,9 @@ CREATE TABLE HR.PA0007
     AEDTM   DATE          NULL,
     UNAME   NVARCHAR(12)  NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_PA0007 PRIMARY KEY (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, SEQNR),
     CONSTRAINT FK_PA0007_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR)
 );
@@ -216,7 +228,9 @@ CREATE TABLE HR.PA0008
     AEDTM   DATE          NULL,
     UNAME   NVARCHAR(12)  NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_PA0008 PRIMARY KEY (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, SEQNR),
     CONSTRAINT FK_PA0008_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR),
     /* Alternate key so the wage-type sub-records can link on the natural
@@ -238,7 +252,9 @@ CREATE TABLE HR.PA0008_WageType
     WAERS   NVARCHAR(5)   NULL,                            -- Currency
     ANZHL   DECIMAL(9,2)  NULL,                            -- Number / quantity
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_PA0008_WT PRIMARY KEY (PERNR, ENDDA, SEQNR, LineNo),
     CONSTRAINT FK_PA0008_WT FOREIGN KEY (PERNR, ENDDA, SEQNR)
         REFERENCES HR.PA0008(PERNR, ENDDA, SEQNR)          -- links on the natural key (UQ_PA0008_Natural)
@@ -268,7 +284,9 @@ CREATE TABLE HR.PA0009
     AEDTM   DATE          NULL,
     UNAME   NVARCHAR(12)  NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_PA0009 PRIMARY KEY (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, SEQNR),
     CONSTRAINT FK_PA0009_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR)
 );
@@ -293,7 +311,9 @@ CREATE TABLE HR.PA0105
     AEDTM      DATE           NULL,
     UNAME      NVARCHAR(12)   NULL,
     CreatedOn  DATETIME2(0)   DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn  DATETIME2(0)   NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_PA0105 PRIMARY KEY (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, SEQNR),
     CONSTRAINT FK_PA0105_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR)
 );

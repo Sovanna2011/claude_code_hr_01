@@ -172,6 +172,13 @@ public class HRDbContext : DbContext
         return base.SaveChangesAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// The user recorded in the CreatedBy / ChangedBy audit fields. Set this per
+    /// request (e.g. from the authenticated principal) before calling SaveChanges;
+    /// defaults to SYSTEM.
+    /// </summary>
+    public string CurrentUser { get; set; } = "SYSTEM";
+
     private void StampAudit()
     {
         var now = DateTime.UtcNow;
@@ -181,11 +188,15 @@ public class HRDbContext : DbContext
             {
                 if (entry.Metadata.FindProperty("CreatedOn") is not null)
                     entry.Property("CreatedOn").CurrentValue = now;
+                if (entry.Metadata.FindProperty("CreatedBy") is not null)
+                    entry.Property("CreatedBy").CurrentValue = CurrentUser;
             }
             else if (entry.State == EntityState.Modified)
             {
                 if (entry.Metadata.FindProperty("ChangedOn") is not null)
                     entry.Property("ChangedOn").CurrentValue = now;
+                if (entry.Metadata.FindProperty("ChangedBy") is not null)
+                    entry.Property("ChangedBy").CurrentValue = CurrentUser;
             }
         }
     }

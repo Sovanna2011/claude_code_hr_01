@@ -29,7 +29,9 @@ CREATE TABLE HR.LeaveRequest
     DecidedBy   NVARCHAR(60)   NULL,
     DecidedOn   DATETIME2(0)   NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_LeaveRequest PRIMARY KEY (RequestId),
     CONSTRAINT FK_LReq_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR),
     CONSTRAINT CK_LReq_Status CHECK (Status IN ('Pending','Approved','Rejected'))
@@ -49,7 +51,9 @@ CREATE TABLE HR.JobRequisition
     Status    NVARCHAR(10)  DEFAULT 'Open' NOT NULL,
     PostedOn  DATE          NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_JobRequisition PRIMARY KEY (ReqId)
 );
 GO
@@ -64,7 +68,9 @@ CREATE TABLE HR.Applicant
     Stage       NVARCHAR(12)   DEFAULT 'Screening' NOT NULL, -- Screening/Interview/Offer/Hired/Rejected
     AppliedOn   DATE           NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_Applicant PRIMARY KEY (ApplicantId),
     CONSTRAINT FK_App_Req FOREIGN KEY (ReqId) REFERENCES HR.JobRequisition(ReqId)
 );
@@ -83,7 +89,9 @@ CREATE TABLE HR.TrainingCourse
     CourseDate DATE          NULL,
     Seats      INT           NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_TrainingCourse PRIMARY KEY (CourseId)
 );
 GO
@@ -97,7 +105,9 @@ CREATE TABLE HR.TrainingBooking
     Status    NVARCHAR(12) DEFAULT 'Confirmed' NOT NULL,
     BookedOn  DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_TrainingBooking PRIMARY KEY (BookingId),
     CONSTRAINT UQ_Booking UNIQUE (PERNR, CourseId),
     CONSTRAINT FK_Book_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR),

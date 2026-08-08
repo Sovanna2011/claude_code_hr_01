@@ -2368,18 +2368,26 @@ const DDIC_FIELDS={
   TRFGR:{de:"TRFGR",type:"CHAR",len:8,text:"Pay Scale Group"},AWART:{de:"AWART",type:"CHAR",len:4,text:"Att./Absence Type"},
   KTART:{de:"KTART",type:"CHAR",len:4,text:"Absence Quota Type"},ANZHL:{de:"ANZHL",type:"DEC",len:"7,2",text:"Number"},
   LAND1:{de:"LAND1",type:"CHAR",len:3,text:"Country Key"},
-  CREATEDON:{de:"CREATEDON",type:"DATS",len:8,text:"Created On (audit)"},
-  CHANGEDON:{de:"CHANGEDON",type:"DATS",len:8,text:"Last Changed On (audit)"}
+  CREATEDON:{de:"CREATEDON",type:"DEC",len:"15,0",text:"Created On (date & time)"},
+  CREATEDBY:{de:"CREATEDBY",type:"CHAR",len:12,text:"Created By"},
+  CHANGEDON:{de:"CHANGEDON",type:"DEC",len:"15,0",text:"Last Changed On (date & time)"},
+  CHANGEDBY:{de:"CHANGEDBY",type:"CHAR",len:12,text:"Last Changed By"}
 };
 function mapRows(m,keyField){if(!m)return [];if(Array.isArray(m))return m;
   return Object.entries(m).map(([k,v])=>Object.assign({[keyField]:k},(v&&typeof v==="object")?v:{VALUE:v}));}
 /* Every table carries technical audit fields (mirrors the SQL Server schema):
-   createdOn (created date) and changedOn (last updated date). The demo backfills
-   them for display in SE16N / SE11 — created ≈ record begin date, changed = the
-   SAP "changed on" (aedtm) when the record was last maintained. */
-function withAudit(rows){return (rows||[]).map(r=>Object.assign({},r,{
-  createdOn:r.createdOn||r.begda||"2020-01-01",
-  changedOn:r.changedOn||r.aedtm||null}));}
+   createdOn / changedOn (date & time) and createdBy / changedBy. The demo
+   backfills them for display in SE16N / SE11 — created ≈ record begin date at
+   08:00, changed = the SAP "changed on" (aedtm) at 14:30 when last maintained,
+   with the maintainer (uname) as changed-by. */
+function withAudit(rows){return (rows||[]).map(r=>{
+  const chRaw=r.changedOn||r.aedtm||null;
+  return Object.assign({},r,{
+    createdOn:r.createdOn||((r.begda||"2020-01-01")+" 08:00:00"),
+    createdBy:r.createdBy||r.uname||"SYSTEM",
+    changedOn:r.changedOn||(chRaw?(String(chRaw).length<=10?chRaw+" 14:30:00":chRaw):null),
+    changedBy:r.changedBy||(chRaw?(r.uname||"SYSTEM"):null)
+  });});}
 function dbTables(){
   const IK=["PERNR","SUBTY","OBJPS","SPRPS","ENDDA","SEQNR"];
   const t=(name,text,rows,keys)=>({name,text,rows:withAudit(rows||[]),keys:keys||IK});

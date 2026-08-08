@@ -1,8 +1,8 @@
 namespace HRModule.Api.Models.Customizing;
 
-// Every customizing table carries two technical audit columns:
-//   CreatedOn  - record created date/time (UTC)
-//   ChangedOn  - record last updated date/time (UTC); null until first update
+// Every customizing table carries technical audit columns:
+//   CreatedOn / CreatedBy - record created date/time (UTC) and user
+//   ChangedOn / ChangedBy - record last updated date/time (UTC) and user (null until first update)
 
 /// <summary>T001 - Company Codes.</summary>
 public class T001
@@ -12,7 +12,9 @@ public class T001
     public string? LAND1 { get; set; }
     public string? WAERS { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>T500P - Personnel Areas.</summary>
@@ -23,7 +25,9 @@ public class T500P
     public string? BUKRS { get; set; }
     public string? MOLGA { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>T001P - Personnel Subareas.</summary>
@@ -33,7 +37,9 @@ public class T001P
     public string BTRTL { get; set; } = string.Empty;
     public string? BTEXT { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>T501 - Employee Group.</summary>
@@ -42,7 +48,9 @@ public class T501
     public string PERSG { get; set; } = string.Empty;
     public string? PTEXT { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>T503K - Employee Subgroup.</summary>
@@ -51,7 +59,9 @@ public class T503K
     public string PERSK { get; set; } = string.Empty;
     public string? PTEXT { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>T528T - Position texts.</summary>
@@ -60,7 +70,9 @@ public class T528T
     public int PLANS { get; set; }
     public string? PLSTX { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>T529A - Personnel action types.</summary>
@@ -69,7 +81,9 @@ public class T529A
     public string MASSN { get; set; } = string.Empty;
     public string? MNTXT { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>T530 - Reasons for action.</summary>
@@ -79,7 +93,9 @@ public class T530
     public string MASSG { get; set; } = string.Empty;
     public string? MGTXT { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>T554S - Absence / Attendance types.</summary>
@@ -90,7 +106,9 @@ public class T554S
     public string? ATEXT { get; set; }
     public string? KENNZ { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>T005 - Countries.</summary>
@@ -100,7 +118,9 @@ public class T005
     public string? LANDX { get; set; }
     public string? WAERS { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>T512T - Wage type texts.</summary>
@@ -109,7 +129,9 @@ public class T512T
     public string LGART { get; set; } = string.Empty;
     public string? LGTXT { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>T547T - Contract type texts.</summary>
@@ -118,7 +140,9 @@ public class T547T
     public string CTTYP { get; set; } = string.Empty;
     public string? CTTXT { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>Generic domain fixed-value table (GESCH, FAMST, ANRED, USRTY, STAT2).</summary>
@@ -128,7 +152,9 @@ public class DomainValue
     public string ValueKey { get; set; } = string.Empty;
     public string? ValueTxt { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }
 
 /// <summary>Number range object state (emulates SAP SNRO).</summary>
@@ -139,5 +165,7 @@ public class NumberRange
     public long ToNumber { get; set; }
     public long CurrentNumber { get; set; }
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }
     public DateTime? ChangedOn { get; set; }
+    public string? ChangedBy { get; set; }
 }

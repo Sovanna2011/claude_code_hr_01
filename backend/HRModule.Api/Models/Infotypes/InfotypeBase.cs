@@ -39,6 +39,12 @@ public abstract class InfotypeBase
     /// <summary>Technical audit: record created date/time (UTC).</summary>
     public DateTime CreatedOn { get; set; }
 
+    /// <summary>Technical audit: created by (user).</summary>
+    public string? CreatedBy { get; set; }
+
     /// <summary>Technical audit: record last updated date/time (UTC); null until first update.</summary>
     public DateTime? ChangedOn { get; set; }
+
+    /// <summary>Technical audit: last changed by (user).</summary>
+    public string? ChangedBy { get; set; }
 }

@@ -41,7 +41,9 @@ CREATE TABLE HR.HRP1000
     AEDTM   DATE          NULL,
     UNAME   NVARCHAR(12)  NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_HRP1000 PRIMARY KEY (PLVAR, OTYPE, OBJID, ISTAT, ENDDA, BEGDA, SEQNR)
 );
 GO
@@ -68,7 +70,9 @@ CREATE TABLE HR.HRP1001
     AEDTM   DATE          NULL,
     UNAME   NVARCHAR(12)  NULL,
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
     ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
     CONSTRAINT PK_HRP1001 PRIMARY KEY (PLVAR, OTYPE, OBJID, ISTAT, ENDDA, BEGDA, RSIGN, RELAT, SCLAS, SOBID, SEQNR)
 );
 GO

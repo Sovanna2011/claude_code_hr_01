@@ -6,7 +6,9 @@ public class AppRole
     public string RoleKey { get; set; } = string.Empty;   // HR_ADMIN, HR_MANAGER, EMPLOYEE
     public string RoleName { get; set; } = string.Empty;
     public DateTime CreatedOn { get; set; }      // audit: created date/time (UTC)
+    public string? CreatedBy { get; set; }       // audit: created by (user)
     public DateTime? ChangedOn { get; set; }     // audit: last updated date/time (UTC)
+    public string? ChangedBy { get; set; }       // audit: last changed by (user)
 }
 
 /// <summary>Application user for web front-end authentication.</summary>
@@ -21,6 +23,8 @@ public class AppUser
     public int? PERNR { get; set; }                            // linked employee
     public bool IsActive { get; set; } = true;
     public DateTime CreatedOn { get; set; }
+    public string? CreatedBy { get; set; }       // audit: created by (user)
     public DateTime? ChangedOn { get; set; }     // audit: last updated date/time (UTC)
+    public string? ChangedBy { get; set; }       // audit: last changed by (user)
     public DateTime? LastLogin { get; set; }
 }
