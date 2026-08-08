@@ -157,6 +157,39 @@ public class HRDbContext : DbContext
         base.OnModelCreating(mb);
     }
 
+    // ---- Audit stamping ------------------------------------------------
+    // Populate the CreatedOn / ChangedOn audit columns automatically on save
+    // for any entity that declares them (real or shadow properties).
+    public override int SaveChanges()
+    {
+        StampAudit();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        StampAudit();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void StampAudit()
+    {
+        var now = DateTime.UtcNow;
+        foreach (var entry in ChangeTracker.Entries())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                if (entry.Metadata.FindProperty("CreatedOn") is not null)
+                    entry.Property("CreatedOn").CurrentValue = now;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                if (entry.Metadata.FindProperty("ChangedOn") is not null)
+                    entry.Property("ChangedOn").CurrentValue = now;
+            }
+        }
+    }
+
     /// <summary>Applies the shared SAP infotype key + table mapping.</summary>
     private static void ConfigureInfotype<T>(ModelBuilder mb, string table) where T : InfotypeBase
     {

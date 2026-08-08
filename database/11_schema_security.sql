@@ -22,6 +22,8 @@ CREATE TABLE HR.AppRole
 (
     RoleKey   NVARCHAR(20)  NOT NULL,
     RoleName  NVARCHAR(60)  NOT NULL,
+    CreatedOn DATETIME2(0)  DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0)  NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_AppRole PRIMARY KEY (RoleKey)
 );
 GO
@@ -38,6 +40,7 @@ CREATE TABLE HR.AppUser
     PERNR        INT           NULL,        -- linked employee (self-service)
     IsActive     BIT           DEFAULT 1 NOT NULL,
     CreatedOn    DATETIME2(0)  DEFAULT SYSUTCDATETIME() NOT NULL,
+    ChangedOn    DATETIME2(0)  NULL,                                -- audit: last updated date/time
     LastLogin    DATETIME2(0)  NULL,
     CONSTRAINT PK_AppUser PRIMARY KEY (UserId),
     CONSTRAINT UQ_AppUser_Username UNIQUE (Username),

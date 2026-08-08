@@ -21,6 +21,8 @@ CREATE TABLE HR.PublicHoliday
     HolDate  DATE          NOT NULL,
     HolName  NVARCHAR(60)  NULL,
     MOLGA    NVARCHAR(2)   DEFAULT '01' NOT NULL, -- country grouping
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_PublicHoliday PRIMARY KEY (MOLGA, HolDate)
 );
 GO
@@ -40,6 +42,7 @@ CREATE TABLE HR.OvertimeRecord
         CASE WHEN DATEDIFF(DAY, '1970-01-04', OtDate) % 7 = 0
              THEN 'Sunday' ELSE 'Normal' END),
     CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_OvertimeRecord PRIMARY KEY (OtId),
     CONSTRAINT FK_Ot_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR)
 );
@@ -50,6 +53,8 @@ CREATE TABLE HR.PayrollConfig
 (
     ConfigKey NVARCHAR(30) NOT NULL,
     NumValue  DECIMAL(9,4) NOT NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_PayrollConfig PRIMARY KEY (ConfigKey)
 );
 GO
@@ -69,6 +74,8 @@ CREATE TABLE HR.PayrollResult
     Net        DECIMAL(15,2) NOT NULL,
     Currency   NVARCHAR(5)   DEFAULT 'EUR' NOT NULL,
     RunOn      DATETIME2(0)  DEFAULT SYSUTCDATETIME() NOT NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_PayrollResult PRIMARY KEY (ResultId),
     CONSTRAINT FK_PR_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR)
 );

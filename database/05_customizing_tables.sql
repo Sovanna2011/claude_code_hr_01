@@ -19,6 +19,8 @@ CREATE TABLE HR.T001
     BUTXT NVARCHAR(50)  NULL,         -- Name
     LAND1 NVARCHAR(3)   NULL,         -- Country
     WAERS NVARCHAR(5)   NULL,         -- Currency
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_T001 PRIMARY KEY (BUKRS)
 );
 GO
@@ -31,6 +33,8 @@ CREATE TABLE HR.T500P
     NAME1 NVARCHAR(60)  NULL,         -- Name
     BUKRS NVARCHAR(4)   NULL,         -- Company code
     MOLGA NVARCHAR(2)   NULL,         -- Country grouping
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_T500P PRIMARY KEY (WERKS)
 );
 GO
@@ -42,6 +46,8 @@ CREATE TABLE HR.T001P
     WERKS NVARCHAR(4)   NOT NULL,     -- Personnel area
     BTRTL NVARCHAR(4)   NOT NULL,     -- Personnel subarea
     BTEXT NVARCHAR(30)  NULL,         -- Text
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_T001P PRIMARY KEY (WERKS, BTRTL)
 );
 GO
@@ -52,6 +58,8 @@ CREATE TABLE HR.T501
 (
     PERSG NVARCHAR(1)   NOT NULL,     -- Employee group
     PTEXT NVARCHAR(30)  NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_T501 PRIMARY KEY (PERSG)
 );
 GO
@@ -62,6 +70,8 @@ CREATE TABLE HR.T503K
 (
     PERSK NVARCHAR(2)   NOT NULL,     -- Employee subgroup
     PTEXT NVARCHAR(30)  NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_T503K PRIMARY KEY (PERSK)
 );
 GO
@@ -72,6 +82,8 @@ CREATE TABLE HR.T528T
 (
     PLANS INT           NOT NULL,     -- Position
     PLSTX NVARCHAR(40)  NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_T528T PRIMARY KEY (PLANS)
 );
 GO
@@ -82,6 +94,8 @@ CREATE TABLE HR.T529A
 (
     MASSN NVARCHAR(2)   NOT NULL,     -- Action type
     MNTXT NVARCHAR(40)  NULL,         -- Text
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_T529A PRIMARY KEY (MASSN)
 );
 GO
@@ -93,6 +107,8 @@ CREATE TABLE HR.T530
     MASSN NVARCHAR(2)   NOT NULL,
     MASSG NVARCHAR(2)   NOT NULL,
     MGTXT NVARCHAR(40)  NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_T530 PRIMARY KEY (MASSN, MASSG)
 );
 GO
@@ -105,6 +121,8 @@ CREATE TABLE HR.T554S
     AWART NVARCHAR(4)   NOT NULL,     -- Absence/attendance type
     ATEXT NVARCHAR(30)  NULL,
     KENNZ NCHAR(1)      NULL,         -- 'A'=absence 'P'=attendance
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_T554S PRIMARY KEY (MOABW, AWART)
 );
 GO
@@ -116,6 +134,8 @@ CREATE TABLE HR.T005
     LAND1 NVARCHAR(3)   NOT NULL,     -- Country key
     LANDX NVARCHAR(50)  NULL,         -- Country name
     WAERS NVARCHAR(5)   NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_T005 PRIMARY KEY (LAND1)
 );
 GO
@@ -126,6 +146,8 @@ CREATE TABLE HR.T512T
 (
     LGART NVARCHAR(4)   NOT NULL,     -- Wage type
     LGTXT NVARCHAR(30)  NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_T512T PRIMARY KEY (LGART)
 );
 GO
@@ -138,6 +160,8 @@ CREATE TABLE HR.DomainValue
     Domain   NVARCHAR(20)  NOT NULL,  -- GESCH, FAMST, ANRED, USRTY, STAT2
     ValueKey NVARCHAR(10)  NOT NULL,
     ValueTxt NVARCHAR(40)  NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_DomainValue PRIMARY KEY (Domain, ValueKey)
 );
 GO

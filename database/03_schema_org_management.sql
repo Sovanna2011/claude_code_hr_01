@@ -40,6 +40,8 @@ CREATE TABLE HR.HRP1000
     STEXT   NVARCHAR(40)  NULL,                            -- Object name / description
     AEDTM   DATE          NULL,
     UNAME   NVARCHAR(12)  NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_HRP1000 PRIMARY KEY (PLVAR, OTYPE, OBJID, ISTAT, ENDDA, BEGDA, SEQNR)
 );
 GO
@@ -65,6 +67,8 @@ CREATE TABLE HR.HRP1001
     PRIOX   NVARCHAR(4)   NULL,                            -- Priority
     AEDTM   DATE          NULL,
     UNAME   NVARCHAR(12)  NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_HRP1001 PRIMARY KEY (PLVAR, OTYPE, OBJID, ISTAT, ENDDA, BEGDA, RSIGN, RELAT, SCLAS, SOBID, SEQNR)
 );
 GO

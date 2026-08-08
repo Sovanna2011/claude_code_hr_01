@@ -16,4 +16,6 @@ public class HRP1000
     public string? STEXT { get; set; }           // Object name
     public DateTime? AEDTM { get; set; }
     public string? UNAME { get; set; }
+    public DateTime CreatedOn { get; set; }      // audit: created date/time (UTC)
+    public DateTime? ChangedOn { get; set; }     // audit: last updated date/time (UTC)
 }

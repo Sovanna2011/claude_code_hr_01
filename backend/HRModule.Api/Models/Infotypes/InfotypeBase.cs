@@ -35,4 +35,10 @@ public abstract class InfotypeBase
 
     /// <summary>Changed by (UNAME).</summary>
     public string? UNAME { get; set; }
+
+    /// <summary>Technical audit: record created date/time (UTC).</summary>
+    public DateTime CreatedOn { get; set; }
+
+    /// <summary>Technical audit: record last updated date/time (UTC); null until first update.</summary>
+    public DateTime? ChangedOn { get; set; }
 }

@@ -74,6 +74,8 @@ CREATE TABLE HR.NumberRange
     FromNumber    BIGINT       NOT NULL,
     ToNumber      BIGINT       NOT NULL,
     CurrentNumber BIGINT       NOT NULL,
+    CreatedOn     DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn     DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_NumberRange PRIMARY KEY (RangeObject)
 );
 GO

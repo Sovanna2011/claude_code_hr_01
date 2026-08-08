@@ -34,6 +34,8 @@ CREATE TABLE HR.PA2001
     APPROVED BIT           DEFAULT 0 NOT NULL,
     AEDTM    DATE          NULL,
     UNAME    NVARCHAR(12)  NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_PA2001 PRIMARY KEY (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, BEGDA, SEQNR),
     CONSTRAINT FK_PA2001_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR)
 );
@@ -59,6 +61,8 @@ CREATE TABLE HR.PA2006
     DEEND   DATE          NULL,                            -- Deduction to
     AEDTM   DATE          NULL,
     UNAME   NVARCHAR(12)  NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
     CONSTRAINT PK_PA2006 PRIMARY KEY (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, BEGDA, SEQNR),
     CONSTRAINT FK_PA2006_Emp FOREIGN KEY (PERNR) REFERENCES HR.EmployeeMaster(PERNR)
 );
