@@ -1,98 +1,224 @@
-<title>HR Module — HCM Demo</title>
+<title>SAP SuccessFactors — HR Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 /* ===================================================================
-   HR Module — self-contained demo (SAP Fiori "Horizon"-inspired)
+   HR Module — self-contained demo (SAP SuccessFactors / HXM-inspired)
    All data + business logic run in the browser; nothing is fetched.
    =================================================================== */
 :root{
-  --accent:#0064d9; --accent-strong:#0a4bb0; --accent-soft:#e5eefc; --shell-bg:#0a4bb0;
-  --bg:#eef1f3; --surface:#ffffff; --surface-2:#f6f8f9; --surface-3:#eef2f4;
-  --border:#d3dbe0; --border-strong:#b9c4cc;
-  --text:#1a2733; --muted:#56646f; --faint:#8592a0;
-  --good:#107e3e; --good-bg:#e6f3ea; --warn:#c25400; --warn-bg:#fcefe3;
+  /* SAP Fiori 3 "Horizon" theme — Morning Horizon (light). Neutral white shell,
+     brand accent #0070f2. Matches the Accounting System web interface. */
+  --accent:#0070f2; --accent-strong:#0064d9; --accent-soft:#e3f0ff;
+  --shell-bg:#ffffff; --shell-text:#1d2d3e; --shell-hover:rgba(29,45,62,.07); --shell-border:#e5e5e5;
+  --bg:#f5f6f7; --surface:#ffffff; --surface-2:#f5f6f7; --surface-3:#eceff1;
+  --border:#d9d9d9; --border-strong:#89919a;
+  --text:#1d2d3e; --muted:#556b82; --faint:#8a97a1;
+  --good:#256f3a; --good-bg:#e5f2e9; --warn:#e76500; --warn-bg:#fbeadd;
   --bad:#bb0000; --bad-bg:#fbe8e8; --info:#0070f2;
-  --shadow-sm:0 1px 2px rgba(20,40,60,.08);
-  --shadow:0 2px 4px rgba(20,40,60,.08),0 6px 20px rgba(20,40,60,.06);
-  --radius:12px; --radius-sm:8px;
-  --font:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+  --shadow-sm:0 0 0 1px rgba(34,54,84,.03),0 1px 2px rgba(34,54,84,.10);
+  --shadow:0 0 0 1px rgba(34,54,84,.04),0 8px 20px rgba(34,54,84,.18);
+  --radius:12px; --radius-sm:8px; --f-h:1.7rem;
+  --font:"72","72full","Helvetica Neue",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
 }
 @media (prefers-color-scheme:dark){
   :root{
-    --accent:#4db1ff; --accent-strong:#7cc6ff; --accent-soft:#122a44; --shell-bg:#0c1620;
-    --bg:#0f151b; --surface:#1b2531; --surface-2:#202c3a; --surface-3:#25333f;
-    --border:#31404e; --border-strong:#425364;
-    --text:#e7ecf0; --muted:#9fb0bd; --faint:#6f808e;
-    --good:#4bb97a; --good-bg:#12261a; --warn:#f0904a; --warn-bg:#2c1e12;
-    --bad:#ff6b6b; --bad-bg:#2c1414; --info:#4db1ff;
-    --shadow-sm:0 1px 2px rgba(0,0,0,.4);
-    --shadow:0 2px 4px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3);
+    /* Evening Horizon (dark). */
+    --accent:#4dabf7; --accent-strong:#74c0fc; --accent-soft:#1d3547;
+    --shell-bg:#1b232b; --shell-text:#eaecee; --shell-hover:rgba(255,255,255,.08); --shell-border:#2a353f;
+    --bg:#101418; --surface:#1b232b; --surface-2:#222c35; --surface-3:#27333f;
+    --border:#33414d; --border-strong:#5b6b7b;
+    --text:#eaecee; --muted:#a9b4be; --faint:#6f8090;
+    --good:#4bbf73; --good-bg:#12261a; --warn:#ffab5e; --warn-bg:#2c1e12;
+    --bad:#ff8a80; --bad-bg:#2c1414; --info:#4dabf7;
+    --shadow-sm:0 0 0 1px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.35);
+    --shadow:0 0 0 1px rgba(0,0,0,.3),0 8px 20px rgba(0,0,0,.5);
   }
 }
 :root[data-theme="light"]{
-  --accent:#0064d9; --accent-strong:#0a4bb0; --accent-soft:#e5eefc; --shell-bg:#0a4bb0;
-  --bg:#eef1f3; --surface:#fff; --surface-2:#f6f8f9; --surface-3:#eef2f4;
-  --border:#d3dbe0; --border-strong:#b9c4cc;
-  --text:#1a2733; --muted:#56646f; --faint:#8592a0;
-  --good:#107e3e; --good-bg:#e6f3ea; --warn:#c25400; --warn-bg:#fcefe3;
+  --accent:#0070f2; --accent-strong:#0064d9; --accent-soft:#e3f0ff;
+  --shell-bg:#ffffff; --shell-text:#1d2d3e; --shell-hover:rgba(29,45,62,.07); --shell-border:#e5e5e5;
+  --bg:#f5f6f7; --surface:#ffffff; --surface-2:#f5f6f7; --surface-3:#eceff1;
+  --border:#d9d9d9; --border-strong:#89919a;
+  --text:#1d2d3e; --muted:#556b82; --faint:#8a97a1;
+  --good:#256f3a; --good-bg:#e5f2e9; --warn:#e76500; --warn-bg:#fbeadd;
   --bad:#bb0000; --bad-bg:#fbe8e8; --info:#0070f2;
-  --shadow-sm:0 1px 2px rgba(20,40,60,.08);
-  --shadow:0 2px 4px rgba(20,40,60,.08),0 6px 20px rgba(20,40,60,.06);
+  --shadow-sm:0 0 0 1px rgba(34,54,84,.03),0 1px 2px rgba(34,54,84,.10);
+  --shadow:0 0 0 1px rgba(34,54,84,.04),0 8px 20px rgba(34,54,84,.18);
 }
 :root[data-theme="dark"]{
-  --accent:#4db1ff; --accent-strong:#7cc6ff; --accent-soft:#122a44; --shell-bg:#0c1620;
-  --bg:#0f151b; --surface:#1b2531; --surface-2:#202c3a; --surface-3:#25333f;
-  --border:#31404e; --border-strong:#425364;
-  --text:#e7ecf0; --muted:#9fb0bd; --faint:#6f808e;
-  --good:#4bb97a; --good-bg:#12261a; --warn:#f0904a; --warn-bg:#2c1e12;
-  --bad:#ff6b6b; --bad-bg:#2c1414; --info:#4db1ff;
-  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
-  --shadow:0 2px 4px rgba(0,0,0,.35),0 8px 24px rgba(0,0,0,.3);
+  --accent:#4dabf7; --accent-strong:#74c0fc; --accent-soft:#1d3547;
+  --shell-bg:#1b232b; --shell-text:#eaecee; --shell-hover:rgba(255,255,255,.08); --shell-border:#2a353f;
+  --bg:#101418; --surface:#1b232b; --surface-2:#222c35; --surface-3:#27333f;
+  --border:#33414d; --border-strong:#5b6b7b;
+  --text:#eaecee; --muted:#a9b4be; --faint:#6f8090;
+  --good:#4bbf73; --good-bg:#12261a; --warn:#ffab5e; --warn-bg:#2c1e12;
+  --bad:#ff8a80; --bad-bg:#2c1414; --info:#4dabf7;
+  --shadow-sm:0 0 0 1px rgba(0,0,0,.3),0 1px 2px rgba(0,0,0,.35);
+  --shadow:0 2px 4px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
+html{height:100%}
+/* App-shell: fixed viewport, the shell bar stays put and only the content region scrolls. */
+html,body{max-width:100%;overflow-x:hidden}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);
-  font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
 .num{font-variant-numeric:tabular-nums}
 button{font-family:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 
 /* ---- ShellBar ---- */
-.shell{position:sticky;top:0;z-index:20;background:var(--shell-bg);
-  color:#fff;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-  padding:6px 16px;min-height:52px;box-shadow:var(--shadow-sm)}
-.shell .brandtext{white-space:nowrap}
+.shell{flex:0 0 auto;position:relative;z-index:20;background:var(--shell-bg);
+  color:var(--shell-text);display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:6px 16px;min-height:52px;border-bottom:1px solid var(--shell-border);box-shadow:0 1px 2px rgba(34,54,84,.06)}
+.shell .brandtext{white-space:nowrap;font-weight:700;font-size:14px;color:var(--shell-text)}
+.shell .owm{font-weight:800;letter-spacing:2.5px;font-size:16px;color:var(--accent)}
+.shell .brandsep{width:1px;height:20px;background:var(--border);flex:0 0 auto}
 .shell nav{flex:1 1 auto;overflow:visible;min-width:0}
 @media (max-width:760px){
-  .shell{gap:8px}
+  .shell{gap:8px;padding:6px 10px}
   .shell .logo .sub{display:none}
-  .shell nav button{padding:8px 10px;font-size:12.5px}
+  .shell nav{flex-wrap:wrap;margin-left:0;row-gap:4px}
+  .shell nav button{padding:7px 10px;font-size:12.5px}
   .shell nav button svg{display:none}
+  .shell .owm{font-size:14px;letter-spacing:1.5px}
+  main{padding:14px 12px 48px}
+  .page-head h1{font-size:19px}
+  .obj-head{padding:14px;gap:12px}
+  .obj-head .id{margin-left:0;text-align:left;width:100%;order:3}
+  .obj-head .attrs{gap:12px}
+  .home-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .home-hero{padding:16px}
+  .home-hero h1{font-size:19px}
+  .nav-sub,.action-menu,.palette-menu,.more-menu,.tab-more-menu{max-width:calc(100vw - 20px)}
+  .tbl-wrap{-webkit-overflow-scrolling:touch}
+}
+@media (max-width:520px){
+  .shell .brandsep,.shell .brandtext{display:none}
+  .shell .whoami .wi-txt{display:none}
+  .shell .util select#lang{max-width:66px}
+  .home-grid{grid-template-columns:1fr 1fr}
+  .action-menu,.nav-sub{right:auto;left:0}
+  .modal-bg{padding:8px}
 }
 .shell .logo{display:flex;align-items:center;gap:10px;font-weight:700;
   letter-spacing:.2px;white-space:nowrap}
-.shell .logo .mark{width:26px;height:26px;border-radius:6px;background:#fff;
-  color:var(--accent-strong);display:grid;place-items:center;font-weight:800;font-size:13px}
-.shell .sub{font-weight:400;opacity:.8;font-size:12px;border-left:1px solid rgba(255,255,255,.3);
+.shell .logo .mark{width:26px;height:26px;border-radius:7px;background:var(--accent);
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+.shell .sub{font-weight:400;color:var(--muted);font-size:12px;border-left:1px solid var(--border);
   padding-left:12px;margin-left:2px}
 .shell nav{display:flex;gap:2px;margin-left:8px}
-.shell nav button{background:transparent;border:0;color:#fff;opacity:.82;
-  padding:8px 14px;border-radius:7px;cursor:pointer;font-size:13.5px;font-weight:600;
+.shell nav button{background:transparent;border:0;color:var(--shell-text);
+  padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:600;
   display:flex;align-items:center;gap:7px}
-.shell nav button:hover{opacity:1;background:rgba(255,255,255,.12)}
-.shell nav button.active{opacity:1;background:rgba(255,255,255,.18)}
+.shell nav button:hover{background:var(--shell-hover)}
+.shell nav button.active{background:var(--accent-soft);color:var(--accent);box-shadow:inset 0 -2px 0 var(--accent)}
 .shell .spacer{flex:1}
 .shell .util{display:flex;gap:6px;align-items:center}
-.shell .util button{background:rgba(255,255,255,.12);border:0;color:#fff;width:34px;height:34px;
-  border-radius:8px;cursor:pointer;display:grid;place-items:center;font-size:15px}
-.shell .util button:hover{background:rgba(255,255,255,.22)}
-.shell .util select#lang{background:rgba(255,255,255,.12);border:0;color:#fff;height:34px;border-radius:8px;
+.shell .util button{background:transparent;border:0;color:var(--muted);width:34px;height:34px;
+  border-radius:50%;cursor:pointer;display:grid;place-items:center;font-size:15px}
+.shell .util button:hover{background:var(--shell-hover);color:var(--accent)}
+.shell .util select#lang{background:var(--surface);border:1px solid var(--border-strong);color:var(--text);height:32px;border-radius:var(--radius-sm);
   cursor:pointer;font-size:13px;padding:0 6px;font-weight:600}
-.shell .util select#lang option{color:#111}
+.shell .util select#lang option{color:var(--text);background:var(--surface)}
 .shell nav svg,.shell .util svg{width:16px;height:16px;fill:currentColor}
+
+/* ===== SAP Fiori 4.0 "My Home" shell (two-row launchpad) ===== */
+.shell{gap:8px;padding:0 12px;min-height:44px}
+.shell-burger,.shell-back{border:0;background:transparent;color:var(--shell-text);cursor:pointer;
+  width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+.shell-back{font-size:20px}
+.shell-burger:hover,.shell-back:hover{background:var(--shell-hover);color:var(--accent)}
+.shell-logo-box{background:#0a6ed1;color:#fff;font-weight:800;font-size:14px;letter-spacing:.5px;
+  padding:2px 8px 4px;border-radius:3px;position:relative;line-height:1}
+.shell-logo-box::after{content:"";position:absolute;right:-7px;top:0;
+  border-top:22px solid #0a6ed1;border-right:7px solid transparent}
+.shell-divider{width:1px;height:20px;background:var(--border);margin:0 6px;flex:0 0 auto}
+.shell-home{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:14px;cursor:pointer;color:var(--shell-text);white-space:nowrap}
+.shell-home .chv{font-size:10px;color:var(--muted)}
+.shell-home:hover{color:var(--accent)}
+.shell-search{flex:0 1 24rem;margin-left:auto}
+.search-box{display:flex;align-items:center;width:100%;border:1px solid var(--accent);border-radius:16px;
+  background:color-mix(in srgb,var(--text) 6%,transparent);height:32px;padding:0 4px 0 8px}
+.search-box .scope{border:0;background:transparent;color:var(--text);font-size:12.5px;font-family:inherit;
+  padding:0 2px 0 4px;height:100%;cursor:pointer;font-weight:400}
+.search-box .scope option{background:var(--surface);color:var(--text)}
+.search-box .scv{font-size:10px;color:var(--muted)}
+.search-box .sep{width:1px;height:16px;background:var(--border);margin:0 8px}
+.search-box input{flex:1;min-width:0;border:0;outline:none;background:transparent;color:var(--text);
+  font-family:inherit;font-size:13px;font-style:italic;height:100%}
+.search-box input:not(:placeholder-shown){font-style:normal}
+.search-box .go{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:0 6px;display:grid;place-items:center}
+.search-box .go:hover{color:var(--accent)}
+.search-box .go svg{width:16px;height:16px}
+.shell-icon{width:32px;height:32px;border-radius:50%;border:0;background:transparent;color:var(--muted);
+  cursor:pointer;display:inline-grid;place-items:center;font-size:15px}
+.shell-icon:hover{background:var(--shell-hover);color:var(--accent)}
+#notif{position:relative}
+#notif::after{content:"";position:absolute;top:6px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--warn);border:1.5px solid var(--shell-bg)}
+.shell-lang{background:var(--surface);border:1px solid var(--border-strong);color:var(--text);height:30px;border-radius:var(--radius-sm);
+  cursor:pointer;font-size:12.5px;padding:0 4px;font-weight:600}
+.shell-lang option{color:var(--text);background:var(--surface)}
+.shell .whoami-av{width:30px;height:30px}
+/* Second-row navigation bar (module menus) */
+.nav-tabs{flex:0 0 auto;position:relative;z-index:19;display:flex;align-items:center;gap:0;
+  background:var(--shell-bg);border-bottom:1px solid var(--shell-border);padding:0 12px;min-height:38px;box-shadow:0 1px 2px rgba(34,54,84,.05)}
+.nav-tabs .navgroup,.nav-tabs .more-wrap{display:flex;align-items:center}
+.nav-tabs .navtop,.nav-tabs .navitem{background:transparent;border:0;color:var(--text);cursor:pointer;
+  font-family:inherit;font-size:13.5px;font-weight:700;padding:9px 0;margin:0 14px 0 0;display:inline-flex;align-items:center;gap:0;
+  border-radius:0;border-bottom:2px solid transparent}
+.nav-tabs .navtop:hover,.nav-tabs .navitem:hover{color:var(--accent);background:transparent}
+.nav-tabs .navtop.active,.nav-tabs .navitem.active{color:var(--accent);background:transparent;border-bottom-color:var(--accent);box-shadow:none}
+.nav-tabs .navtop svg,.nav-tabs .navitem svg{display:none}
+.nav-tabs .tsep{margin:0 0 0 8px;color:var(--muted);opacity:.5;font-weight:400}
+.nav-tabs .tcaret{margin-left:6px;color:var(--muted);font-size:10px;font-weight:400}
+.nav-tabs .more-wrap{margin-left:auto}
+.nav-tabs .morebtn{border:1px solid var(--border-strong);border-radius:16px;background:transparent;color:var(--text);
+  font-size:13px;font-weight:700;padding:5px 14px;margin:0}
+.nav-tabs .morebtn:hover{border-color:var(--accent);color:var(--accent);background:transparent}
+.nav-tabs .nav-sub,.nav-tabs .more-menu{top:calc(100% + 2px)}
+.nav-tabs:empty{display:none}
+@media (max-width:760px){.shell-search{flex-basis:12rem}.shell-home{display:none}}
+@media (max-width:520px){.shell-search{display:none}.shell-logo-box::after{display:none}}
+
+/* ===== Fiori 4.0 launchpad content (My Home) ===== */
+.lp-section{margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.lp-section h2{font-size:17px;font-weight:700;margin:0}
+.lp-caret{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:13px}
+.lp-refresh{margin-left:auto;color:var(--accent);font-size:12.5px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-weight:600}
+.lp-head{font-size:15px;font-weight:700;color:var(--text);margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.lp-head::before{content:"";width:4px;height:15px;border-radius:8px;background:var(--accent);display:inline-block}
+.todo-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);
+  padding:34px 16px;text-align:center}
+.todo-card .t1{font-weight:700;font-size:15px}
+.todo-card .t2{color:var(--muted);font-size:13px;margin-top:4px}
+.todo-list{display:flex;flex-direction:column;gap:1px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.todo-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--surface)}
+.todo-item+.todo-item{border-top:1px solid var(--border)}
+.todo-item .ti-ic{width:34px;height:34px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:0 0 auto}
+.todo-item .ti-ic svg{width:18px;height:18px;fill:currentColor}
+.todo-item .ti-tx b{font-size:13.5px}.todo-item .ti-tx div{font-size:12px;color:var(--muted)}
+.todo-item .ti-go{margin-left:auto}
+/* Fiori dynamic tile dimensions match the S/4HANA reference: fixed 11rem square. */
+.ftiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:1rem}
+.ftile{background:var(--surface);border:1px solid var(--border);border-radius:.5rem;
+  height:11rem;padding:1rem;cursor:pointer;text-align:left;display:flex;flex-direction:column;color:var(--text);position:relative;
+  transition:border-color .15s,background .15s}
+.ftile:hover{border-color:var(--accent);background:var(--surface-2)}
+.ftile .ft-title{font-weight:700;font-size:.88rem;line-height:1.25}
+.ftile .ft-sub{font-size:.8rem;color:var(--muted);margin-top:.1rem;line-height:1.25}
+.ftile .ft-body{flex:1;display:flex;align-items:flex-end;gap:.5rem;min-height:2.5rem}
+.ftile .ft-ico{width:1.5rem;height:1.5rem;color:var(--muted);fill:currentColor;flex:0 0 auto}
+.ftile .ft-ico svg{width:1.5rem;height:1.5rem;fill:currentColor}
+.ftile .ft-num{font-size:1.9rem;font-weight:300;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.ftile .ft-num.neg{color:var(--bad)}.ftile .ft-num.pos{color:var(--good)}
+.ftile .ft-foot{font-size:.78rem;color:var(--muted);margin-top:.6rem}
+.ftile .tbadge{position:absolute;top:12px;right:12px;background:var(--bad);color:#fff;font-weight:700;
+  min-width:18px;height:18px;padding:0 5px;border-radius:9px;font-size:11px;display:grid;place-items:center}
 .more-wrap{position:relative;flex:0 0 auto}
-.morebtn{background:transparent;border:0;color:#fff;opacity:.9;padding:8px 12px;border-radius:7px;
+.morebtn{background:transparent;border:0;color:var(--shell-text);padding:8px 12px;border-radius:8px;
   cursor:pointer;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap}
-.morebtn:hover{background:rgba(255,255,255,.14)}
+.morebtn:hover{background:var(--shell-hover)}
 .morebtn svg{width:15px;height:15px;fill:currentColor}
 .more-menu{position:absolute;top:120%;right:0;background:var(--surface);border:1px solid var(--border);
   border-radius:10px;box-shadow:var(--shadow);min-width:190px;display:none;flex-direction:column;padding:6px;z-index:40}
@@ -101,9 +227,36 @@ button{font-family:inherit}
 .more-menu .navitem:hover{background:var(--surface-2)}
 .more-menu .navitem.active{background:var(--accent-soft);color:var(--accent)}
 .more-menu .navitem svg{fill:currentColor}
+/* SuccessFactors-style grouped module navigation (menu -> sub-menu) */
+.navgroup{position:relative;display:inline-flex}
+.navtop{gap:5px}
+.nav-sub{position:absolute;top:calc(100% + 5px);left:0;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;box-shadow:var(--shadow);min-width:216px;display:none;flex-direction:column;padding:6px;z-index:45}
+.nav-sub.open{display:flex}
+.nav-sub .nav-subitem{background:transparent;border:0;color:var(--text);opacity:1;text-align:left;justify-content:flex-start;
+  width:100%;padding:9px 12px;border-radius:7px;cursor:pointer;font-size:13.5px;font-weight:600;display:flex;gap:8px}
+.nav-sub .nav-subitem:hover{background:var(--surface-2)}
+.nav-sub .nav-subitem.active{background:var(--accent-soft);color:var(--accent)}
+/* SuccessFactors "Take Action" menu on the People profile */
+.action-wrap{position:relative}
+.action-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;box-shadow:var(--shadow);min-width:232px;display:none;flex-direction:column;padding:6px;z-index:45}
+.action-menu.open{display:flex}
+.action-menu .btn{border:0;background:transparent;color:var(--text);justify-content:flex-start;text-align:left;width:100%;font-weight:600}
+.action-menu .btn:hover{background:var(--surface-2);border-color:transparent}
+.action-menu .btn.primary{background:transparent;color:var(--accent)}
+.action-menu .btn.primary:hover{background:var(--accent-soft)}
+.action-menu .act-sep{height:1px;background:var(--border);margin:5px 4px}
 
 /* ---- Layout ---- */
-main{max-width:1200px;margin:0 auto;padding:18px 16px 60px}
+main{max-width:1200px;width:100%;margin:0 auto;padding:18px 16px 60px;
+  flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden}
+.card,.tbl-wrap,.toolbar,.stat-row,.home-grid{max-width:100%}
+/* Use more width on large / ultrawide monitors */
+@media (min-width:1500px){main{max-width:1360px}}
+@media (min-width:1800px){main{max-width:1600px}}
+@media (min-width:2200px){main{max-width:1880px}}
+@media (min-width:2800px){main{max-width:2200px}}
 .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px;flex-wrap:wrap}
 .page-head h1{font-size:22px;margin:0;font-weight:700;letter-spacing:-.2px}
 .page-head .crumb{font-size:12px;color:var(--muted);margin-bottom:3px;
@@ -113,24 +266,55 @@ main{max-width:1200px;margin:0 auto;padding:18px 16px 60px}
   padding:10px 12px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
 .field{display:flex;flex-direction:column;gap:4px}
 .field label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600}
-input,select{font-family:inherit;font-size:14px;color:var(--text);background:var(--surface);
-  border:1px solid var(--border-strong);border-radius:var(--radius-sm);padding:8px 10px}
-input:focus,select:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 2px var(--accent-soft)}
+/* ===== SAP Fiori canonical field format (from the Account System) =====
+   text box : flat, dashed underline, subtle fill · dropdown : boxed w/ caret ·
+   search / filter fields : full-border box · brand frame on focus. */
+input:not([type=checkbox]):not([type=radio]),textarea{
+  height:var(--f-h);font-family:inherit;font-size:.82rem;color:var(--text);
+  background:color-mix(in srgb,var(--text) 5%,transparent);
+  border:0;border-bottom:1px dashed var(--border-strong);border-radius:2px 2px 0 0;padding:.2rem .4rem;
+  transition:border-color .12s ease,background .12s ease}
+textarea{height:auto;border:1px solid var(--border);border-radius:2px}
+input:not([type=checkbox]):not([type=radio]):focus,textarea:focus{
+  outline:none;border-bottom:1px solid var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+input[readonly]{opacity:.75}
+/* Amount / number fields: no spinner arrows (as in the Accounting System). */
+input[type=number]{-moz-appearance:textfield;appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;appearance:none;margin:0}
+/* dropdown list: quiet box + CSS caret triangle; brand frame on focus */
+select{height:var(--f-h);font-family:inherit;font-size:.82rem;color:var(--text);
+  border:1px solid var(--border);border-radius:2px;
+  background-color:color-mix(in srgb,var(--text) 4%,transparent);
+  -webkit-appearance:none;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+  padding:0 1.5rem 0 .4rem;transition:border-color .12s ease}
+select:focus{border-color:var(--accent);outline:none}
+select option{background:var(--surface);color:var(--text)}
+/* shell selects manage their own caret — suppress the global triangle */
+.search-box .scope{background-image:none}
+.shell-lang{-webkit-appearance:auto;appearance:auto;background-image:none;padding-right:4px}
+/* framed fields carrying a search / suggest / column filter: full border box
+   (!important beats the global input rule, whose :not() selectors add specificity) */
+.search input,.colf,.combo input,input.suggest{
+  border:1px solid var(--border-strong)!important;border-radius:2px}
+.search input:focus,.colf:focus,.combo input:focus,input.suggest:focus{border-color:var(--accent)!important}
 .search{position:relative;flex:1;min-width:220px}
-.search input{width:100%;padding-left:34px}
+.search input{width:100%;padding-left:34px;height:calc(var(--f-h) + 6px)}
 .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;fill:var(--faint)}
 
 /* ---- Buttons ---- */
-.btn{border:1px solid var(--border-strong);background:var(--surface);color:var(--text);
-  padding:8px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:13.5px;font-weight:600;
-  display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
-.btn:hover{background:var(--surface-2);border-color:var(--accent)}
+/* Fiori buttons: default = brand outline, primary = filled, ghost = text only. */
+.btn{border:1px solid var(--accent);background:var(--surface);color:var(--accent);
+  padding:.45rem 1rem;border-radius:var(--radius-sm);cursor:pointer;font-size:.82rem;font-weight:600;
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:background .15s ease}
+.btn:hover{background:var(--surface-2)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
 .btn.ghost{border-color:transparent;background:transparent;color:var(--accent)}
 .btn.ghost:hover{background:var(--accent-soft)}
 .btn svg{width:15px;height:15px;fill:currentColor}
-.btn.sm{padding:6px 10px;font-size:12.5px}
+.btn.sm{padding:.25rem .6rem;font-size:.75rem}
 .btn.xs{padding:3px 8px;font-size:11.5px}
 .btn.xs svg{width:12px;height:12px}
 .nowrap{white-space:nowrap}
@@ -173,10 +357,14 @@ table.mtx th,table.mtx td{text-align:center;padding:4px 6px;font-size:12px}
 .m-hol{background:rgba(180,120,20,.18);color:#b47814}
 .m-off{background:var(--surface-2);color:var(--muted)}
 .list-card .card-head{border-radius:var(--radius) var(--radius) 0 0}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
+/* Grid density follows the Accounting System: compact rows (td .55rem .85rem). */
+table{width:100%;border-collapse:collapse;font-size:.8rem}
 th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);
-  font-weight:700;padding:10px 16px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface-2)}
-td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+  font-weight:700;padding:.6rem .85rem;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface-2)}
+td{padding:.55rem .85rem;border-bottom:1px solid var(--border);vertical-align:middle}
+/* SE16N / SE11 key columns highlighted like the SAP data browser */
+th.se-key{background:var(--accent-soft);color:var(--accent)}
+td.se-key{background:color-mix(in srgb,var(--accent) 7%,transparent);font-weight:600}
 .cols-panel{margin-bottom:14px}
 .colmenu-wrap{position:relative;display:inline-block}
 .colmenu{position:absolute;top:calc(100% + 4px);right:0;left:auto;z-index:40;background:var(--surface);color:var(--text);
@@ -198,6 +386,9 @@ td{padding:11px 16px;border-bottom:1px solid var(--border);vertical-align:middle
 .combo-opt{padding:8px 12px;cursor:pointer;font-size:13.5px}
 .combo-opt:hover{background:var(--accent-soft)}
 .combo-empty{padding:8px 12px;color:var(--muted);font-size:13px}
+.pm-combo{position:relative}
+.pm-combo .combo-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:50;box-shadow:var(--shadow);min-width:260px;max-height:260px}
+.pm-combo .combo-opt{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--text)}
 .rolechks{display:flex;flex-direction:column;gap:6px;margin-top:4px}
 .rolechk{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);
   border-radius:8px;background:var(--surface);cursor:pointer;font-size:13.5px}
@@ -240,8 +431,8 @@ a.mail:hover{text-decoration:underline}
 .avatar .av-edit{position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;
   border:2px solid var(--surface);background:var(--accent);color:#fff;cursor:pointer;display:grid;place-items:center;padding:0}
 .avatar .av-edit svg{width:12px;height:12px;fill:#fff}
-.whoami-av{width:30px;height:30px;border-radius:50%;object-fit:cover;cursor:pointer;border:1px solid rgba(255,255,255,.4)}
-.whoami-wrap{display:flex;align-items:center;gap:8px;padding-left:12px;border-left:1px solid rgba(255,255,255,.3)}
+.whoami-av{width:30px;height:30px;border-radius:50%;object-fit:cover;cursor:pointer;border:1px solid var(--border)}
+.whoami-wrap{display:flex;align-items:center;gap:8px;padding-left:12px;border-left:1px solid var(--border)}
 .obj-head .id{margin-left:auto;text-align:right}
 .obj-head .id .n{font-size:24px;font-weight:800;color:var(--accent)}
 .obj-head .id .l{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
@@ -251,7 +442,7 @@ a.mail:hover{text-decoration:underline}
 
 /* ---- Tabs ---- */
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;overflow:visible;
-  position:sticky;top:var(--shell-h,60px);z-index:15;background:var(--bg);padding-top:6px}
+  position:sticky;top:0;z-index:15;background:var(--bg);padding-top:6px}
 .tab-more-wrap{position:relative;margin-left:auto;align-self:center}
 .tab-morebtn{background:transparent;border:0;color:var(--muted);padding:10px 12px;cursor:pointer;
   font-size:13.5px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:6px;border-bottom:3px solid transparent}
@@ -314,23 +505,39 @@ a.mail:hover{text-decoration:underline}
 .otree-tbl .otree .oic{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:6px;background:var(--accent-soft);color:var(--accent);vertical-align:middle;margin:0 8px 0 6px}
 .otree-tbl .otree .oic svg{width:14px;height:14px;fill:currentColor}
 .otree-tbl .otree .nm{font-weight:700;vertical-align:middle}
+.otree-tbl tr.orow[draggable]{cursor:grab}
+.otree-tbl .otree .ohandle{display:inline-block;color:var(--muted);opacity:.55;cursor:grab;margin-right:4px;font-size:13px;vertical-align:middle;user-select:none}
+.otree-tbl tr.orow.dragging{opacity:.45}
+.otree-tbl tr.orow.dragging td{background:var(--accent-soft)}
+.otree-tbl tr.orow.dragover td{background:var(--accent-soft);box-shadow:inset 0 -2px 0 var(--accent),inset 0 2px 0 var(--accent)}
+.otree-tbl tr.orow.dragbad td{background:rgba(220,60,60,.10);box-shadow:inset 0 0 0 2px rgba(220,60,60,.45)}
+.otree-tbl tr.otop td{border-top:1px dashed var(--border);font-style:italic}
+.otree-tbl tr.prow td{background:var(--surface-2)}
+.otree-tbl tr.prow:hover td{background:var(--accent-soft)}
+.otree-tbl .otree .pic{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--muted);vertical-align:middle;margin:0 8px 0 6px}
+.otree-tbl .otree .pic svg{width:13px;height:13px;fill:currentColor}
+.otree-tbl .otree .pnm{font-weight:600;color:var(--text)}
 
 /* ---- Modal ---- */
 .modal-bg{position:fixed;inset:0;background:rgba(15,25,35,.45);backdrop-filter:blur(2px);
   display:grid;place-items:center;z-index:50;padding:16px;animation:fade .15s ease}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-.modal{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);
-  width:min(520px,100%);max-height:90vh;display:flex;flex-direction:column;animation:pop .18s ease}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+  width:min(600px,100%);max-height:90vh;display:flex;flex-direction:column;animation:pop .18s ease}
 @keyframes pop{from{transform:translateY(8px) scale(.98);opacity:0}to{transform:none;opacity:1}}
-.modal h3{margin:0;padding:16px 20px;border-bottom:1px solid var(--border);font-size:16px}
-.modal .body{padding:18px 20px;overflow:auto;display:flex;flex-direction:column;gap:14px}
-.modal .foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;
+.modal h3{margin:0;padding:16px 22px;border-bottom:1px solid var(--border);font-size:16px;font-weight:700;
+  letter-spacing:-.1px;display:flex;align-items:center;gap:9px}
+.modal h3::before{content:"";width:4px;height:18px;border-radius:3px;background:var(--accent);flex:0 0 auto}
+.modal .body{padding:20px 22px;overflow:auto;display:flex;flex-direction:column;gap:16px}
+.modal .foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;
   background:var(--surface-2)}
-.modal .grp{display:flex;flex-direction:column;gap:5px}
-.modal .grp label{font-size:12px;color:var(--muted);font-weight:600}
-.modal .grp label .req{color:var(--bad)}
-.modal .grp input,.modal .grp select{width:100%}
-.modal .grp input[type=checkbox]{width:auto;flex:0 0 auto;margin:0}
+.modal .grp{display:flex;flex-direction:column;gap:6px}
+.modal .grp label{font-size:12.5px;color:var(--muted);font-weight:600;letter-spacing:.1px}
+.modal .grp label .req{color:var(--bad);margin-left:2px}
+.modal .grp input,.modal .grp select{width:100%;height:var(--f-h)}
+.modal .grp textarea{width:100%;min-height:calc(var(--f-h) * 2)}
+.modal .grp textarea{min-height:78px;resize:vertical;line-height:1.45}
+.modal .grp input[type=checkbox]{width:auto;flex:0 0 auto;margin:0;min-height:auto;height:auto;accent-color:var(--accent)}
 .modal .grp label.chk{flex-direction:row;align-items:center;gap:8px;cursor:pointer;margin-top:26px}
 .rolechk{cursor:pointer;justify-content:flex-start;text-align:left}
 .modal .hint{font-size:12.5px;color:var(--muted);background:var(--surface-3);border-radius:var(--radius-sm);
@@ -339,9 +546,9 @@ a.mail:hover{text-decoration:underline}
 .hint{font-size:12.5px;color:var(--muted);background:var(--surface-3);border-radius:var(--radius-sm);
   padding:9px 12px;display:flex;gap:8px;align-items:flex-start}
 .hint svg{width:15px;height:15px;fill:var(--info);flex:0 0 auto;margin-top:1px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.modal .grp.sec{margin-top:2px;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
-  color:var(--accent);font-weight:700;border-top:1px solid var(--border);padding-top:12px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.modal .grp.sec{margin-top:4px;font-size:11px;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--accent);font-weight:700;border-top:1px solid var(--border);padding-top:13px}
 
 /* ---- Toast ---- */
 #toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:80;
@@ -358,7 +565,7 @@ a.mail:hover{text-decoration:underline}
 .banner svg{width:16px;height:16px;fill:currentColor;flex:0 0 auto}
 .empty{padding:40px;text-align:center;color:var(--muted)}
 .whoami{display:flex;flex-direction:row;align-items:center;gap:9px;line-height:1.15;text-align:left;
-  padding-left:12px;border-left:1px solid rgba(255,255,255,.3);white-space:nowrap}
+  padding-left:12px;border-left:1px solid var(--border);white-space:nowrap}
 .whoami .wi-txt{display:flex;flex-direction:column}
 .whoami b{font-size:12.5px}.whoami span{font-size:11px;opacity:.8}
 .rolebadge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--accent-soft);color:var(--accent)}
@@ -372,7 +579,8 @@ a.mail:hover{text-decoration:underline}
 .login .tag{color:var(--muted);font-size:13px;margin:2px 0 22px}
 .login .grp{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
 .login .grp label{font-size:12px;color:var(--muted);font-weight:600}
-.login input{width:100%}
+.login .grp label{font-weight:600}
+.login input{width:100%;height:var(--f-h)}
 .login .btn{width:100%;justify-content:center;margin-top:4px}
 .login .err{background:var(--bad-bg);color:var(--bad);border-radius:8px;padding:9px 12px;font-size:13px;margin-bottom:14px;display:none}
 .demo-users{margin-top:20px;border-top:1px solid var(--border);padding-top:16px}
@@ -384,7 +592,45 @@ a.mail:hover{text-decoration:underline}
 .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow-sm)}
 .stat .v{font-size:26px;font-weight:800;color:var(--accent);line-height:1}
 .stat .l{font-size:12px;color:var(--muted);margin-top:4px}
-.shell .util #logout,.shell .util #reset,.shell .util #theme{font-size:16px}
+.shell .util #logout,.shell .util #reset,.shell .util #theme,.shell .util #palette{font-size:16px}
+.palette-wrap{position:relative;display:inline-flex}
+.palette-menu{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;box-shadow:var(--shadow);padding:12px;display:none;grid-template-columns:repeat(4,1fr);gap:9px;z-index:60;width:220px}
+.palette-menu.open{display:grid}
+.palette-title{grid-column:1/-1;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;margin:0 0 2px}
+.swatch{width:40px;height:40px;border-radius:11px;border:2px solid transparent;cursor:pointer;display:grid;place-items:center;padding:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.swatch:hover{transform:translateY(-1px)}
+.swatch.sel{border-color:var(--text)}
+.swatch .tick{color:#fff;font-size:15px;font-weight:700;display:none;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.swatch.sel .tick{display:block}
+/* Home / main screen tiles */
+.home-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:4px}
+.home-tile{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:16px;cursor:pointer;text-align:left;color:var(--text);
+  transition:box-shadow .12s ease,transform .12s ease,border-color .12s ease;position:relative}
+.home-tile:hover{box-shadow:var(--shadow);transform:translateY(-2px);border-color:var(--accent)}
+.home-tile .ti{width:40px;height:40px;border-radius:10px;background:var(--accent-soft);color:var(--accent);
+  display:grid;place-items:center}
+.home-tile .ti svg{width:22px;height:22px;fill:currentColor}
+.home-tile .tt{font-weight:700;font-size:15px}
+.home-tile .ts{color:var(--muted);font-size:12.5px}
+.mc-total td{border-top:2px solid var(--border-strong);background:var(--surface-2);font-weight:600}
+.home-tile .tbadge{position:absolute;top:12px;right:12px;background:var(--bad);color:#fff;font-weight:700;
+  font-size:11px;border-radius:20px;padding:2px 8px;min-width:20px;text-align:center}
+.home-hero{background:linear-gradient(120deg,var(--accent),var(--accent-strong));color:#fff;border-radius:var(--radius);
+  padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+.home-hero h1{margin:0 0 4px;font-size:22px;font-weight:800}
+.home-hero p{margin:0;opacity:.9;font-size:13.5px}
+.home-sect{font-size:13px;letter-spacing:.2px;color:var(--text);font-weight:700;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.home-sect::before{content:"";width:4px;height:15px;border-radius:8px;background:var(--accent);display:inline-block}
+/* Grouped Admin Center configuration launcher */
+.cfg-groups{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+.cfg-grp{display:grid;grid-template-columns:190px 1fr;gap:14px;align-items:start;padding:8px 0}
+.cfg-grp+.cfg-grp{border-top:1px solid var(--border)}
+.cfg-grp-l{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700;padding-top:7px}
+.cfg-grp-btns{display:flex;flex-wrap:wrap;gap:6px}
+@media(max-width:680px){.cfg-grp{grid-template-columns:1fr;gap:5px}}
 /* Graphical org / reporting charts (boxed tree) */
 .chart-scroll{overflow-x:auto;padding:24px 16px}
 .orgtree,.orgtree ul{list-style:none;margin:0;padding:0}
@@ -424,28 +670,45 @@ a.mail:hover{text-decoration:underline}
   body>*{display:none!important}
   #printArea{display:block!important;position:static}
   #printArea,.ps-doc,.ps-doc *{color:#111!important}
-  .ps-doc .ps-sec{color:#0a4bb0!important}
+  .ps-doc .ps-sec{color:#a3382a!important}
   .ps-doc .ps-row,.ps-doc .ps-row.tot{border-color:#ccc!important}
   .ps-doc .net{color:#0a7a3d!important}
 }
 </style>
 
 <header class="shell">
-  <div class="logo"><span class="mark">HR</span> <span class="brandtext">HR Module</span></div>
-  <span id="whoami" class="whoami" style="display:none"></span>
-  <nav id="nav"></nav>
-  <div class="spacer"></div>
+  <button class="shell-burger" data-nav="home" title="Home">&#9776;</button>
+  <button class="shell-back" onclick="history.back()" title="Back">&#8249;</button>
+  <span class="shell-logo-box">SAP</span>
+  <span class="shell-divider"></span>
+  <span class="shell-home" data-nav="home" title="Home">Home <span class="chv">&#9662;</span></span>
+  <div class="shell-search">
+    <div class="search-box">
+      <select class="scope" id="searchScope" title="Search scope">
+        <option>Apps</option><option>All</option><option>People</option><option>Configuration</option>
+      </select>
+      <span class="scv">&#9662;</span><span class="sep"></span>
+      <input id="cmdField" placeholder='Search In: &quot;Apps&quot;' autocomplete="off">
+      <button class="go" id="cmdGo" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.2-4.2"/></svg></button>
+    </div>
+  </div>
+  <span class="spacer"></span>
   <div class="util">
-    <select id="lang" title="Language">
+    <button class="shell-icon" id="notif" title="Notifications">&#128276;</button>
+    <button class="shell-icon" id="help" title="Help">&#63;</button>
+    <button class="shell-icon" id="reset" title="Reset demo data">&#8635;</button>
+    <div class="palette-wrap"><button class="shell-icon" id="palette" title="Theme colour">&#127912;</button><div class="palette-menu" id="paletteMenu"></div></div>
+    <button class="shell-icon" id="theme" title="Toggle light / dark">&#9680;</button>
+    <select id="lang" class="shell-lang" title="Language">
       <option value="EN">🇬🇧 EN</option>
       <option value="KH">🇰🇭 ខ្មែរ</option>
       <option value="CN">🇨🇳 中文</option>
     </select>
-    <button id="reset" title="Reset demo data">↻</button>
-    <button id="theme" title="Toggle light / dark">◐</button>
-    <button id="logout" title="Sign out" style="display:none">⎋</button>
+    <span id="whoami" class="whoami" style="display:none"></span>
+    <button class="shell-icon" id="logout" title="Sign out" style="display:none">&#9099;</button>
   </div>
 </header>
+<nav id="nav" class="nav-tabs"></nav>
 
 <main id="app"></main>
 <div id="modal-root"></div>
@@ -471,7 +734,8 @@ const I = {
   edit:'<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75zM20.7 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75z"/></svg>',
   move:'<svg viewBox="0 0 24 24"><path d="M13 6v5h5V7l4 5-4 5v-4h-7V6zM11 18v-5H6v4l-4-5 4-5v4h7v7z"/></svg>',
   education:'<svg viewBox="0 0 24 24"><path d="M12 3L1 9l11 6 9-4.9V17h2V9zM5 13.2V17c0 1.7 3.1 3 7 3s7-1.3 7-3v-3.8l-7 3.8z"/></svg>',
-  doc:'<svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zm8 1.5V8h4.5zM8 12h8v2H8zm0 4h8v2H8z"/></svg>'
+  doc:'<svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zm8 1.5V8h4.5zM8 12h8v2H8zm0 4h8v2H8z"/></svg>',
+  home:'<svg viewBox="0 0 24 24"><path d="M12 3L2 12h3v8h5v-6h4v6h5v-8h3z"/></svg>'
 };
 
 /* ============================ DATA (mirrors DB seed) ============================ */
@@ -497,7 +761,8 @@ function seed(){return{
    {pernr:1002,begda:"2019-01-01",endda:HIGH,schkz:"NORM",zterf:"0",empct:100,teilk:false,wostd:40,arbst:8,mostd:173.33,jrstd:2080,wkwdy:5,beguz:"08:30",enduz:"17:30",break:60}],
   PA0008:[
    {pernr:1000,begda:"2020-03-01",endda:HIGH,trfgr:"E4",bsgrd:100,waers:"EUR",ansal:96000,wt:[{lgart:"1010",betrg:8000,waers:"EUR"}]},
-   {pernr:1001,begda:"2021-06-15",endda:HIGH,trfgr:"E2",bsgrd:100,waers:"EUR",ansal:60000,wt:[{lgart:"1010",betrg:5000,waers:"EUR"}]}],
+   {pernr:1001,begda:"2021-06-15",endda:HIGH,trfgr:"E2",bsgrd:100,waers:"EUR",ansal:60000,wt:[{lgart:"1010",betrg:5000,waers:"EUR"}]},
+   {pernr:1002,begda:"2020-01-06",endda:HIGH,trfgr:"E3",bsgrd:100,waers:"USD",ansal:54000,wt:[{lgart:"1010",betrg:4500,waers:"USD"}]}],
   PA0009:[
    {pernr:1000,begda:"2020-03-01",endda:HIGH,subty:"0",banks:"DE",bankl:"10070000",bankn:"DE89370400440532013000",bkont:"00",banka:"Deutsche Bank",bic:"DEUTDEBBXXX",emftx:"Andreas Schmidt",zlsch:"D",bdpct:100,waers:"EUR",purpose:"Monthly salary"},
    {pernr:1001,begda:"2021-06-15",endda:HIGH,subty:"0",banks:"US",bankl:"021000021",bankn:"US64SVBKUS6S3300958879",bkont:"01",banka:"JPMorgan Chase",bic:"CHASUS33XXX",emftx:"Linda Nguyen",zlsch:"D",bdpct:100,waers:"EUR",purpose:"Monthly salary"}],
@@ -530,7 +795,7 @@ function seed(){return{
   PA0024:[
    {pernr:1000,subty:"03",begda:"2020-03-01",endda:HIGH,quali:"People leadership",auspr:8},
    {pernr:1000,subty:"02",begda:"2020-03-01",endda:HIGH,quali:"English (fluent)",auspr:7},
-   {pernr:1000,subty:"01",begda:"2020-03-01",endda:HIGH,quali:"SAP SuccessFactors",auspr:6},
+   {pernr:1000,subty:"01",begda:"2020-03-01",endda:HIGH,quali:"Oracle Fusion HCM",auspr:6},
    {pernr:1001,subty:"01",begda:"2021-06-15",endda:HIGH,quali:"HR Analytics",auspr:8},
    {pernr:1001,subty:"02",begda:"2021-06-15",endda:HIGH,quali:"Spanish (intermediate)",auspr:5}],
   PA2002:[
@@ -538,9 +803,9 @@ function seed(){return{
    {pernr:1001,begda:"2026-03-10",endda:"2026-03-12",awart:"0400",abwtg:3,stdaz:24},
    {pernr:1001,begda:"2026-04-15",endda:"2026-04-15",awart:"1000",abwtg:null,stdaz:3.5}],
   HRP1000:[
-   {otype:"O",objid:50000001,begda:"2020-01-01",endda:HIGH,short:"EXEC",stext:"Executive Board"},
+   {otype:"O",objid:50000001,begda:"2020-01-01",endda:HIGH,short:"EXEC",stext:"Executive Board",bukrs:"1000"},
    {otype:"O",objid:50000010,begda:"2020-01-01",endda:HIGH,short:"HR",stext:"Human Resources"},
-   {otype:"O",objid:50000020,begda:"2020-01-01",endda:HIGH,short:"FIN",stext:"Finance"},
+   {otype:"O",objid:50000020,begda:"2020-01-01",endda:HIGH,short:"FIN",stext:"Finance",bukrs:"2000"},
    {otype:"O",objid:50000011,begda:"2020-01-01",endda:HIGH,short:"REC",stext:"Recruiting"},
    {otype:"O",objid:50000012,begda:"2020-01-01",endda:HIGH,short:"PAY",stext:"Payroll & Benefits"},
    {otype:"O",objid:50000021,begda:"2020-01-01",endda:HIGH,short:"ACC",stext:"Accounting"},
@@ -566,7 +831,8 @@ function seed(){return{
    {otype:"S",objid:50000101,rsign:"A",relat:"003",sclas:"O",sobid:"50000010",begda:"2020-01-01",endda:HIGH},
    {otype:"S",objid:50000101,rsign:"A",relat:"007",sclas:"C",sobid:"50000900",begda:"2020-01-01",endda:HIGH},
    {otype:"S",objid:50000101,rsign:"A",relat:"002",sclas:"S",sobid:"50000100",begda:"2020-01-01",endda:HIGH}],
-  T001:{"1000":{name:"Global Corp AG",country:"DE",currency:"EUR",city:"Berlin"}},
+  T001:{"1000":{name:"Global Corp AG",country:"DE",currency:"EUR",city:"Berlin"},
+        "2000":{name:"Global Corp Asia Ltd",country:"KH",currency:"USD",city:"Phnom Penh"}},
   T500P:{"1000":{text:"Head Office",bukrs:"1000"},"2000":{text:"Branch Office",bukrs:"1000"}},
   subgroupGroup:{"DU":"1","DW":"1","DT":"1"},
   T002:{"EN":"English","DE":"German","FR":"French","ES":"Spanish","VI":"Vietnamese"},
@@ -614,7 +880,9 @@ function seed(){return{
   T547T:{"01":"Permanent","02":"Fixed-term","03":"Temporary","04":"Internship"},
   dom:{GESCH:{"1":"Male","2":"Female","3":"Undefined"},
        FAMST:{"0":"Single","1":"Married","2":"Widowed","3":"Divorced","4":"Separated"},
-       ANRED:{"1":"Mrs.","2":"Mr.","3":"Unknown"},
+       ANRED:{"1":"Mrs.","2":"Mr.","3":"Company","4":"Messrs.","5":"Ms."},
+       MASSN:{"01":"Hiring","02":"Organizational reassignment","03":"Pay increase","04":"Promotion","10":"Leaving","11":"Retirement"},
+       MASSG:{"01":"New hire","02":"Resignation","03":"Dismissal","04":"Annual review","05":"Restructuring","06":"End of contract"},
        TITEL:{"01":"Dr.","02":"Prof.","03":"Prof. Dr.","04":"B.A.","05":"B.Sc.","06":"M.A.","07":"M.Sc.","08":"MBA","09":"Ph.D.","10":"Eng."},
        STAT2:{"0":"Withdrawn","1":"Inactive","2":"Retiree","3":"Active"},
        USRTY:{"0010":"E-Mail","0020":"Telephone","CELL":"Mobile phone","FAX":"Fax","MAIL":"System user"},
@@ -622,7 +890,29 @@ function seed(){return{
        SLART:{"10":"University","20":"Secondary school","30":"Vocational training","40":"Doctorate"},
        TMART:{"01":"Expiry of probation","02":"Work permit expiry","03":"Contract end","04":"Next appraisal"},
        QUALG:{"01":"Technical","02":"Language","03":"Leadership"},
-       ANSSA:{"1":"Permanent residence","2":"Temporary residence","3":"Home address","4":"Mailing address","5":"Emergency address"}},
+       ANSSA:{"1":"Permanent residence","2":"Temporary residence","3":"Home address","4":"Mailing address","5":"Emergency address"},
+       PROBST:{"01":"In progress","02":"Passed","03":"Failed","04":"Extended"},
+       TRFREA:{"01":"Business need","02":"Employee request","03":"Reorganization","04":"Location change","05":"Promotion-linked"},
+       PROMOR:{"01":"Performance","02":"Reorganization","03":"Succession plan","04":"Market alignment"},
+       TERMRE:{"01":"Resignation","02":"Dismissal","03":"Retirement","04":"End of contract","05":"Mutual agreement","06":"Redundancy"},
+       OFFCHK:{"01":"Return laptop & devices","02":"Revoke system access","03":"Exit interview","04":"Final settlement","05":"Handover completed","06":"Return ID badge & keys"},
+       SALREA:{"01":"Merit increase","02":"Promotion","03":"Market adjustment","04":"Cost of living","05":"Demotion","06":"Annual review"}},
+  departments:{
+   D01:{name:"Human Resources",bukrs:"1000",parent:""},
+   D02:{name:"Finance",bukrs:"1000",parent:""},
+   D03:{name:"Information Technology",bukrs:"1000",parent:""},
+   D04:{name:"Sales & Marketing",bukrs:"1000",parent:""},
+   D05:{name:"Operations",bukrs:"1000",parent:""},
+   D06:{name:"Payroll",bukrs:"1000",parent:"D02"}},
+  lifecycle:[
+   {_id:"lc1",pernr:1000,kind:"probation",begda:"2020-03-01",endda:"2020-08-31",status:"02",note:"Confirmed after 6 months."},
+   {_id:"lc2",pernr:1000,kind:"transfer",date:"2022-01-01",fromDept:"D02",toDept:"D01",reason:"05",note:"Moved to lead HR."},
+   {_id:"lc3",pernr:1000,kind:"promotion",date:"2022-01-01",fromPos:"HR Specialist",toPos:"Head of HR",grade:"E4",reason:"03",note:""},
+   {_id:"lc4",pernr:1000,kind:"salary",date:"2023-04-01",oldAmt:88000,newAmt:96000,waers:"EUR",reason:"06",note:"Annual review."},
+   {_id:"lc5",pernr:1000,kind:"dept",date:"2022-01-01",dept:"D01",note:"Head of Human Resources."},
+   {_id:"lc6",pernr:1001,kind:"probation",begda:"2021-06-15",endda:"2021-09-14",status:"01",note:""},
+   {_id:"lc7",pernr:1001,kind:"salary",date:"2024-04-01",oldAmt:55000,newAmt:60000,waers:"EUR",reason:"01",note:"Strong performance."},
+   {_id:"lc8",pernr:1001,kind:"dept",date:"2021-06-15",dept:"D01",note:""}],
   users:[
    {username:"admin",password:"admin123",name:"HAANG Sovanna",roles:["HR_ADMIN","EMPLOYEE"],pernr:1002,email:"s.hang@globalcorp.com"},
    {username:"manager",password:"manager123",name:"Andreas Schmidt",roles:["HR_MANAGER","EMPLOYEE"],pernr:1000,email:"a.schmidt@globalcorp.com"},
@@ -679,7 +969,7 @@ function seed(){return{
    {id:3,reqId:50002,name:"Ana Silva",email:"a.silva@mail.com",stage:"Offer",applied:"2026-07-08"}],
   courses:[
    {id:"D100",title:"Leadership Essentials",cat:"Leadership",hours:16,date:"2026-09-15",seats:12},
-   {id:"D200",title:"SAP HCM Fundamentals",cat:"Technical",hours:24,date:"2026-10-06",seats:20},
+   {id:"D200",title:"Oracle Fusion HCM Fundamentals",cat:"Technical",hours:24,date:"2026-10-06",seats:20},
    {id:"D300",title:"Business English (B2)",cat:"Language",hours:40,date:"2026-11-03",seats:15},
    {id:"D400",title:"Data Privacy & GDPR",cat:"Compliance",hours:4,date:"2026-09-01",seats:50}],
   bookings:[
@@ -696,7 +986,8 @@ function seed(){return{
    {pernr:1001,date:"2026-06-14",hours:3.0},   // Sun - Sunday OT
    {pernr:1001,date:"2026-12-25",hours:2.0}],  // Public holiday OT
   // Payroll: rates & OT multipliers (SAP-style customizing)
-  payroll:{taxRate:0.15,socialRate:0.09,otMult:{normal:1.25,sunday:1.5,holiday:2.0},monthlyFactor:4.33},
+  payroll:{taxRate:0.15,socialRate:0.09,otMult:{normal:1.25,sunday:1.5,holiday:2.0},monthlyFactor:4.33,cutoffDay:26,
+    periodFreq:"monthly",periodStart:"2026-01",periodCount:12,openPeriod:"2026-06"},
   photos:{},  // pernr -> data URI (uploaded photo); default is a generated avatar
   attachments:[],  // {id,kind,pernr,refId,name,mime,size,data,uploaded}
   // Daily attendance register: one row per employee per day
@@ -731,7 +1022,7 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",
 /* Employee photo: uploaded data URI, else a generated initials avatar (SVG data URI). */
 function avatarSvg(name,seed){
   const init=((name||"").split(" ").filter(Boolean).map(w=>w[0]).join("").slice(0,2)||"?").toUpperCase();
-  const colors=["#0a6ed1","#107e3e","#c25400","#7d3fbb","#0891b2","#be123c","#2563eb"];
+  const colors=["#c74634","#107e3e","#c25400","#7d3fbb","#0891b2","#be123c","#2563eb"];
   const c=colors[Math.abs(seed||0)%colors.length];
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="96" height="96" rx="48" fill="${c}"/><text x="48" y="61" font-family="Segoe UI,Arial,sans-serif" font-size="38" font-weight="700" fill="#fff" text-anchor="middle">${init}</text></svg>`;
   return "data:image/svg+xml;base64,"+btoa(svg);
@@ -964,6 +1255,19 @@ function orgFlat(key){key=key||today();
     const r=db.HRP1001.find(x=>x.otype==="O"&&x.sclas==="O"&&x.rsign==="A"&&x.relat==="002"&&x.objid===o.objid&&x.begda<=key&&x.endda>=key);
     return{id:o.objid,name:o.stext,short:o.short,parent:r?+r.sobid:null,children:[]};}).sort((a,b)=>a.id-b.id);
 }
+/* Effective company code (T001) of an org unit: its own assignment, else inherited
+   from the nearest ancestor up the "reports to" (A/002) chain. Mirrors SAP IT1008. */
+function orgCompany(id,key){key=key||today();
+  let cur=id,guard=0;
+  while(cur&&guard++<50){
+    const o=db.HRP1000.find(x=>x.otype==="O"&&x.objid===cur);
+    if(o&&o.bukrs)return {bukrs:o.bukrs,own:cur===id};
+    const rel=db.HRP1001.find(r=>r.otype==="O"&&r.sclas==="O"&&r.rsign==="A"&&r.relat==="002"&&r.objid===cur&&r.begda<=key&&r.endda>=key);
+    cur=rel?+rel.sobid:null;
+  }
+  const first=Object.keys(db.T001||{})[0]||null;
+  return {bukrs:first,own:false};
+}
 function orgTree(key){key=key||today();
   const flat=orgFlat(key),by={};flat.forEach(u=>by[u.id]=u);
   db.PA0001.filter(a=>a.orgeh&&a.begda<=key&&a.endda>=key).forEach(a=>{if(by[a.orgeh])by[a.orgeh].hc=(by[a.orgeh].hc||0)+1;});
@@ -1017,19 +1321,56 @@ const can=(...roles)=>roles.some(hasRole);
 /* Infotype-level authorization: does any of the user's roles allow the
    activity (display/add/update/delete) on this infotype? */
 function allowed(it,act){return (SESSION&&SESSION.roles||[]).some(r=>db.auth[r]&&db.auth[r][it]&&db.auth[r][it][act]);}
-function navFor(role){
-  if(role==="HR_ADMIN")return [["list","People","people"],["orggraph","Org Chart","org"],["pos","Positions","pos"],["payroll","Payroll","money"],["attreg","Attendance","cal"],["leave","Leave","cal"],["recruit","Recruitment","person"],["training","Training","education"],["config","Config","doc"],["reports","Reports","doc"]];
-  if(role==="HR_MANAGER")return [["mss","My Team","people"],["attreg","Attendance","cal"],["leave","Approvals","cal"],["orggraph","Org Chart","org"],["training","Training","education"],["reports","Reports","doc"]];
-  return [["ess","My Profile","person"],["myleave","My Leave","cal"],["training","Training","education"]];
+/* SuccessFactors-style navigation: a few module groups, each opening a
+   sub-menu. Single-item modules render as a direct link (the module name). */
+function navGroups(role){
+  if(role==="HR_ADMIN")return [
+    {label:"Home",ico:"home",items:[["home","Home"]]},
+    {label:"Employee Central",ico:"people",items:[["list","Employee Directory"],["orggraph","Org Chart"],["pos","Positions"]]},
+    {label:"Time & Attendance",ico:"cal",items:[["leave","Time Off"],["attreg","Attendance"]]},
+    {label:"Talent",ico:"education",items:[["recruit","Recruiting"],["training","Learning"]]},
+    {label:"Compensation",ico:"money",items:[["payroll","Payroll"]]},
+    {label:"Reporting",ico:"doc",items:[
+      ["reports","Overtime",{rep:"ot"}],
+      ["reports","Attendances",{rep:"att"}],
+      ["reports","Employee Attendance",{rep:"empatt"}],
+      ["reports","Daily Attendance",{rep:"matrix"}]
+    ]},
+    {label:"Admin Center",ico:"doc",items:CONFIG_GROUPS.map(g=>["config",g.label,{grp:g.label,cfg:g.tabs[0][0]}])}
+  ];
+  if(role==="HR_MANAGER")return [
+    {label:"Home",ico:"home",items:[["home","Home"]]},
+    {label:"My Team",ico:"people",items:[["mss","Team Overview"],["orggraph","Org Chart"]]},
+    {label:"Time & Attendance",ico:"cal",items:[["leave","Approvals"],["attreg","Attendance"]]},
+    {label:"Learning",ico:"education",items:[["training","Learning"]]},
+    {label:"Reporting",ico:"doc",items:[
+      ["reports","Overtime",{rep:"ot"}],
+      ["reports","Attendances",{rep:"att"}],
+      ["reports","Employee Attendance",{rep:"empatt"}],
+      ["reports","Daily Attendance",{rep:"matrix"}]
+    ]}
+  ];
+  return [
+    {label:"Home",ico:"home",items:[["home","Home"]]},
+    {label:"My Profile",ico:"person",items:[["ess","My Profile"]]},
+    {label:"Time Off",ico:"cal",items:[["myleave","Time Off"]]},
+    {label:"Learning",ico:"education",items:[["training","Learning"]]}
+  ];
 }
 function navBar(){
   if(!SESSION){$("#nav").innerHTML="";return;}
-  const items=navFor(SESSION.role);
-  const act=v=>S.view===v||(S.view==="detail"&&v==="list");
-  $("#nav").innerHTML=items.map(([v,l,ic])=>
-    `<button data-nav="${v}" class="navitem ${act(v)?'active':''}">${I[ic]}${esc(t(l))}</button>`).join("")
-    +`<div class="more-wrap" style="display:none"><button class="morebtn" data-more>${I.doc} ${esc(t("More"))} ▾</button><div class="more-menu" id="moreMenu"></div></div>`;
-  requestAnimationFrame(fitNav);
+  const groups=navGroups(SESSION.role);
+  const va=v=>S.view===v||(S.view==="detail"&&v==="list");
+  // active state for an item, honouring an optional sub-selection (config tab or report)
+  const ia=(v,o)=>{o=o||{};return o.grp?(S.view==="config"&&(S.cfgGroup||CONFIG_GROUPS[0].label)===o.grp):o.cfg?(S.view==="config"&&S.cfgTab===o.cfg):o.rep?(S.view==="reports"&&(S.rep||"ot")===o.rep):va(v);};
+  $("#nav").innerHTML=groups.map((g,gi)=>{
+    if(g.items.length===1){const v=g.items[0][0];
+      return `<button data-nav="${v}" class="navitem ${va(v)?'active':''}">${I[g.ico]}${esc(t(g.label))}</button>`;}
+    const ga=g.items.some(([v,,o])=>ia(v,o));
+    return `<div class="navgroup"><button class="navitem navtop ${ga?'active':''}" data-navmenu="${gi}">${I[g.ico]}${esc(t(g.label))}<span class="tsep">|</span><span class="tcaret">▾</span></button>`+
+      `<div class="nav-sub" id="navSub${gi}">${g.items.map(([v,l,o])=>{o=o||{};return `<button class="nav-subitem ${ia(v,o)?'active':''}" data-nav="${v}"${o.grp?` data-cfggrp="${esc(o.grp)}"`:""}${o.cfg?` data-cfgtab="${o.cfg}"`:""}${o.rep?` data-rep="${o.rep}"`:""}>${esc(t(l))}</button>`;}).join("")}</div></div>`;
+  }).join("");
+  requestAnimationFrame(syncShellH);
 }
 /* Priority+ nav: move items that don't fit into a "More ▾" dropdown. */
 function fitNav(){
@@ -1107,7 +1448,8 @@ function render(){
   if(!SESSION){navBar();renderLogin();return;}
   navBar();
   requestAnimationFrame(syncShellH);
-  if(S.view==="list")renderList();
+  if(S.view==="home")renderHome();
+  else if(S.view==="list")renderList();
   else if(S.view==="detail")renderDetail();
   else if(S.view==="org")renderOrg();
   else if(S.view==="pos")renderPositions();
@@ -1130,8 +1472,8 @@ function render(){
 
 function renderLogin(){
   app.innerHTML=`<div class="login-wrap"><div class="login">
-    <div class="brandrow"><span class="mark">HR</span><div><h1>${esc(t("Sign in"))}</h1></div></div>
-    <div class="tag">HR Module — Human Capital Management</div>
+    <div class="brandrow"><span class="mark">SF</span><div><h1>${esc(t("Sign in"))}</h1></div></div>
+    <div class="tag">SAP SuccessFactors HXM — Human Resources</div>
     <div class="err" id="loginErr"></div>
     <div class="grp"><label>${esc(t("Username"))}</label><input id="lu" autocomplete="username" placeholder="e.g. admin"></div>
     <div class="grp"><label>${esc(t("Password"))}</label><input id="lp" type="password" autocomplete="current-password" placeholder="${esc(t("Password"))}"></div>
@@ -1232,6 +1574,79 @@ function colsDialog(){
 function tab(id,label,ico){return `<button data-tab="${id}" class="${S.tab===id?'active':''}"><span class="ico">${I[ico]}</span>${esc(t(label))}</button>`;}
 function dl(pairs){return `<dl class="dl">${pairs.map(([k,v])=>`<div class="row"><dt>${k}</dt><dd>${v==null||v===""?"—":v}</dd></div>`).join("")}</dl>`;}
 
+/* ---- Employment lifecycle infotypes (Department, Probation, Transfer,
+   Promotion, Salary adjustment, Termination, Offboarding). One generic,
+   config-driven engine renders the list, the form and the row cells. ---- */
+const LC_KINDS={
+  dept:{label:"Department assignment",ico:"org",it:"Departments",
+    fields:[{k:"date",l:"Effective date",type:"date",req:true},{k:"dept",l:"Department",src:"departments",req:true},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Effective date",date:true},{k:"dept",l:"Department",lbl:"departments"},{k:"note",l:"Note"}]},
+  probation:{label:"Probation",ico:"cal",it:"Probation",
+    fields:[{k:"begda",l:"Start date",type:"date",req:true},{k:"endda",l:"End date",type:"date"},{k:"status",l:"Status",src:"PROBST"},{k:"note",l:"Note"}],
+    cols:[{k:"begda",l:"Start",date:true},{k:"endda",l:"End",date:true},{k:"status",l:"Status",dom:"PROBST",pill:true},{k:"note",l:"Note"}]},
+  transfer:{label:"Transfers",ico:"move",it:"Transfers",
+    fields:[{k:"date",l:"Transfer date",type:"date",req:true},{k:"fromDept",l:"From department",src:"departments"},{k:"toDept",l:"To department",src:"departments",req:true},{k:"reason",l:"Reason",src:"TRFREA"},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Date",date:true},{k:"fromDept",l:"From",lbl:"departments"},{k:"toDept",l:"To",lbl:"departments"},{k:"reason",l:"Reason",dom:"TRFREA"},{k:"note",l:"Note"}]},
+  promotion:{label:"Promotions",ico:"move",it:"Promotion",
+    fields:[{k:"date",l:"Promotion date",type:"date",req:true},{k:"fromPos",l:"From position"},{k:"toPos",l:"To position",req:true},{k:"grade",l:"New pay grade"},{k:"reason",l:"Reason",src:"PROMOR"},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Date",date:true},{k:"fromPos",l:"From"},{k:"toPos",l:"To"},{k:"grade",l:"Grade"},{k:"reason",l:"Reason",dom:"PROMOR"}]},
+  salary:{label:"Salary adjustments",ico:"money",it:"Salary Adjustment",
+    fields:[{k:"date",l:"Effective date",type:"date",req:true},{k:"oldAmt",l:"Current annual salary",type:"num"},{k:"newAmt",l:"New annual salary",type:"num",req:true},{k:"waers",l:"Currency",src:"currencies"},{k:"reason",l:"Reason",src:"SALREA"},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Date",date:true},{k:"oldAmt",l:"Old",amt:"waers"},{k:"newAmt",l:"New",amt:"waers"},{k:"pct",l:"Change",pct:true},{k:"reason",l:"Reason",dom:"SALREA"}]},
+  termination:{label:"Termination",ico:"doc",it:"Termination",
+    fields:[{k:"date",l:"Last working day",type:"date",req:true},{k:"reason",l:"Reason",src:"TERMRE",req:true},{k:"rehire",l:"Eligible for rehire",type:"chk"},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Last working day",date:true},{k:"reason",l:"Reason",dom:"TERMRE"},{k:"rehire",l:"Rehire?",bool:true},{k:"note",l:"Note"}]},
+  offboard:{label:"Offboarding checklist",ico:"check",it:"Offboarding",
+    fields:[{k:"item",l:"Checklist item",src:"OFFCHK",req:true},{k:"due",l:"Due date",type:"date"},{k:"done",l:"Completed",type:"chk"},{k:"note",l:"Note"}],
+    cols:[{k:"item",l:"Item",dom:"OFFCHK"},{k:"due",l:"Due",date:true},{k:"done",l:"Status",done:true},{k:"note",l:"Note"}]},
+  orgassign:{label:"Org assignment change",ico:"org",it:"Org Assignment Change",
+    fields:[{k:"date",l:"Effective date",type:"date",req:true},{k:"bukrs",l:"Company code",src:"T001"},{k:"werks",l:"Personnel area",src:"T500P"},{k:"orgeh",l:"Organizational unit",src:"departments"},{k:"position",l:"Position"},{k:"kostl",l:"Cost center"},{k:"reason",l:"Reason",src:"TRFREA"},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Effective date",date:true},{k:"bukrs",l:"Company",lbl:"T001"},{k:"werks",l:"Pers. area",lbl:"T500P"},{k:"orgeh",l:"Org unit",lbl:"departments"},{k:"position",l:"Position"},{k:"reason",l:"Reason",dom:"TRFREA"}]},
+  jobchange:{label:"Job change",ico:"move",it:"Job Change",
+    fields:[{k:"date",l:"Effective date",type:"date",req:true},{k:"fromPos",l:"Current job title"},{k:"toPos",l:"New job title",req:true},{k:"toDept",l:"New department",src:"departments"},{k:"manager",l:"New manager"},{k:"grade",l:"New pay grade"},{k:"reason",l:"Reason",src:"PROMOR"},{k:"note",l:"Note"}],
+    cols:[{k:"date",l:"Effective date",date:true},{k:"fromPos",l:"From"},{k:"toPos",l:"To"},{k:"toDept",l:"Department",lbl:"departments"},{k:"manager",l:"New manager"},{k:"reason",l:"Reason",dom:"PROMOR"}]}
+};
+const LC_ORDER=["orgassign","jobchange","dept","probation","transfer","promotion","salary","termination","offboard"];
+let lcCtx=null;
+function lcCanEdit(){return isAdmin()||isManager();}
+function lcSrc(src){return db[src]||db.dom[src]||{};}
+function lcLabel(src,key){if(!key)return "—";const v=lcSrc(src)[key];const t=v&&typeof v==="object"?(v.name||v.text||""):v;return esc(key+(t?" – "+t:""));}
+function lcCell(r,c){
+  if(c.pct){const o=+r.oldAmt,n=+r.newAmt;if(o&&!isNaN(o)&&!isNaN(n)){const p=(n-o)/o*100;return `<span class="pill ${p>=0?'good':'bad'} num">${(p>=0?"+":"")+p.toFixed(1)}%</span>`;}return "—";}
+  const v=r[c.k];
+  if(c.bool)return v?`<span class="pill good">Yes</span>`:`<span class="pill neutral">No</span>`;
+  if(c.done)return v?`<span class="pill good">Done</span>`:`<span class="pill warn">Open</span>`;
+  if(v==null||v==="")return "—";
+  if(c.date)return `<span class="num">${fmtDate(v)}</span>`;
+  if(c.amt)return `<span class="num">${fmtAmt(v,r[c.amt]||"")}</span>`;
+  if(c.lbl)return c.pill?`<span class="pill neutral">${lcLabel(c.lbl,v)}</span>`:lcLabel(c.lbl,v);
+  if(c.dom){const txt=dom(c.dom,v)||v;return c.pill?`<span class="pill neutral">${esc(txt)}</span>`:esc(txt);}
+  return esc(v);
+}
+function lifecycleSection(kind,pernr){
+  const cfg=LC_KINDS[kind];const recs=db.lifecycle.filter(r=>r.pernr===pernr&&r.kind===kind);
+  const ed=lcCanEdit();
+  const cols=cfg.cols.concat(ed?[{k:"act",l:"Actions",act:true}]:[]);
+  const rows=recs.length?recs.map(r=>`<tr>${cols.map(c=>c.act
+      ?`<td class="td-r nowrap"><button class="btn xs" data-lcedit="${esc(r._id)}">${I.edit} Edit</button> <button class="btn xs ghost" data-lcdel="${esc(r._id)}">Delete</button></td>`
+      :`<td>${lcCell(r,c)}</td>`).join("")}</tr>`).join("")
+    :`<tr><td colspan="${cols.length}"><div class="empty">No ${esc(cfg.label.toLowerCase())} records.</div></td></tr>`;
+  return `<div class="card list-card"><div class="card-head"><h2>${esc(cfg.label)} · ${esc(cfg.it)}</h2><span class="count">${recs.length}</span><div class="spacer"></div>${ed?`<button class="btn sm primary" data-act="lc:${kind}">${I[cfg.ico]||I.doc} Add</button>`:""}</div>
+    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr>${cols.map(c=>`<th${c.act?' class="th-r"':''}>${esc(c.l)}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function openLifecycle(kind,rec){
+  const cfg=LC_KINDS[kind];const edit=!!rec;rec=rec||{};
+  lcCtx={kind,id:edit?rec._id:null};
+  const body=cfg.fields.map(f=>{
+    const id="lc_"+f.k,req=f.req?' <span class="req">*</span>':'';
+    if(f.type==="chk")return `<div class="grp"><label class="chk"><input type="checkbox" id="${id}" ${rec[f.k]?"checked":""}> ${esc(f.l)}</label></div>`;
+    if(f.src)return `<div class="grp"><label>${esc(f.l)}${req}</label><select id="${id}"><option value="">—</option>${opt(lcSrc(f.src),rec[f.k]!=null?rec[f.k]:"")}</select></div>`;
+    const type=f.type==="date"?"date":f.type==="num"?"number":"text";
+    return `<div class="grp"><label>${esc(f.l)}${req}</label><input type="${type}" id="${id}" value="${esc(rec[f.k]!=null?rec[f.k]:"")}"></div>`;
+  }).join("");
+  modal((edit?"Edit ":"Add ")+cfg.label+" · "+cfg.it,`<div class="two">${body}</div>`,
+    `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="lcSave">${edit?"Save":"Add"}</button>`);
+}
 function renderDetail(){
   const e=getEmployee(S.pernr,S.key);
   if(!e.personal){app.innerHTML=`<div class="empty">Employee not found on this key date.</div>`;return;}
@@ -1370,18 +1785,28 @@ function renderDetail(){
     <div class="tbl-wrap"><table><thead><tr><th>Task</th><th>Date</th><th>Reminder</th></tr></thead><tbody>
     ${e.dates.map(d=>`<tr><td>${esc(d.task)}</td><td class="num">${fmtDate(d.date)}</td><td class="num">${fmtDate(d.rem)}</td></tr>`).join("")||`<tr><td colspan=3><div class="empty">No monitored dates.</div></td></tr>`}
     </tbody></table></div>`;}
+  else if(S.tab==="jobchg"){content=`<div class="hint" style="margin-bottom:14px">${I.info}<span>Employment lifecycle actions — department moves, probation, transfers, promotions, salary adjustments, termination and offboarding. Value lists are maintained under Configuration.</span></div>`+
+    LC_ORDER.map((k,i)=>lifecycleSection(k,S.pernr)+(i<LC_ORDER.length-1?`<div style="height:16px"></div>`:"")).join("");}
 
   app.innerHTML=`
   <div class="page-head">
     <div><div class="crumb">${isEmployee()?"Employee Self-Service / My profile":`<a href="#" data-nav="${isManager()?'mss':'list'}" style="color:inherit;text-decoration:none">← ${isManager()?'My team':'Employees'}</a> / Master data`}</div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${allowed("0002","update")?`<button class="btn" data-act="edit">${I.edit} Edit personal</button>`:""}
-      ${allowed("0006","update")?`<button class="btn" data-act="address">${I.addr} Edit address</button>`:""}
-      ${allowed("0105","add")?`<button class="btn" data-act="comm">${I.addr} Add communication</button>`:""}
-      ${allowed("0021","add")?`<button class="btn" data-act="family">${I.people} Add family</button>`:""}
-      ${allowed("0001","update")?`<button class="btn" data-act="reassign">${I.move} Reassign</button>`:""}
-      ${allowed("2002","add")?`<button class="btn" data-act="attendance">${I.cal} Attendance</button>`:""}
-      ${allowed("2001","add")?`<button class="btn primary" data-act="absence">${I.cal} Absence</button>`:""}
+      ${(allowed("0002","update")||allowed("0006","update")||allowed("0105","add")||allowed("0021","add")||allowed("0001","update")||allowed("2001","add")||allowed("2002","add")||lcCanEdit())?`<div class="action-wrap">
+        <button class="btn primary" data-actionmenu>${I.edit} Take Action ▾</button>
+        <div class="action-menu" id="actionMenu">
+          ${allowed("0002","update")?`<button class="btn" data-act="edit">${I.edit} Edit personal data</button>`:""}
+          ${allowed("0006","update")?`<button class="btn" data-act="address">${I.addr} Edit address</button>`:""}
+          ${allowed("0105","add")?`<button class="btn" data-act="comm">${I.addr} Add communication</button>`:""}
+          ${allowed("0021","add")?`<button class="btn" data-act="family">${I.people} Add family member</button>`:""}
+          ${(allowed("0001","update")||lcCanEdit())?`<div class="act-sep"></div>`:""}
+          ${lcCanEdit()?`<button class="btn" data-act="lc:jobchange">${I.move} Job Change</button>`:""}
+          ${lcCanEdit()?`<button class="btn" data-act="lc:orgassign">${I.org} Org Assignment Change</button>`:""}
+          ${allowed("0001","update")?`<button class="btn" data-act="reassign">${I.move} Reassign (IT0001)</button>`:""}
+          ${(allowed("2001","add")||allowed("2002","add"))?`<div class="act-sep"></div>`:""}
+          ${allowed("2001","add")?`<button class="btn" data-act="absence">${I.cal} Record time off</button>`:""}
+          ${allowed("2002","add")?`<button class="btn" data-act="attendance">${I.cal} Record attendance</button>`:""}
+        </div></div>`:""}
       ${isEmployee()?`<button class="btn" data-act="mypayslip">${I.money} My payslip</button><button class="btn primary" data-nav="myleave">${I.cal} My leave</button>`:""}
       ${isManager()?`<button class="btn" data-payslip="${e.pernr}">${I.money} Payslip</button>`:""}
     </div>
@@ -1402,7 +1827,7 @@ function renderDetail(){
     ${tab("personal","Personal Data","person")}${tab("org","Org Assignment","org")}
     ${tab("address","Address","addr")}${tab("comm","Communication","addr")}${tab("family","Family","people")}
     ${tab("edu","Education & Experience","education")}${tab("pay","Working Time & Pay","money")}
-    ${tab("contract","Contract","doc")}${tab("time","Time & Leave","cal")}
+    ${tab("contract","Contract","doc")}${tab("time","Time & Leave","cal")}${tab("jobchg","Job Changes","move")}
     <div class="tab-more-wrap" style="display:none"><button class="tab-morebtn" data-tabmore>${I.doc} More ▾</button><div class="tab-more-menu" id="tabMoreMenu"></div></div>
   </div>
   ${content}`;
@@ -1430,34 +1855,108 @@ function renderOrg(){
   if(!S._orgInit){(function addAll(ns){ns.forEach(n=>{S.open.add(n.id);addAll(n.children);});})(roots);S._orgInit=true;}
   // Total headcount = employees directly assigned + everyone in the sub-units below.
   const total=n=>{let s=n.hc||0;n.children.forEach(c=>s+=total(c));return s;};
+  // Positions (object type S) related to each org unit via the A/003 "belongs to" relationship.
+  const posByOrg={};positions("",S.key).forEach(p=>{if(p.orgId){(posByOrg[p.orgId]=posByOrg[p.orgId]||[]).push(p);}});
   // Flatten the tree to table rows, tracking depth and whether ancestors are all open.
-  const rows=[];
+  // Position rows are interleaved as children of their org unit.
+  const rows=[];let orgCount=0,posCount=0;
   (function walk(ns,depth,ancOpen){ns.forEach(n=>{
-    const open=S.open.has(n.id),leaf=!n.children.length;
-    rows.push({n,depth,open,leaf,visible:ancOpen});
+    const ps=(posByOrg[n.id]||[]);
+    const open=S.open.has(n.id),leaf=!n.children.length&&!ps.length;
+    rows.push({n,depth,open,leaf,visible:ancOpen});orgCount++;
+    ps.forEach(p=>{rows.push({pos:p,depth:depth+1,visible:ancOpen&&open});posCount++;});
     walk(n.children,depth+1,ancOpen&&open);});})(roots,0,true);
   const grand=roots.reduce((s,n)=>s+total(n),0);
-  const body=rows.map(r=>{const n=r.n;
-    return `<tr class="orow${r.visible?"":" hidden"}">
+  const canDnd=isAdmin()||allowed("O","update");
+  // Company code (T001) cell — effective code with an "inherited" hint when not set on the unit itself.
+  const ccell=id=>{const c=orgCompany(id,S.key);if(!c.bukrs)return "—";const nm=(db.T001[c.bukrs]||{}).name||"";
+    return `<span class="ccode" title="${esc(c.bukrs+" – "+nm)}">${esc(c.bukrs)}</span> <span class="muted" style="font-size:12px">${esc(nm)}</span>${c.own?"":` <span class="pill" style="font-size:10px;padding:0 5px">inherited</span>`}`;};
+  const body=rows.map(r=>{
+    if(r.pos){const p=r.pos;
+      return `<tr class="orow prow${r.visible?"":" hidden"}"${canDnd?` draggable="true" data-posdrag="${p.id}"`:""}>
+      <td class="otree" style="padding-left:${10+r.depth*22}px">
+        ${canDnd?`<span class="ohandle" title="Drag to move this position to another org unit">${I.drag||"⠿"}</span>`:""}<span class="tog leaf">${I.chev}</span>
+        <span class="pic">${I.badge||I.person}</span><span class="nm pnm">${esc(p.name)}</span> <span class="pill ${p.vacant?"warn":"good"}">${p.vacant?"Vacant":"Occupied"}</span></td>
+      <td class="num">${p.id}</td>
+      <td class="muted" style="font-size:12px">${p.orgId?esc(orgCompany(p.orgId,S.key).bukrs||"—"):"—"}</td>
+      <td>${p.holder?esc(p.holder):"—"}</td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num muted" style="font-size:12px">Position</td></tr>`;}
+    const n=r.n;
+    return `<tr class="orow${r.visible?"":" hidden"}"${canDnd?` draggable="true" data-odrag="${n.id}"`:""}>
       <td class="otree" data-tog="${n.id}" style="padding-left:${10+r.depth*22}px">
-        <span class="tog ${r.leaf?"leaf":""}${r.open?" open":""}">${I.chev}</span>
+        ${canDnd?`<span class="ohandle" title="Drag to move this unit">${I.drag||"⠿"}</span>`:""}<span class="tog ${r.leaf?"leaf":""}${r.open?" open":""}">${I.chev}</span>
         <span class="oic">${I.org}</span><span class="nm">${esc(n.name)}</span></td>
       <td class="num">${n.id}</td>
+      <td>${ccell(n.id)}</td>
       <td>${n.mgr?esc(n.mgr):"—"}</td>
       <td class="num"><span class="hc">${I.people}${n.hc||0}</span></td>
       <td class="num"><b>${total(n)}</b></td>
-      <td class="num">${n.children.length||"—"}</td></tr>`;}).join("");
+      <td class="num">${n.children.length||"—"}${(posByOrg[n.id]||[]).length?` · ${(posByOrg[n.id]||[]).length}P`:""}</td></tr>`;}).join("");
   app.innerHTML=`
   <div class="page-head"><div><div class="crumb">Organizational Management</div><h1>Organizational structure — tree</h1></div>
     <div style="display:flex;gap:8px;align-items:flex-end">
       <button class="btn" data-nav="orggraph">${I.org} Chart view</button>
       <div class="field"><label>Key date</label><input type="date" id="kd" value="${S.key}"></div></div></div>
-  <div class="card list-card"><div class="card-head"><h2>Organizational units</h2><span class="count">${rows.length}</span><div class="spacer"></div>
-    <span class="muted" style="font-size:13px">Total employees: <b>${grand}</b></span></div>
+  ${canDnd?`<div class="hint">${I.info}<span>The org structure changes <b>only by drag &amp; drop</b> — drag a <b>unit</b> onto another to make it report there (or onto <b>“Top level”</b> to make it a root), and drag a <b>position</b> onto a unit to assign it there.</span></div>`:""}
+  <div class="card list-card"><div class="card-head"><h2>Organizational units &amp; positions</h2><span class="count">${orgCount}</span><div class="spacer"></div>
+    <span class="muted" style="font-size:13px">${posCount} position${posCount===1?"":"s"} · Total employees: <b>${grand}</b></span></div>
     <div class="tbl-wrap dt-grid dt-grid-1"><table class="dt otree-tbl"><thead><tr>
-      <th>Organizational unit</th><th>Org ID</th><th>Manager</th><th title="Employees assigned directly to this unit">Employees</th><th title="Including all sub-units below">Total (incl. sub-units)</th><th>Sub-units</th>
-    </tr></thead><tbody>${body||`<tr><td colspan="6"><div class="empty">No organizational units.</div></td></tr>`}</tbody></table></div></div>`;
+      <th>Organizational unit / position</th><th>ID</th><th>Company code</th><th>Manager / holder</th><th title="Employees assigned directly to this unit">Employees</th><th title="Including all sub-units below">Total (incl. sub-units)</th><th>Sub-units</th>
+    </tr></thead><tbody>${body||`<tr><td colspan="7"><div class="empty">No organizational units.</div></td></tr>`}${canDnd&&body?`<tr class="orow otop" data-odroptop="1"><td class="otree" colspan="7" style="padding-left:10px;color:var(--muted)"><span class="oic">${I.org}</span><span class="nm">▲ Top level — drop a unit here to make it a root unit</span></td></tr>`:""}</tbody></table></div></div>`;
   $("#kd").addEventListener("change",e=>{S.key=e.target.value;renderOrg();});
+  if(canDnd)wireOrgDnd();
+}
+/* Drag-and-drop reparenting of organizational units (the only way to change the org hierarchy).
+   Moves the A/002 "reports to" relationship in HRP1001. Guards against self-drops and cycles. */
+function orgDescendants(id){const set=new Set();(function walk(pid){db.HRP1001.filter(r=>r.otype==="O"&&r.relat==="002"&&r.rsign==="A"&&String(r.sobid)===String(pid)).forEach(r=>{const c=+r.objid;if(!set.has(c)){set.add(c);walk(c);}});})(id);return set;}
+function orgReparent(id,parent){
+  id=+id;
+  // Remove any existing "reports to" (A 002) edge for this unit.
+  db.HRP1001=db.HRP1001.filter(r=>!(r.otype==="O"&&r.objid===id&&r.relat==="002"&&r.rsign==="A"));
+  if(parent){db.HRP1001.push({otype:"O",objid:id,rsign:"A",relat:"002",sclas:"O",sobid:String(+parent),begda:"2020-01-01",endda:HIGH});}
+  const nm=(db.HRP1000.find(o=>o.otype==="O"&&o.objid===id)||{}).stext||("Org "+id);
+  const pn=parent?((db.HRP1000.find(o=>o.otype==="O"&&o.objid===+parent)||{}).stext||("Org "+parent)):null;
+  S.open.add(+parent);renderOrg();
+  toast(pn?`“${nm}” now reports to “${pn}”.`:`“${nm}” moved to the top level.`,"good");
+}
+/* Reassign a position (S) to a different org unit — moves the A/003 "belongs to" relationship. */
+function positionReparent(posId,orgId){
+  posId=+posId;orgId=+orgId;
+  db.HRP1001=db.HRP1001.filter(r=>!(r.otype==="S"&&r.objid===posId&&r.relat==="003"&&r.rsign==="A"));
+  db.HRP1001.push({otype:"S",objid:posId,rsign:"A",relat:"003",sclas:"O",sobid:String(orgId),begda:"2020-01-01",endda:HIGH});
+  const pnm=(db.HRP1000.find(o=>o.otype==="S"&&o.objid===posId)||{}).stext||("Position "+posId);
+  const onm=(db.HRP1000.find(o=>o.otype==="O"&&o.objid===orgId)||{}).stext||("Org "+orgId);
+  S.open.add(orgId);renderOrg();
+  toast(`Position “${pnm}” now belongs to “${onm}”.`,"good");
+}
+function wireOrgDnd(){
+  let drag=null; // {type:'org'|'pos', id}
+  const clear=()=>app.querySelectorAll(".orow.dragover,.orow.dragbad").forEach(r=>r.classList.remove("dragover","dragbad"));
+  app.querySelectorAll("tr.orow[data-odrag],tr.orow[data-posdrag]").forEach(row=>{
+    row.addEventListener("dragstart",e=>{
+      drag=row.dataset.posdrag?{type:"pos",id:+row.dataset.posdrag}:{type:"org",id:+row.dataset.odrag};
+      row.classList.add("dragging");e.dataTransfer.effectAllowed="move";try{e.dataTransfer.setData("text/plain",String(drag.id));}catch(_){}});
+    row.addEventListener("dragend",()=>{drag=null;row.classList.remove("dragging");clear();});
+  });
+  // Valid drop for an org drag: any org row (not itself/descendant) or Top level. For a position drag: any org row.
+  app.querySelectorAll("tr.orow[data-odrag],tr.orow[data-odroptop]").forEach(t=>{
+    const top=t.hasAttribute("data-odroptop");
+    const tid=top?null:+t.dataset.odrag;
+    const isBad=()=>{if(!drag)return true;
+      if(drag.type==="pos")return top; // positions can only drop on an org unit
+      return top?false:(tid===drag.id||orgDescendants(drag.id).has(tid));};
+    t.addEventListener("dragover",e=>{if(!drag)return;const bad=isBad();e.preventDefault();e.dataTransfer.dropEffect=bad?"none":"move";clear();t.classList.add(bad?"dragbad":"dragover");});
+    t.addEventListener("dragleave",()=>t.classList.remove("dragover","dragbad"));
+    t.addEventListener("drop",e=>{
+      e.preventDefault();if(!drag){clear();return;}
+      const d=drag;drag=null;clear();
+      if(d.type==="pos"){if(top){toast("Assign the position to an organizational unit.","bad");return;}positionReparent(d.id,tid);return;}
+      if(!top&&(tid===d.id||orgDescendants(d.id).has(tid))){toast("Cannot move a unit into itself or one of its sub-units.","bad");return;}
+      orgReparent(d.id,tid);
+    });
+  });
 }
 
 const POS_COLS=[
@@ -1654,16 +2153,19 @@ function addTitle(t){if(!t)throw new Error("Enter a title.");
   db.dom.TITEL[key]=t;return key;}
 function addSubgroup(k,t){if(!k)throw new Error("Enter a subgroup key.");db.T503K[k]=t;}
 function addCostCenter(id,name){if(!id)throw new Error("Enter a cost center id.");if(db.costCenters.find(c=>c.id===id))throw new Error("Cost center already exists.");db.costCenters.push({id,name});}
-function addOrgUnit(name,parent){if(!name)throw new Error("Enter an org unit name.");
+function addOrgUnit(name,parent,bukrs){if(!name)throw new Error("Enter an org unit name.");
   const maxId=Math.max.apply(null,db.HRP1000.filter(o=>o.otype==="O").map(o=>o.objid));
   const objid=maxId+1;
-  db.HRP1000.push({otype:"O",objid,begda:"2020-01-01",endda:HIGH,short:name.slice(0,4).toUpperCase(),stext:name});
+  const rec={otype:"O",objid,begda:"2020-01-01",endda:HIGH,short:name.slice(0,4).toUpperCase(),stext:name};
+  if(bukrs)rec.bukrs=bukrs;
+  db.HRP1000.push(rec);
   if(parent)db.HRP1001.push({otype:"O",objid,rsign:"A",relat:"002",sclas:"O",sobid:String(parent),begda:"2020-01-01",endda:HIGH});
   return objid;}
-function addRole(key,name){key=(key||"").trim().toUpperCase().replace(/[^A-Z0-9_]/g,"_");
+function addRole(key,name,type,desc){key=(key||"").trim().toUpperCase().replace(/[^A-Z0-9_]/g,"_");
   if(!key)throw new Error("Enter a role key.");
   if(db.roleNames[key])throw new Error("Role already exists.");
   db.roleNames[key]=name||key;db.auth[key]={};
+  db.roleMeta=db.roleMeta||{};db.roleMeta[key]={type:type||"S",desc:desc||""};
   db.infotypes.forEach(([c])=>db.auth[key][c]={display:false,add:false,update:false,delete:false});return key;}
 function removeRole(key){delete db.roleNames[key];delete db.auth[key];
   db.users.forEach(u=>{if(u.roles)u.roles=u.roles.filter(r=>r!==key);});}
@@ -1682,7 +2184,8 @@ function removePosition(id){db.HRP1000=db.HRP1000.filter(o=>!(o.otype==="S"&&o.o
 function addUser(u){if(!u.username||!u.password)throw new Error("Enter username and password.");
   if(db.users.find(x=>x.username===u.username))throw new Error("Username already exists.");
   const roles=(u.roles&&u.roles.length)?u.roles:(u.role?[u.role]:["EMPLOYEE"]);
-  db.users.push({username:u.username,password:u.password,name:u.name||u.username,roles,pernr:u.pernr||null,email:u.email||null});}
+  db.users.push({username:u.username,password:u.password,name:u.name||u.username,roles,pernr:u.pernr||null,email:u.email||null,
+    userType:u.userType||"A",userGroup:u.userGroup||"",validFrom:u.validFrom||"2020-01-01",validTo:u.validTo||HIGH,locked:!!u.locked});}
 
 function renderAuthMatrix(){
   const role=S.authRole||"HR_ADMIN";
@@ -1726,7 +2229,18 @@ const CFG_SCHEMA={
   anred:{h:"Forms of address (ANRED)",store:"dom",path:"ANRED",keyL:"Key",fields:[{k:"text",l:"Form of address"}]},
   addrtype:{h:"Address types (ANSSA)",store:"dom",path:"ANSSA",keyL:"Key",fields:[{k:"text",l:"Address type"}]},
   commtype:{h:"Communication types (USRTY)",store:"dom",path:"USRTY",keyL:"Key",fields:[{k:"text",l:"Communication type"}]},
-  famtype:{h:"Family / relationship types (FAMSA)",store:"dom",path:"FAMSA",keyL:"Key",fields:[{k:"text",l:"Relationship"}]}
+  famtype:{h:"Family / relationship types (FAMSA)",store:"dom",path:"FAMSA",keyL:"Key",fields:[{k:"text",l:"Relationship"}]},
+  dept:{h:"Departments",store:"omap",path:"departments",keyL:"Department id",
+    fields:[{k:"name",l:"Name"},{k:"bukrs",l:"Company code",src:"T001"},{k:"parent",l:"Parent department",src:"departments"}]},
+  probst:{h:"Probation statuses (PROBST)",store:"dom",path:"PROBST",keyL:"Key",fields:[{k:"text",l:"Status"}]},
+  transreason:{h:"Transfer reasons (TRFREA)",store:"dom",path:"TRFREA",keyL:"Key",fields:[{k:"text",l:"Reason"}]},
+  promoreason:{h:"Promotion reasons (PROMOR)",store:"dom",path:"PROMOR",keyL:"Key",fields:[{k:"text",l:"Reason"}]},
+  termreason:{h:"Termination reasons (TERMRE)",store:"dom",path:"TERMRE",keyL:"Key",fields:[{k:"text",l:"Reason"}]},
+  offchk:{h:"Offboarding checklist items (OFFCHK)",store:"dom",path:"OFFCHK",keyL:"Key",fields:[{k:"text",l:"Checklist item"}]},
+  salreason:{h:"Salary adjustment reasons (SALREA)",store:"dom",path:"SALREA",keyL:"Key",fields:[{k:"text",l:"Reason"}]},
+  action:{h:"Action types (IT0000 · T529A)",store:"dom",path:"MASSN",keyL:"Key",fields:[{k:"text",l:"Action type"}]},
+  actreason:{h:"Action reasons (IT0000 · T530)",store:"dom",path:"MASSG",keyL:"Key",fields:[{k:"text",l:"Reason"}]},
+  empstat:{h:"Employment status (IT0000 · STAT2)",store:"dom",path:"STAT2",keyL:"Key",fields:[{k:"text",l:"Status"}]}
 };
 function cfgStore(def){return def.store==="dom"?db.dom[def.path]:db[def.path];}
 function cfgRows(def){const s=cfgStore(def);
@@ -1781,37 +2295,287 @@ function cfgDialog(tab,key){const def=CFG_SCHEMA[tab];const edit=key!=null;const
     relField=`<div class="grp"><label>${esc(def.rel.l)}</label><select id="cf_rel"><option value="">—</option>${opt(db[def.rel.src]||{},cur)}</select></div>`;}
   modal((edit?"Edit ":"Add ")+def.h,keyInput+fields+relField,
     `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="cfgSave">Save</button>`);}
-function cfgUsersTable(){return `<div class="card"><div class="card-head"><h2>Users &amp; roles</h2><span class="count">${db.users.length}</span><div class="spacer"></div><button class="btn sm primary" data-act="cfgUser">+ Add user</button></div>
-    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>Username</th><th>Name</th><th>E-mail</th><th>Roles</th><th>Employee</th><th class="th-r">Actions</th></tr></thead><tbody>${db.users.map(u=>`<tr><td><b>${esc(u.username)}</b></td><td>${esc(u.name)}</td><td>${esc(u.email||"—")}</td><td>${(u.roles||[u.role]).map(r=>statusPill(db.roleNames[r])).join(" ")}</td><td class="num">${u.pernr||"—"}</td>
-    <td class="td-r nowrap"><button class="btn xs" data-useredit="${esc(u.username)}">${I.edit} Edit</button> <button class="btn xs ghost" data-userdel="${esc(u.username)}">Delete</button></td></tr>`).join("")}</tbody></table></div></div>`;}
+/* ===== SAP S/4HANA user & role management (SU01 user master / PFCG roles) ===== */
+const USER_TYPES={A:"Dialog",B:"System",C:"Communication",S:"Service",L:"Reference"};
+const USER_GROUPS=["SUPER","HR","PAYROLL","TIME","RECRUIT","TRAIN","EMPLOYEE"];
+const ROLE_TYPES={S:"Single",C:"Composite"};
+function uType(u){return u.userType||"A";}
+function uGroup(u){return u.userGroup||((u.roles&&u.roles[0]||"").split("_")[0])||"";}
+function uValidFrom(u){return u.validFrom||"2020-01-01";}
+function uValidTo(u){return u.validTo||HIGH;}
+function uLocked(u){return !!u.locked;}
+function roleMeta(k){return (db.roleMeta&&db.roleMeta[k])||{type:"S",desc:""};}
+/* Business-user list — modelled on SAP "Maintain Business Users" / SU01. */
+function cfgUsersTable(){return `<div class="card"><div class="card-head"><h2>Users</h2><span class="count">${db.users.length}</span><div class="spacer"></div><span class="muted" style="font-size:13px">Business users · SU01</span> <button class="btn sm primary" data-act="cfgUser">${I.person} New user</button></div>
+    <div class="hint">${I.info}<span>Maintain business users like SAP <b>SU01</b> — user ID, user type, user group, validity period and assigned <b>business roles</b> (PFCG).</span></div>
+    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>User</th><th>User name</th><th>Type</th><th>User group</th><th>Business roles</th><th>Valid to</th><th>Status</th><th>Employee</th><th class="th-r">Actions</th></tr></thead><tbody>${db.users.map(u=>{const roles=u.roles||[u.role];
+    return `<tr><td><b>${esc(u.username)}</b></td><td>${esc(u.name)}</td>
+    <td>${esc(USER_TYPES[uType(u)]||uType(u))}</td>
+    <td>${esc(uGroup(u))||"—"}</td>
+    <td>${roles.map(r=>statusPill(db.roleNames[r]||r)).join(" ")}</td>
+    <td>${uValidTo(u)===HIGH?"Unlimited":fmtDate(uValidTo(u))}</td>
+    <td>${uLocked(u)?`<span class="pill warn">🔒 Locked</span>`:`<span class="pill good">Active</span>`}</td>
+    <td class="num">${u.pernr||"—"}</td>
+    <td class="td-r nowrap"><button class="btn xs" data-useredit="${esc(u.username)}">${I.edit} Edit</button> <button class="btn xs ghost" data-userdel="${esc(u.username)}">Delete</button></td></tr>`;}).join("")}</tbody></table></div></div>`;}
+/* Business-role list — modelled on SAP PFCG (role name, type, description). */
 function cfgRolesTable(){const roles=Object.entries(db.roleNames);
   const cnt=k=>db.users.filter(u=>(u.roles||[]).includes(k)).length;
-  return `<div class="card"><div class="card-head"><h2>Roles</h2><span class="count">${roles.length}</span><div class="spacer"></div><button class="btn sm primary" data-roleadd>+ Add role</button></div>
-    <div class="hint">${I.info}<span>Define any number of roles. Grant each role activities per infotype on the Authorizations tab, then assign roles to users.</span></div>
-    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>Role key</th><th>Name</th><th class="th-r">Users</th><th class="th-r">Actions</th></tr></thead><tbody>${roles.map(([k,v])=>`<tr><td class="num">${esc(k)}</td><td>${esc(v)}</td><td class="td-r num">${cnt(k)}</td>
-    <td class="td-r nowrap"><button class="btn xs" data-roleedit="${esc(k)}">${I.edit} Edit</button> <button class="btn xs ghost" data-roledel="${esc(k)}">Delete</button></td></tr>`).join("")}</tbody></table></div></div>`;}
-function roleDialog(key){const edit=key!=null;cfgCtx={role:edit?key:null};
-  modal(edit?"Edit role":"Add role",`
-  <div class="grp"><label>Role key <span class="req">*</span></label><input id="ro_key" value="${edit?esc(key):""}" ${edit?"disabled":""} placeholder="e.g. PAYROLL_CLERK"></div>
-  <div class="grp"><label>Display name <span class="req">*</span></label><input id="ro_name" value="${edit?esc(db.roleNames[key]||""):""}" placeholder="e.g. Payroll Clerk"></div>`,
+  return `<div class="card"><div class="card-head"><h2>Business roles</h2><span class="count">${roles.length}</span><div class="spacer"></div><span class="muted" style="font-size:13px">PFCG</span> <button class="btn sm primary" data-roleadd>${I.doc} New role</button></div>
+    <div class="hint">${I.info}<span>Roles are maintained like SAP <b>PFCG</b>: a technical <b>role name</b>, a role <b>type</b> (single / composite) and a description. Grant activities per infotype on the Authorizations tab, then assign roles to users.</span></div>
+    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>Role</th><th>Description</th><th>Type</th><th class="th-r">Users</th><th class="th-r">Actions</th></tr></thead><tbody>${roles.map(([k,v])=>{const m=roleMeta(k);
+    return `<tr><td class="num"><b>${esc(k)}</b></td><td>${esc(v)}</td><td><span class="pill ${m.type==="C"?"warn":""}">${esc(ROLE_TYPES[m.type]||"Single")}</span></td><td class="td-r num">${cnt(k)}</td>
+    <td class="td-r nowrap"><button class="btn xs" data-roleedit="${esc(k)}">${I.edit} Edit</button> <button class="btn xs ghost" data-roledel="${esc(k)}">Delete</button></td></tr>`;}).join("")}</tbody></table></div></div>`;}
+/* Role maintenance — modelled on SAP PFCG. */
+function roleDialog(key){const edit=key!=null;cfgCtx={role:edit?key:null};const m=edit?roleMeta(key):{type:"S",desc:""};
+  modal(edit?"Change role · PFCG":"Create role · PFCG",`
+  <div class="grp sec">Role definition</div>
+  <div class="two">
+    <div class="grp"><label>Role (technical name) <span class="req">*</span></label><input id="ro_key" value="${edit?esc(key):""}" ${edit?"disabled":""} placeholder="e.g. Z_PAYROLL_CLERK"></div>
+    <div class="grp"><label>Role type</label><select id="ro_type"><option value="S" ${m.type!=="C"?"selected":""}>Single role</option><option value="C" ${m.type==="C"?"selected":""}>Composite role</option></select></div>
+  </div>
+  <div class="grp"><label>Description <span class="req">*</span></label><input id="ro_name" value="${edit?esc(db.roleNames[key]||""):""}" placeholder="e.g. Payroll Clerk"></div>
+  <div class="grp"><label>Long text</label><textarea id="ro_desc" rows="2" placeholder="Role purpose / notes">${edit?esc(m.desc||""):""}</textarea></div>`,
   `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="roleSave">Save</button>`);}
+/* ===== SAP ABAP Workbench transactions: SE16N (Data Browser) + SE11 (Dictionary) =====
+   The demo stores SAP-named tables (PA infotypes, HRP1000/1001, T-tables), so we
+   can browse their contents (SE16N) and display their DDIC structure (SE11). */
+const DDIC_FIELDS={
+  PERNR:{de:"PERSNO",type:"NUMC",len:8,text:"Personnel Number"},
+  SUBTY:{de:"SUBTY",type:"CHAR",len:4,text:"Subtype"},
+  OBJPS:{de:"OBJPS",type:"CHAR",len:2,text:"Object Identification"},
+  SPRPS:{de:"SPRPS",type:"CHAR",len:1,text:"Lock Indicator"},
+  BEGDA:{de:"BEGDA",type:"DATS",len:8,text:"Start Date"},
+  ENDDA:{de:"ENDDA",type:"DATS",len:8,text:"End Date"},
+  SEQNR:{de:"SEQNR",type:"NUMC",len:3,text:"Number of Infotype Record with Same Key"},
+  AEDTM:{de:"AEDTM",type:"DATS",len:8,text:"Last Changed On"},
+  UNAME:{de:"UNAME",type:"CHAR",len:12,text:"Name of Person Who Changed Object"},
+  MASSN:{de:"MASSN",type:"CHAR",len:2,text:"Action Type"},MASSG:{de:"MASSG",type:"CHAR",len:2,text:"Reason for Action"},
+  STAT2:{de:"STAT2",type:"CHAR",len:1,text:"Employment Status"},
+  BUKRS:{de:"BUKRS",type:"CHAR",len:4,text:"Company Code"},WERKS:{de:"PERSA",type:"CHAR",len:4,text:"Personnel Area"},
+  BTRTL:{de:"BTRTL",type:"CHAR",len:4,text:"Personnel Subarea"},PERSG:{de:"PERSG",type:"CHAR",len:1,text:"Employee Group"},
+  PERSK:{de:"PERSK",type:"CHAR",len:2,text:"Employee Subgroup"},ORGEH:{de:"ORGEH",type:"NUMC",len:8,text:"Organizational Unit"},
+  PLANS:{de:"PLANS",type:"NUMC",len:8,text:"Position"},STELL:{de:"STELL",type:"NUMC",len:8,text:"Job"},
+  KOSTL:{de:"KOSTL",type:"CHAR",len:10,text:"Cost Center"},
+  NACHN:{de:"NACHN",type:"CHAR",len:40,text:"Last Name"},VORNA:{de:"VORNA",type:"CHAR",len:40,text:"First Name"},
+  GBDAT:{de:"GBDAT",type:"DATS",len:8,text:"Date of Birth"},GESCH:{de:"GESCH",type:"CHAR",len:1,text:"Gender Key"},
+  ANRED:{de:"ANRED",type:"CHAR",len:1,text:"Form-of-Address Key"},NATIO:{de:"NATIO",type:"CHAR",len:3,text:"Nationality"},
+  PLVAR:{de:"PLVAR",type:"CHAR",len:2,text:"Plan Version"},OTYPE:{de:"OTYPE",type:"CHAR",len:2,text:"Object Type"},
+  OBJID:{de:"HROBJID",type:"NUMC",len:8,text:"Object ID"},ISTAT:{de:"ISTAT",type:"NUMC",len:1,text:"Planning Status"},
+  SHORT:{de:"SHORT",type:"CHAR",len:12,text:"Object Abbreviation"},STEXT:{de:"STEXT",type:"CHAR",len:40,text:"Object Name"},
+  RSIGN:{de:"RSIGN",type:"CHAR",len:1,text:"Relationship Specification"},RELAT:{de:"RELAT",type:"CHAR",len:3,text:"Relationship Type"},
+  SCLAS:{de:"SCLAS",type:"CHAR",len:2,text:"Type of Related Object"},SOBID:{de:"SOBID",type:"CHAR",len:8,text:"ID of Related Object"},
+  ANSAL:{de:"ANSAL",type:"CURR",len:"15,2",text:"Annual Salary"},WAERS:{de:"WAERS",type:"CUKY",len:5,text:"Currency Key"},
+  TRFGR:{de:"TRFGR",type:"CHAR",len:8,text:"Pay Scale Group"},AWART:{de:"AWART",type:"CHAR",len:4,text:"Att./Absence Type"},
+  KTART:{de:"KTART",type:"CHAR",len:4,text:"Absence Quota Type"},ANZHL:{de:"ANZHL",type:"DEC",len:"7,2",text:"Number"},
+  LAND1:{de:"LAND1",type:"CHAR",len:3,text:"Country Key"},
+  CREATEDON:{de:"CREATEDON",type:"DEC",len:"15,0",text:"Created On (date & time)"},
+  CREATEDBY:{de:"CREATEDBY",type:"CHAR",len:12,text:"Created By"},
+  CHANGEDON:{de:"CHANGEDON",type:"DEC",len:"15,0",text:"Last Changed On (date & time)"},
+  CHANGEDBY:{de:"CHANGEDBY",type:"CHAR",len:12,text:"Last Changed By"}
+};
+function mapRows(m,keyField){if(!m)return [];if(Array.isArray(m))return m;
+  return Object.entries(m).map(([k,v])=>Object.assign({[keyField]:k},(v&&typeof v==="object")?v:{VALUE:v}));}
+/* Every table carries technical audit fields (mirrors the SQL Server schema):
+   createdOn / changedOn (date & time) and createdBy / changedBy. The demo
+   backfills them for display in SE16N / SE11 — created ≈ record begin date at
+   08:00, changed = the SAP "changed on" (aedtm) at 14:30 when last maintained,
+   with the maintainer (uname) as changed-by. */
+function withAudit(rows){return (rows||[]).map(r=>{
+  const chRaw=r.changedOn||r.aedtm||null;
+  return Object.assign({},r,{
+    createdOn:r.createdOn||((r.begda||"2020-01-01")+" 08:00:00"),
+    createdBy:r.createdBy||r.uname||"SYSTEM",
+    changedOn:r.changedOn||(chRaw?(String(chRaw).length<=10?chRaw+" 14:30:00":chRaw):null),
+    changedBy:r.changedBy||(chRaw?(r.uname||"SYSTEM"):null)
+  });});}
+function dbTables(){
+  const IK=["PERNR","SUBTY","OBJPS","SPRPS","ENDDA","SEQNR"];
+  const t=(name,text,rows,keys)=>({name,text,rows:withAudit(rows||[]),keys:keys||IK});
+  return [
+    t("PA0000","HR Master Record: Infotype 0000 (Actions)",db.PA0000),
+    t("PA0001","HR Master Record: Infotype 0001 (Org. Assignment)",db.PA0001),
+    t("PA0002","HR Master Record: Infotype 0002 (Personal Data)",db.PA0002),
+    t("PA0006","HR Master Record: Infotype 0006 (Addresses)",db.PA0006),
+    t("PA0007","HR Master Record: Infotype 0007 (Planned Working Time)",db.PA0007),
+    t("PA0008","HR Master Record: Infotype 0008 (Basic Pay)",db.PA0008),
+    t("PA0009","HR Master Record: Infotype 0009 (Bank Details)",db.PA0009),
+    t("PA0105","HR Master Record: Infotype 0105 (Communication)",db.PA0105),
+    t("PA2001","Absences",db.PA2001),
+    t("PA2006","Absence Quotas",db.PA2006),
+    t("HRP1000","OM: Infotype 1000 (Objects)",db.HRP1000,["PLVAR","OTYPE","OBJID","ISTAT","ENDDA","SEQNR"]),
+    t("HRP1001","OM: Infotype 1001 (Relationships)",db.HRP1001,["PLVAR","OTYPE","OBJID","ISTAT","ENDDA","SEQNR","RSIGN","RELAT","SCLAS","SOBID"]),
+    t("T001","Company Codes",mapRows(db.T001,"BUKRS"),["BUKRS"]),
+    t("T500P","Personnel Areas",mapRows(db.T500P,"WERKS"),["WERKS"])
+  ].filter(x=>x.rows&&x.rows.length>0);
+}
+function inferField(up,raw,rows){
+  if(DDIC_FIELDS[up])return DDIC_FIELDS[up];
+  let type="CHAR",len=10;
+  for(const r of rows){const v=r[raw];if(v==null)continue;
+    if(typeof v==="number"){if(Number.isInteger(v)){type="INT4";len=10;}else{type="DEC";len="15,2";}break;}
+    if(typeof v==="boolean"){type="CHAR";len=1;break;}
+    if(typeof v==="object"){type="STRG";len=0;break;}
+    if(typeof v==="string"){if(/^\d{4}-\d{2}-\d{2}$/.test(v)){type="DATS";len=8;break;}type="CHAR";len=Math.max(len,v.length);}}
+  return {de:up,type,len,text:raw};
+}
+/* Order a table's columns (key fields first, in key order) and expose SAP-upper
+   names while reading values by the raw (lower-case) key used in the demo db. */
+function ddicCols(cur,rows){
+  const raw=[];rows.forEach(r=>Object.keys(r).forEach(k=>{if(!raw.includes(k))raw.push(k);}));
+  const byUp={};raw.forEach(c=>{byUp[c.toUpperCase()]=c;});
+  const ks=new Set((cur.keys||[]).map(k=>k.toUpperCase()));
+  const ordered=[];(cur.keys||[]).forEach(k=>{const u=k.toUpperCase();if(byUp[u]!=null)ordered.push(byUp[u]);});
+  raw.forEach(c=>{if(!ordered.includes(c))ordered.push(c);});
+  return ordered.map(c=>({raw:c,up:c.toUpperCase(),key:ks.has(c.toUpperCase())}));
+}
+/* SE16N — General Table Display (Data Browser). */
+function renderSE16N(){
+  const tabs=dbTables();if(!tabs.length)return `<div class="card"><div class="empty">No tables.</div></div>`;
+  if(!S.se16Table||!tabs.find(t=>t.name===S.se16Table))S.se16Table=tabs[0].name;
+  const cur=tabs.find(t=>t.name===S.se16Table);const max=S.se16Max||500;
+  const opts=tabs.map(t=>`<option value="${t.name}" ${t.name===cur.name?"selected":""}>${t.name} — ${esc(t.text)}</option>`).join("");
+  let body="";
+  if(S.se16Go){
+    const rows=cur.rows.slice(0,max);const cols=ddicCols(cur,rows);
+    const fmt=v=>v==null?"":(typeof v==="object"?esc(JSON.stringify(v)):esc(String(v)));
+    body=`<div class="card"><div class="card-head"><h2>${esc(cur.name)}</h2><span class="count">${cur.rows.length}</span><div class="spacer"></div><span class="muted" style="font-size:13px">${rows.length} of ${cur.rows.length} entries</span></div>
+      <div class="tbl-wrap"><table class="dt"><thead><tr>${cols.map(c=>`<th class="${c.key?"se-key":""}">${esc(c.up)}</th>`).join("")}</tr></thead>
+      <tbody>${rows.length?rows.map(r=>`<tr>${cols.map(c=>`<td class="${c.key?"se-key":""} ${typeof r[c.raw]==="number"?"num":""}">${fmt(r[c.raw])}</td>`).join("")}</tr>`).join(""):`<tr><td colspan="${cols.length||1}"><div class="empty">Table contains no entries.</div></td></tr>`}</tbody></table></div></div>`;
+  }
+  return `<div class="card"><div class="card-head"><h2>Data Browser</h2><div class="spacer"></div><span class="muted" style="font-size:13px">SE16N · General Table Display</span></div>
+    <div class="hint">${I.info}<span>Enter a table name and execute to display its contents — like SAP <b>SE16N</b>. (Tip: type <b>SE16N</b> or <b>SE11</b> in the shell command field.)</span></div>
+    <div class="toolbar">
+      <div class="field"><label>Table</label><select id="se16tab">${opts}</select></div>
+      <div class="field"><label>Maximum no. of hits</label><input id="se16max" type="number" min="1" value="${max}"></div>
+      <button class="btn primary" data-act="se16run">▶ Execute</button>
+    </div></div>${body}`;
+}
+/* SE11 — ABAP Dictionary: display table field structure. */
+function renderSE11(){
+  const tabs=dbTables();if(!tabs.length)return `<div class="card"><div class="empty">No tables.</div></div>`;
+  if(!S.se11Table||!tabs.find(t=>t.name===S.se11Table))S.se11Table=tabs[0].name;
+  const cur=tabs.find(t=>t.name===S.se11Table);
+  const opts=tabs.map(t=>`<option value="${t.name}" ${t.name===cur.name?"selected":""}>${t.name} — ${esc(t.text)}</option>`).join("");
+  let body="";
+  if(S.se11Go){
+    const rows=cur.rows;const cols=ddicCols(cur,rows);
+    body=`<div class="card"><div class="card-head"><h2>Dictionary: Table ${esc(cur.name)}</h2><div class="spacer"></div><span class="pill good">Active</span></div>
+      <div class="subcard">${dl([["Short description",cur.text],["Delivery class","A — Application table"],["Table category","Transparent table"],["Key fields",(cur.keys||[]).length],["Fields",cols.length]])}</div>
+      <div class="tbl-wrap" style="margin-top:12px"><table class="dt"><thead><tr><th>Field</th><th class="th-c">Key</th><th>Data element</th><th>Data type</th><th class="th-r">Length</th><th>Short description</th></tr></thead>
+      <tbody>${cols.map(c=>{const f=inferField(c.up,c.raw,rows);return `<tr><td class="${c.key?"se-key":""}"><b>${esc(c.up)}</b></td><td class="td-c">${c.key?"✓":""}</td><td>${esc(f.de)}</td><td>${esc(f.type)}</td><td class="td-r num">${esc(String(f.len))}</td><td>${esc(f.text)}</td></tr>`;}).join("")}</tbody></table></div></div>`;
+  }
+  return `<div class="card"><div class="card-head"><h2>ABAP Dictionary</h2><div class="spacer"></div><span class="muted" style="font-size:13px">SE11 · Display Table/Structure</span></div>
+    <div class="hint">${I.info}<span>Display the field structure (fields, data elements, types, keys) of a database table — like SAP <b>SE11</b>.</span></div>
+    <div class="toolbar"><div class="field"><label>Database table</label><select id="se11tab">${opts}</select></div><button class="btn primary" data-act="se11go">🔍 Display</button></div></div>${body}`;
+}
 function cfgOrgTable(){const orgs=db.HRP1000.filter(o=>o.otype==="O");
   const parentOf=id=>{const rel=db.HRP1001.find(r=>r.otype==="O"&&r.objid===id&&r.relat==="002"&&r.rsign==="A");return rel?+rel.sobid:null;};
   return `<div class="card"><div class="card-head"><h2>Organizational units</h2><span class="count">${orgs.length}</span><div class="spacer"></div><button class="btn sm primary" data-act="cfgOrg">+ Add</button></div>
-    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>Org ID</th><th>Name</th><th>Short</th><th>Reports to</th><th class="th-r">Actions</th></tr></thead><tbody>${orgs.map(o=>{const p=parentOf(o.objid);const pn=p?(db.HRP1000.find(x=>x.otype==="O"&&x.objid===p)||{}).stext:null;
-    return `<tr><td class="num">${o.objid}</td><td>${esc(o.stext)}</td><td>${esc(o.short)}</td><td>${p?esc(p+" "+(pn||"")):"—"}</td>
+    <div class="tbl-wrap dt-grid dt-grid-1"><table><thead><tr><th>Org ID</th><th>Name</th><th>Short</th><th>Company code</th><th>Reports to</th><th class="th-r">Actions</th></tr></thead><tbody>${orgs.map(o=>{const p=parentOf(o.objid);const pn=p?(db.HRP1000.find(x=>x.otype==="O"&&x.objid===p)||{}).stext:null;
+    const cc=orgCompany(o.objid);const ccn=cc.bukrs?(db.T001[cc.bukrs]||{}).name:null;
+    return `<tr><td class="num">${o.objid}</td><td>${esc(o.stext)}</td><td>${esc(o.short)}</td><td>${cc.bukrs?esc(cc.bukrs+" – "+(ccn||""))+(cc.own?"":` <span class="pill" style="font-size:10px;padding:0 5px">inh.</span>`):"—"}</td><td>${p?esc(p+" "+(pn||"")):"—"}</td>
     <td class="td-r nowrap"><button class="btn xs" data-orgedit="${o.objid}">${I.edit} Edit</button> <button class="btn xs ghost" data-orgdel="${o.objid}">Delete</button></td></tr>`;}).join("")}</tbody></table></div></div>`;}
+/* Payroll run configuration (monthly cut-off period + rates & multipliers). */
+function renderPayrollCfg(){
+  const p=db.payroll;
+  const rows=[
+    ["Period cut-off day","<b>"+p.cutoffDay+"</b> — the payroll month runs from day "+p.cutoffDay+" of the previous month to day "+(p.cutoffDay-1)+" of the month (e.g. 26 May – 25 Jun)"],
+    ["Tax rate",(p.taxRate*100).toFixed(1)+" %"],
+    ["Social security rate",(p.socialRate*100).toFixed(1)+" %"],
+    ["Overtime × normal",p.otMult.normal+"×"],
+    ["Overtime × Sunday",p.otMult.sunday+"×"],
+    ["Overtime × public holiday",p.otMult.holiday+"×"],
+    ["Monthly factor (weeks per month)",p.monthlyFactor]
+  ];
+  return `<div class="card"><div class="card-head"><h2>Payroll run configuration</h2><div class="spacer"></div>${isAdmin()?`<button class="btn sm primary" data-act="payrollcfg">${I.edit} Edit settings</button>`:""}</div>
+    <div class="hint">${I.info}<span>The monthly payroll period is a rolling cut-off (e.g. day 26 → 25). Rates &amp; multipliers drive gross-to-net and overtime pay. Changes apply to the next payroll run.</span></div>
+    <div class="subcard">${dl(rows)}</div></div>`;
+}
+function payrollCfgDialog(){
+  const p=db.payroll;
+  modal("Edit payroll run configuration",`<div class="two">
+    <div class="grp"><label>Period cut-off day (1–28) <span class="req">*</span></label><input type="number" id="pc_cut" min="1" max="28" value="${p.cutoffDay}"></div>
+    <div class="grp"><label>Monthly factor</label><input type="number" step="0.01" id="pc_mf" value="${p.monthlyFactor}"></div>
+    <div class="grp"><label>Tax rate (%)</label><input type="number" step="0.1" id="pc_tax" value="${(p.taxRate*100)}"></div>
+    <div class="grp"><label>Social security rate (%)</label><input type="number" step="0.1" id="pc_soc" value="${(p.socialRate*100)}"></div>
+    <div class="grp sec">Overtime multipliers</div>
+    <div class="grp"><label>OT × normal</label><input type="number" step="0.05" id="pc_otn" value="${p.otMult.normal}"></div>
+    <div class="grp"><label>OT × Sunday</label><input type="number" step="0.05" id="pc_ots" value="${p.otMult.sunday}"></div>
+    <div class="grp"><label>OT × public holiday</label><input type="number" step="0.05" id="pc_oth" value="${p.otMult.holiday}"></div>
+  </div>`,`<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="payrollcfg">Save</button>`);
+}
+/* Payroll period calendar configuration — frequency, first period, cut-off, and the open period.
+   Shows the generated periods with From–To dates and status; periods can be opened/closed in sequence. */
+function renderPayperiodCfg(){
+  const p=db.payroll;const admin=isAdmin();
+  const periods=payrollPeriods();
+  const freqLbl={monthly:"Monthly",quarterly:"Quarterly"}[p.periodFreq||"monthly"];
+  const openP=periods.find(x=>x.status==="Open");
+  const settings=[
+    ["Period frequency",freqLbl],
+    ["Period cut-off","Day <b>"+p.cutoffDay+"</b> → "+(p.cutoffDay-1)+" (e.g. 26 May – 25 Jun)"],
+    ["First period",periods[0]?`<b>${esc(periods[0].label)}</b> · ${fmtDate(periods[0].from)} – ${fmtDate(periods[0].to)}`:"—"],
+    ["Number of periods",p.periodCount],
+    ["Currently open period",openP?`<b>${esc(openP.label)}</b> · ${fmtDate(openP.from)} – ${fmtDate(openP.to)}`:"— (all closed)"]
+  ];
+  const pill=s=>`<span class="pill ${s==="Open"?"good":s==="Closed"?"":"warn"}">${s}</span>`;
+  const rows=periods.map(x=>`<tr>
+    <td class="num">${x.idx}</td>
+    <td><b>${esc(x.label)}</b> <span class="muted">${esc(x.ym)}</span></td>
+    <td>${fmtDate(x.from)}</td><td>${fmtDate(x.to)}</td>
+    <td class="num">${x.days}</td>
+    <td>${pill(x.status)}</td>
+    ${admin?`<td class="td-r nowrap">${x.status==="Planned"?`<button class="btn xs primary" data-act="periodOpen" data-ym="${x.ym}">Open</button>`:x.status==="Open"?`<button class="btn xs" data-act="periodClose" data-ym="${x.ym}">Close</button>`:`<span class="muted">—</span>`}</td>`:""}
+  </tr>`).join("");
+  return `<div class="card"><div class="card-head"><h2>Payroll period configuration</h2><div class="spacer"></div>${admin?`<button class="btn sm primary" data-act="payperiodcfg">${I.edit} Edit period settings</button>`:""}</div>
+    <div class="hint">${I.info}<span>Payroll periods follow the rolling cut-off (day ${p.cutoffDay} → ${p.cutoffDay-1}). Only one period is <b>Open</b> for processing at a time; opening the next period closes the current one.</span></div>
+    <div class="subcard">${dl(settings)}</div>
+    <div class="tbl-wrap" style="margin-top:12px"><table><thead><tr><th>#</th><th>Period</th><th>From</th><th>To</th><th title="Mon–Fri working days">Work days</th><th>Status</th>${admin?`<th class="th-r">Action</th>`:""}</tr></thead>
+    <tbody>${rows}</tbody></table></div></div>`;
+}
+function payperiodCfgDialog(){
+  const p=db.payroll;const periods=payrollPeriods();
+  const openOpts=periods.map(x=>`<option value="${x.ym}" ${(p.openPeriod||"")===x.ym?"selected":""}>${esc(x.label)} · ${fmtDate(x.from)} – ${fmtDate(x.to)}</option>`).join("");
+  modal("Edit payroll period configuration",`<div class="two">
+    <div class="grp"><label>Period frequency</label><select id="pp_freq"><option value="monthly" ${(p.periodFreq||"monthly")==="monthly"?"selected":""}>Monthly</option><option value="quarterly" ${p.periodFreq==="quarterly"?"selected":""}>Quarterly</option></select></div>
+    <div class="grp"><label>Period cut-off day (1–28) <span class="req">*</span></label><input type="number" id="pp_cut" min="1" max="28" value="${p.cutoffDay}"></div>
+    <div class="grp"><label>First period (month) <span class="req">*</span></label><input type="month" id="pp_start" value="${esc(p.periodStart||"2026-01")}"></div>
+    <div class="grp"><label>Number of periods (1–60) <span class="req">*</span></label><input type="number" id="pp_count" min="1" max="60" value="${p.periodCount||12}"></div>
+    <div class="grp" style="grid-column:1/-1"><label>Currently open period</label><select id="pp_open">${openOpts}</select></div>
+  </div>`,`<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="payperiodcfg">Save</button>`);
+}
+/* Admin Center configuration grouped into SuccessFactors-style categories. */
+const CONFIG_GROUPS=[
+  {label:"Personnel Actions",tabs:[["action","Action types · IT0000"],["actreason","Action reasons"],["empstat","Employment status"]]},
+  {label:"Enterprise Structure",tabs:[["company","Company codes"],["parea","Personnel areas"],["cost","Cost centers"],["dept","Departments"],["org","Organizational units"]]},
+  {label:"Personnel Structure",tabs:[["groups","Employee groups"],["subgroups","Employee subgroups"]]},
+  {label:"Payroll & Currency",tabs:[["payrollcfg","Payroll Run"],["payperiod","Payroll periods"],["currency","Currencies"],["exchange","Exchange rates"]]},
+  {label:"Master Data",tabs:[["nat","Countries"],["region","Regions"],["city","Cities"],["lang","Languages"],["anred","Forms of address"],["titles","Titles"],["addrtype","Address types"],["commtype","Comm. types"],["famtype","Family types"]]},
+  {label:"Lifecycle Value Lists",tabs:[["probst","Probation statuses"],["transreason","Transfer reasons"],["promoreason","Promotion reasons"],["termreason","Termination reasons"],["offchk","Offboarding items"],["salreason","Salary adj. reasons"]]},
+  {label:"Localization",tabs:[["syslang","System languages"],["numrange","Number ranges"]]},
+  {label:"Security",tabs:[["roles","Roles"],["users","Users & roles"],["auth","Authorizations"]]},
+  {label:"Development (ABAP)",tabs:[["se16n","Data Browser · SE16N"],["se11","ABAP Dictionary · SE11"]]}
+];
 function renderConfig(){
-  if(!S.cfgTab)S.cfgTab="company";
+  // Each Admin Center sub-menu item opens one config group; show only that group's tabs.
+  let grp=CONFIG_GROUPS.find(g=>g.label===S.cfgGroup)||CONFIG_GROUPS[0];
+  S.cfgGroup=grp.label;
+  // Keep the active tab within the selected group; default to its first tab.
+  if(!grp.tabs.some(([id])=>id===S.cfgTab))S.cfgTab=grp.tabs[0][0];
   const T=(id,l)=>`<button class="btn sm ${S.cfgTab===id?'primary':''}" data-cfg="${id}">${l}</button>`;
   let body="";
   if(S.cfgTab==="auth")body=renderAuthMatrix();
   else if(S.cfgTab==="roles")body=cfgRolesTable();
   else if(S.cfgTab==="users")body=cfgUsersTable();
   else if(S.cfgTab==="org")body=cfgOrgTable();
+  else if(S.cfgTab==="payrollcfg")body=renderPayrollCfg();
+  else if(S.cfgTab==="payperiod")body=renderPayperiodCfg();
+  else if(S.cfgTab==="se16n")body=renderSE16N();
+  else if(S.cfgTab==="se11")body=renderSE11();
   else if(CFG_SCHEMA[S.cfgTab])body=cfgTable(S.cfgTab);
-  app.innerHTML=pageHead(t("Configuration"),t("System configuration"))+
-    `<div class="toolbar" style="gap:6px;flex-wrap:wrap">${T("company","Company codes")}${T("parea","Personnel areas")}${T("groups","Employee groups")}${T("subgroups","Employee subgroups")}${T("cost","Cost centers")}${T("org","Organizational units")}${T("lang","Languages")}${T("nat","Countries")}${T("currency","Currencies")}${T("exchange","Exchange rates")}${T("region","Regions")}${T("city","Cities")}${T("anred","Forms of address")}${T("titles","Titles")}${T("addrtype","Address types")}${T("commtype","Comm. types")}${T("famtype","Family types")}${T("syslang","System languages")}${T("numrange","Number ranges")}${T("roles","Roles")}${T("users","Users & roles")}${T("auth","Authorizations")}</div>${body}`;
+  const tabsHtml=`<div class="cfg-groups"><div class="cfg-grp"><div class="cfg-grp-l">${esc(grp.label)}</div>
+    <div class="cfg-grp-btns">${grp.tabs.map(([id,l])=>T(id,l)).join("")}</div></div></div>`;
+  app.innerHTML=pageHead(t("Admin Center")+" · "+t("Configuration"),esc(grp.label))+tabsHtml+body;
 }
 
 /* ============================ MODULE VIEWS ============================ */
@@ -1969,79 +2733,143 @@ function exportAttReg(){
 }
 
 /* ---- Reports (overtime + attendance, date range) ---- */
+/* ---- Main screen / Home (SuccessFactors-style landing with tiles) ---- */
+/* SAP Fiori 4.0 "My Home" launchpad: To-Dos + Overview KPI tiles + one section
+   of app tiles per module — mirrors the S/4HANA My Home reference. */
+function renderHome(){
+  const pending=(db.leaveRequests||[]).filter(r=>r.status==="Pending");
+  const myPending=(db.leaveRequests||[]).filter(r=>r.pernr===SESSION.pernr&&r.status==="Pending");
+  const empCount=(db.emp||[]).length;
+  const openReq=(db.reqData||[]).filter(r=>(r.status||"Open")==="Open").length;
+  const deptCount=Object.keys(db.departments||{}).length;
+  const posCount=positions("",today()).length;
+  // A Fiori dynamic tile: title, subtitle, icon (+ optional number) and a footer.
+  const ftile=(o)=>`<button class="ftile" data-nav="${o.nav}"${o.grp?` data-cfggrp="${esc(o.grp)}"`:""}${o.cfg?` data-cfgtab="${o.cfg}"`:""}${o.rep?` data-rep="${o.rep}"`:""}>
+    ${o.badge?`<span class="tbadge">${o.badge}</span>`:""}
+    <div class="ft-title">${esc(o.title)}</div><div class="ft-sub">${esc(o.sub||"")}</div>
+    <div class="ft-body"><span class="ft-ico">${I[o.icon]||I.doc}</span>${o.num!=null?`<span class="ft-num ${o.numc||""}">${o.num}</span>`:""}</div>
+    <div class="ft-foot">${esc(o.foot||"")}</div></button>`;
+
+  // ---- To-Dos ----
+  const todos=(isAdmin()||isManager())?pending:myPending;
+  const todoHead=`<div class="lp-section"><h2>To-Dos (${todos.length})</h2>
+    <button class="lp-caret" title="Collapse">▾</button>
+    <span class="lp-refresh" data-nav="home">↻ now</span></div>`;
+  const todoBody=todos.length
+    ? `<div class="todo-list">${todos.slice(0,6).map(r=>{const nm=empName(r.pernr)||("PERNR "+r.pernr);
+        const days=(r.begda&&r.endda)?`${fmtDate(r.begda)} – ${fmtDate(r.endda)}`:"";
+        return `<div class="todo-item" data-nav="${isAdmin()||isManager()?"leave":"myleave"}"><span class="ti-ic">${I.cal}</span>
+          <span class="ti-tx"><b>${(isAdmin()||isManager())?esc(nm)+" · Leave request":"Leave request"}</b><div>${esc(days)} · awaiting ${isAdmin()||isManager()?"your approval":"approval"}</div></span>
+          <span class="ti-go">${I.chev}</span></div>`;}).join("")}</div>`
+    : `<div class="todo-card"><div class="t1">You have completed all of your to-dos.</div><div class="t2">New ones will show up here.</div></div>`;
+
+  // ---- Overview KPI tiles (role-aware) ----
+  let kpis;
+  if(isAdmin())kpis=[
+    {title:"Employees",sub:"Headcount",icon:"people",num:empCount,foot:"Active",nav:"list"},
+    {title:"Pending leave",sub:"Approvals",icon:"cal",num:pending.length,numc:pending.length?"neg":"",foot:pending.length?"Action needed":"All clear",nav:"leave",badge:pending.length||""},
+    {title:"Open requisitions",sub:"Recruiting",icon:"education",num:openReq,foot:"Open",nav:"recruit"},
+    {title:"Positions",sub:"Org management",icon:"org",num:posCount,foot:"Defined",nav:"pos"},
+    {title:"Departments",sub:"Enterprise structure",icon:"doc",num:deptCount,foot:"Units",nav:"org"}
+  ];
+  else if(isManager())kpis=[
+    {title:"Pending approvals",sub:"My team",icon:"cal",num:pending.length,numc:pending.length?"neg":"",foot:pending.length?"Action needed":"All clear",nav:"leave",badge:pending.length||""},
+    {title:"Team size",sub:"Direct + indirect",icon:"people",num:empCount,foot:"Members",nav:"mss"}
+  ];
+  else kpis=[
+    {title:"My requests",sub:"Time off",icon:"cal",num:myPending.length,foot:myPending.length?"Pending":"None open",nav:"myleave",badge:myPending.length||""},
+    {title:"My profile",sub:"Personnel no. "+(SESSION.pernr||"—"),icon:"person",num:null,foot:"Open my record",nav:"ess"}
+  ];
+  const overview=`<div class="lp-head">Overview</div><div class="ftiles">${kpis.map(ftile).join("")}</div>`;
+
+  // ---- One section per module, with an app tile per sub-item ----
+  const groups=navGroups(SESSION.role).filter(g=>!(g.items.length===1&&g.items[0][0]==="home"));
+  const sections=groups.map(g=>`<div class="lp-head">${esc(g.label)}</div>
+    <div class="ftiles">${g.items.map(([v,l,o])=>{o=o||{};
+      return ftile({title:l,sub:g.label,icon:g.ico,nav:v,grp:o.grp,cfg:o.cfg,rep:o.rep,
+        badge:((v==="leave"||v==="myleave")&&todos.length)?todos.length:""});}).join("")}</div>`).join("");
+
+  app.innerHTML=todoHead+todoBody+overview+sections;
+}
+/* Reports split into separate reports selectable by the Reporting sub-menu
+   (and a sub-nav bar on the page). S.rep chooses which one renders. */
+const REPORTS=[["ot","Overtime"],["att","Attendances"],["empatt","Employee Attendance"],["matrix","Daily Attendance"]];
 function renderReports(){
+  if(!S.rep)S.rep="ot";
   if(!S.rFrom)S.rFrom="2026-01-01"; if(!S.rTo)S.rTo="2026-12-31";
   if(!S.mFrom)S.mFrom="2026-05-01"; if(!S.mTo)S.mTo="2026-05-14";
   if(!S.eaFrom)S.eaFrom="2026-08-01"; if(!S.eaTo)S.eaTo="2026-08-14";
   if(S.attEmp==null&&db.emp.length)S.attEmp=db.emp[0].pernr;
-  const ot=overtimeReport(S.rFrom,S.rTo), att=attendanceReport(S.rFrom,S.rTo);
-  // Per-employee attendance from date to date
-  const ea=employeeAttendance(S.attEmp,S.eaFrom,S.eaTo);
-  const eaOpts=db.emp.slice().sort((a,b)=>a.pernr-b.pernr).map(e=>`<option value="${e.pernr}" ${e.pernr===S.attEmp?"selected":""}>${e.pernr} – ${esc(empName(e.pernr))}</option>`).join("");
-  const eaCode=c=>({P:"m-pre",A:"m-abs",T:"m-att",H:"m-hol","·":"m-off"}[c]||"m-att");
-  const eaHtml=`<div class="card list-card"><div class="card-head"><h2>Employee attendance — ${esc(empName(S.attEmp))} · ${fmtDate(S.eaFrom)} – ${fmtDate(S.eaTo)}</h2><span class="count">${ea.days.length}</span><div class="spacer"></div>
-    <div class="dt-search"><select id="eaEmp">${eaOpts}</select></div>
-    <div class="dt-search"><input id="eaFrom" type="date" value="${S.eaFrom}"></div><div class="dt-search"><input id="eaTo" type="date" value="${S.eaTo}"></div>
-    <button class="btn sm" data-dtexport="empatt" title="Export to Excel (CSV)">${I.doc} Excel</button></div>
-    <div class="stat-row">
-      <div class="stat"><div class="v num">${ea.sum.present}</div><div class="l">Present</div></div>
-      <div class="stat"><div class="v num">${ea.sum.absent}</div><div class="l">Absent</div></div>
-      <div class="stat"><div class="v num">${ea.sum.event}</div><div class="l">Attendance/Event</div></div>
-      <div class="stat"><div class="v num">${ea.sum.holiday+ea.sum.off}</div><div class="l">Non-working</div></div>
-      <div class="stat"><div class="v num">${ea.sum.hours.toFixed(1)}</div><div class="l">Total hours</div></div>
-    </div>
-    <div class="tbl-wrap dt-grid dt-grid-1"><table class="dt"><thead><tr><th>Date</th><th>Day</th><th>Status</th><th>Hours</th><th>Note</th></tr></thead>
-    <tbody>${ea.days.map(d=>`<tr><td class="num">${fmtDate(d.iso)}</td><td>${d.wd}</td><td><span class="pill ${eaCode(d.code)}">${esc(d.label)}</span></td><td class="num">${d.hours!=null?d.hours:"—"}</td><td>${esc(d.note||"")}</td></tr>`).join("")||`<tr><td colspan="5"><div class="empty">No days in range.</div></td></tr>`}</tbody></table></div></div>`;
-  _dtReg.empatt={title:"Employee attendance "+empName(S.attEmp)+" "+S.eaFrom+"_"+S.eaTo,
-    cols:[{k:"iso",l:"Date"},{k:"wd",l:"Day"},{k:"label",l:"Status"},{k:"hours",l:"Hours"},{k:"note",l:"Note"}],rows:ea.days};
-  const sum=k=>ot.reduce((a,e)=>a+e[k],0);
-  // Daily attendance matrix (capped at 31 columns)
-  let mTo=S.mTo; if(daysBetween(S.mFrom,S.mTo)>31){const d=new Date(S.mFrom+"T00:00:00");d.setDate(d.getDate()+30);mTo=d.toISOString().slice(0,10);}
-  const mtx=attendanceMatrix(S.mFrom,mTo);
-  const matrixHtml=`<div class="card list-card"><div class="card-head"><h2>Daily attendance — all employees · ${fmtDate(S.mFrom)} – ${fmtDate(mTo)}</h2><span class="count">${mtx.rows.length}</span><div class="spacer"></div>
-    <div class="dt-search"><input id="mFrom" type="date" value="${S.mFrom}"></div><div class="dt-search"><input id="mTo" type="date" value="${S.mTo}"></div></div>
-    <div class="mtx-legend"><span class="pill m-pre">P Present</span><span class="pill m-abs">A Absence</span><span class="pill m-att">T Attendance</span><span class="pill m-hol">H Holiday</span><span class="pill m-off">· Non-working</span></div>
-    <div class="tbl-wrap"><table class="mtx"><thead><tr><th class="mtx-emp">Employee</th>${mtx.days.map(d=>`<th class="mtx-day ${d.weekend||d.holiday?'we':''}">${d.dom}<br><span class="muted">${d.wd}</span></th>`).join("")}</tr></thead>
-    <tbody>${mtx.rows.map(r=>`<tr><td class="mtx-emp"><span class="num">${r.pernr}</span> ${esc(r.name)}</td>${r.cells.map(c=>`<td class="mtx-cell ${c.cls}" title="${esc(c.title)}">${c.code}</td>`).join("")}</tr>`).join("")||`<tr><td colspan="${mtx.days.length+1}"><div class="empty">No employees.</div></td></tr>`}</tbody></table></div></div>`;
-  app.innerHTML=pageHead("Reports","Working time & overtime")+`
-  <div class="toolbar">
+  const rep=REPORTS.some(r=>r[0]===S.rep)?S.rep:"ot";
+  const repName=(REPORTS.find(r=>r[0]===rep)||REPORTS[0])[1];
+  const dateBar=`<div class="toolbar">
     <div class="field"><label>From date</label><input type="date" id="rFrom" value="${S.rFrom}"></div>
     <div class="field"><label>To date</label><input type="date" id="rTo" value="${S.rTo}"></div>
-  </div>
-  <div class="stat-row">
-    <div class="stat"><div class="v num">${sum("normal").toFixed(1)}</div><div class="l">Normal OT hours</div></div>
-    <div class="stat"><div class="v num">${sum("sunday").toFixed(1)}</div><div class="l">Sunday OT hours</div></div>
-    <div class="stat"><div class="v num">${sum("holiday").toFixed(1)}</div><div class="l">Public-holiday OT hours</div></div>
-    <div class="stat"><div class="v num">${sum("total").toFixed(1)}</div><div class="l">Total OT hours</div></div>
-  </div>
-  ${dtTable("otrep","Overtime by employee · "+fmtDate(S.rFrom)+" – "+fmtDate(S.rTo),[
-    {k:"pernr",l:"Pers.No.",always:true,html:e=>`<span class="pernr num">${e.pernr}</span>`},
-    {k:"name",l:"Employee",always:true},
-    {k:"normal",l:"Normal OT",v:e=>e.normal,html:e=>`<span class="num">${e.normal.toFixed(1)}</span>`},
-    {k:"sunday",l:"Sunday OT",v:e=>e.sunday,html:e=>`<span class="num">${e.sunday.toFixed(1)}</span>`},
-    {k:"holiday",l:"Holiday OT",v:e=>e.holiday,html:e=>`<span class="num">${e.holiday.toFixed(1)}</span>`},
-    {k:"total",l:"Total",v:e=>e.total,html:e=>`<b class="num">${e.total.toFixed(1)}</b>`}
-  ],ot)}
-  <div style="height:14px"></div>
-  ${dtTable("attrep","Attendances · "+fmtDate(S.rFrom)+" – "+fmtDate(S.rTo),[
-    {k:"pernr",l:"Pers.No.",always:true,html:a=>`<span class="pernr num">${a.pernr}</span>`},
-    {k:"name",l:"Employee",always:true},
-    {k:"type",l:"Type"},
-    {k:"period",l:"From – To",v:a=>a.begda,html:a=>`<span class="num">${fmtDate(a.begda)} – ${fmtDate(a.endda)}</span>`},
-    {k:"days",l:"Days",v:a=>a.days!=null?a.days:"",html:a=>`<span class="num">${a.days!=null?a.days:"—"}</span>`},
-    {k:"hours",l:"Hours",v:a=>a.hours!=null?a.hours:"",html:a=>`<span class="num">${a.hours!=null?a.hours:"—"}</span>`}
-  ],att)}
-  <div style="height:14px"></div>
-  ${eaHtml}
-  <div style="height:14px"></div>
-  ${matrixHtml}`;
-  $("#rFrom").addEventListener("change",e=>{S.rFrom=e.target.value;renderReports();});
-  $("#rTo").addEventListener("change",e=>{S.rTo=e.target.value;renderReports();});
-  $("#mFrom").addEventListener("change",e=>{S.mFrom=e.target.value;renderReports();});
-  $("#mTo").addEventListener("change",e=>{S.mTo=e.target.value;renderReports();});
-  const eaEmp=$("#eaEmp");if(eaEmp)eaEmp.addEventListener("change",e=>{S.attEmp=+e.target.value;renderReports();});
-  const eaF=$("#eaFrom");if(eaF)eaF.addEventListener("change",e=>{S.eaFrom=e.target.value;renderReports();});
-  const eaT=$("#eaTo");if(eaT)eaT.addEventListener("change",e=>{S.eaTo=e.target.value;renderReports();});
+  </div>`;
+  let body="";
+  if(rep==="ot"){
+    const ot=overtimeReport(S.rFrom,S.rTo);const sum=k=>ot.reduce((a,e)=>a+e[k],0);
+    body=dateBar+`<div class="stat-row">
+      <div class="stat"><div class="v num">${sum("normal").toFixed(1)}</div><div class="l">Normal OT hours</div></div>
+      <div class="stat"><div class="v num">${sum("sunday").toFixed(1)}</div><div class="l">Sunday OT hours</div></div>
+      <div class="stat"><div class="v num">${sum("holiday").toFixed(1)}</div><div class="l">Public-holiday OT hours</div></div>
+      <div class="stat"><div class="v num">${sum("total").toFixed(1)}</div><div class="l">Total OT hours</div></div>
+    </div>`+dtTable("otrep","Overtime by employee · "+fmtDate(S.rFrom)+" – "+fmtDate(S.rTo),[
+      {k:"pernr",l:"Pers.No.",always:true,html:e=>`<span class="pernr num">${e.pernr}</span>`},
+      {k:"name",l:"Employee",always:true},
+      {k:"normal",l:"Normal OT",v:e=>e.normal,html:e=>`<span class="num">${e.normal.toFixed(1)}</span>`},
+      {k:"sunday",l:"Sunday OT",v:e=>e.sunday,html:e=>`<span class="num">${e.sunday.toFixed(1)}</span>`},
+      {k:"holiday",l:"Holiday OT",v:e=>e.holiday,html:e=>`<span class="num">${e.holiday.toFixed(1)}</span>`},
+      {k:"total",l:"Total",v:e=>e.total,html:e=>`<b class="num">${e.total.toFixed(1)}</b>`}
+    ],ot);
+  }else if(rep==="att"){
+    const att=attendanceReport(S.rFrom,S.rTo);
+    body=dateBar+dtTable("attrep","Attendances · "+fmtDate(S.rFrom)+" – "+fmtDate(S.rTo),[
+      {k:"pernr",l:"Pers.No.",always:true,html:a=>`<span class="pernr num">${a.pernr}</span>`},
+      {k:"name",l:"Employee",always:true},
+      {k:"type",l:"Type"},
+      {k:"period",l:"From – To",v:a=>a.begda,html:a=>`<span class="num">${fmtDate(a.begda)} – ${fmtDate(a.endda)}</span>`},
+      {k:"days",l:"Days",v:a=>a.days!=null?a.days:"",html:a=>`<span class="num">${a.days!=null?a.days:"—"}</span>`},
+      {k:"hours",l:"Hours",v:a=>a.hours!=null?a.hours:"",html:a=>`<span class="num">${a.hours!=null?a.hours:"—"}</span>`}
+    ],att);
+  }else if(rep==="empatt"){
+    const ea=employeeAttendance(S.attEmp,S.eaFrom,S.eaTo);
+    const eaOpts=db.emp.slice().sort((a,b)=>a.pernr-b.pernr).map(e=>`<option value="${e.pernr}" ${e.pernr===S.attEmp?"selected":""}>${e.pernr} – ${esc(empName(e.pernr))}</option>`).join("");
+    const eaCode=c=>({P:"m-pre",A:"m-abs",T:"m-att",H:"m-hol","·":"m-off"}[c]||"m-att");
+    _dtReg.empatt={title:"Employee attendance "+empName(S.attEmp)+" "+S.eaFrom+"_"+S.eaTo,
+      cols:[{k:"iso",l:"Date"},{k:"wd",l:"Day"},{k:"label",l:"Status"},{k:"hours",l:"Hours"},{k:"note",l:"Note"}],rows:ea.days};
+    body=`<div class="card list-card"><div class="card-head"><h2>Employee attendance — ${esc(empName(S.attEmp))} · ${fmtDate(S.eaFrom)} – ${fmtDate(S.eaTo)}</h2><span class="count">${ea.days.length}</span><div class="spacer"></div>
+      <div class="dt-search"><select id="eaEmp">${eaOpts}</select></div>
+      <div class="dt-search"><input id="eaFrom" type="date" value="${S.eaFrom}"></div><div class="dt-search"><input id="eaTo" type="date" value="${S.eaTo}"></div>
+      <button class="btn sm" data-dtexport="empatt" title="Export to Excel (CSV)">${I.doc} Excel</button></div>
+      <div class="stat-row">
+        <div class="stat"><div class="v num">${ea.sum.present}</div><div class="l">Present</div></div>
+        <div class="stat"><div class="v num">${ea.sum.absent}</div><div class="l">Absent</div></div>
+        <div class="stat"><div class="v num">${ea.sum.event}</div><div class="l">Attendance/Event</div></div>
+        <div class="stat"><div class="v num">${ea.sum.holiday+ea.sum.off}</div><div class="l">Non-working</div></div>
+        <div class="stat"><div class="v num">${ea.sum.hours.toFixed(1)}</div><div class="l">Total hours</div></div>
+      </div>
+      <div class="tbl-wrap dt-grid dt-grid-1"><table class="dt"><thead><tr><th>Date</th><th>Day</th><th>Status</th><th>Hours</th><th>Note</th></tr></thead>
+      <tbody>${ea.days.map(d=>`<tr><td class="num">${fmtDate(d.iso)}</td><td>${d.wd}</td><td><span class="pill ${eaCode(d.code)}">${esc(d.label)}</span></td><td class="num">${d.hours!=null?d.hours:"—"}</td><td>${esc(d.note||"")}</td></tr>`).join("")||`<tr><td colspan="5"><div class="empty">No days in range.</div></td></tr>`}</tbody></table></div></div>`;
+  }else{
+    let mTo=S.mTo; if(daysBetween(S.mFrom,S.mTo)>31){const d=new Date(S.mFrom+"T00:00:00");d.setDate(d.getDate()+30);mTo=d.toISOString().slice(0,10);}
+    const mtx=attendanceMatrix(S.mFrom,mTo);
+    body=`<div class="card list-card"><div class="card-head"><h2>Daily attendance — all employees · ${fmtDate(S.mFrom)} – ${fmtDate(mTo)}</h2><span class="count">${mtx.rows.length}</span><div class="spacer"></div>
+      <div class="dt-search"><input id="mFrom" type="date" value="${S.mFrom}"></div><div class="dt-search"><input id="mTo" type="date" value="${S.mTo}"></div></div>
+      <div class="mtx-legend"><span class="pill m-pre">P Present</span><span class="pill m-abs">A Absence</span><span class="pill m-att">T Attendance</span><span class="pill m-hol">H Holiday</span><span class="pill m-off">· Non-working</span></div>
+      <div class="tbl-wrap"><table class="mtx"><thead><tr><th class="mtx-emp">Employee</th>${mtx.days.map(d=>`<th class="mtx-day ${d.weekend||d.holiday?'we':''}">${d.dom}<br><span class="muted">${d.wd}</span></th>`).join("")}</tr></thead>
+      <tbody>${mtx.rows.map(r=>`<tr><td class="mtx-emp"><span class="num">${r.pernr}</span> ${esc(r.name)}</td>${r.cells.map(c=>`<td class="mtx-cell ${c.cls}" title="${esc(c.title)}">${c.code}</td>`).join("")}</tr>`).join("")||`<tr><td colspan="${mtx.days.length+1}"><div class="empty">No employees.</div></td></tr>`}</tbody></table></div></div>`;
+  }
+  const subnav=`<div class="toolbar" style="gap:6px;flex-wrap:wrap">${REPORTS.map(([k,l])=>`<button class="btn sm ${rep===k?'primary':''}" data-nav="reports" data-rep="${k}">${esc(l)}</button>`).join("")}</div>`;
+  app.innerHTML=pageHead("Reports",repName)+subnav+body;
+  const bind=(id,fn)=>{const el=$("#"+id);if(el)el.addEventListener("change",fn);};
+  bind("rFrom",e=>{S.rFrom=e.target.value;renderReports();});
+  bind("rTo",e=>{S.rTo=e.target.value;renderReports();});
+  bind("mFrom",e=>{S.mFrom=e.target.value;renderReports();});
+  bind("mTo",e=>{S.mTo=e.target.value;renderReports();});
+  bind("eaEmp",e=>{S.attEmp=+e.target.value;renderReports();});
+  bind("eaFrom",e=>{S.eaFrom=e.target.value;renderReports();});
+  bind("eaTo",e=>{S.eaTo=e.target.value;renderReports();});
 }
 
 /* ---- Graphical org chart (boxed tree) ---- */
@@ -2075,8 +2903,75 @@ function renderReportGraph(){
 
 /* ---- Payroll ---- */
 /* First/last calendar day of a YYYY-MM month string. */
-function monthRange(ym){const [y,m]=ym.split("-").map(Number);const from=ym+"-01";
-  const last=new Date(y,m,0).getDate();const to=ym+"-"+String(last).padStart(2,"0");return {from,to};}
+/* A payroll month is identified by its end month (ym = "YYYY-MM"). With a
+   configurable cut-off day D (default 26) the period runs from day D of the
+   previous month to day D-1 of the end month — e.g. 2026-06 -> 26 May–25 Jun.
+   Cut-off 1 keeps a plain calendar month. */
+function monthRange(ym){
+  const [y,m]=ym.split("-").map(Number);
+  const cut=Math.max(1,Math.min(28,(db.payroll&&db.payroll.cutoffDay)||1));
+  const pad=n=>String(n).padStart(2,"0");
+  if(cut<=1){const last=new Date(y,m,0).getDate();return {from:ym+"-01",to:ym+"-"+pad(last)};}
+  const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+  return {from:iso(new Date(y,m-2,cut)), to:iso(new Date(y,m-1,cut-1))};
+}
+/* Working (Mon–Fri) days within an inclusive date range. */
+function workdays(fromIso,toIso){let a=new Date(fromIso+"T00:00:00"),b=new Date(toIso+"T00:00:00"),n=0;
+  for(let d=new Date(a);d<=b;d.setDate(d.getDate()+1)){const w=d.getDay();if(w!==0&&w!==6)n++;}return n;}
+/* Generate the configured payroll period calendar with per-period status.
+   Status is derived from the currently-open period: past = Closed, current = Open, future = Planned. */
+function payrollPeriods(){
+  const p=db.payroll||{};
+  const freq=p.periodFreq||"monthly";
+  const step=freq==="quarterly"?3:1;                 // months per period
+  const cnt=Math.max(1,Math.min(60,p.periodCount||12));
+  const [sy,sm]=(p.periodStart||"2026-01").split("-").map(Number);
+  const openYm=p.openPeriod||(p.periodStart||"2026-01");
+  const list=[];
+  for(let i=0;i<cnt;i++){
+    const d=new Date(sy,sm-1+i*step,1);
+    const ym=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+    const r=monthRange(ym);
+    const lbl=freq==="quarterly"?("Q"+(Math.floor(d.getMonth()/3)+1)+" "+d.getFullYear())
+      :d.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+    const status=ym<openYm?"Closed":ym===openYm?"Open":"Planned";
+    list.push({idx:i+1,ym,label:lbl,from:r.from,to:r.to,days:workdays(r.from,r.to),status});
+  }
+  return list;
+}
+/* Build a searchable list of payroll months around the current selection. */
+function payMonths(centerYm){
+  const [cy,cm]=(centerYm||"2026-06").split("-").map(Number);
+  const list=[];
+  for(let i=18;i>=-6;i--){const d=new Date(cy,cm-1-i,1);const ym=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+    const r=monthRange(ym);const lbl=d.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+    list.push({ym,label:lbl,range:fmtDate(r.from)+" – "+fmtDate(r.to)});}
+  return list;
+}
+/* Payroll totals grouped by each employee's local (pay) currency, plus the
+   converted grand total in the chosen document currency. */
+function multiCurrencyTotals(run,doc,totGrossDoc,totNetDoc){
+  const fmtC=(v,c)=>fmtAmt(v,c);
+  const by={};
+  run.forEach(r=>{const c=r.currency;(by[c]=by[c]||{cur:c,n:0,gross:0,ded:0,net:0});
+    by[c].n++;by[c].gross+=r.gross;by[c].ded+=r.tax+r.social;by[c].net+=r.net;});
+  const rows=Object.values(by).sort((a,b)=>a.cur<b.cur?-1:a.cur>b.cur?1:0);
+  const totDedDoc=run.reduce((a,r)=>a+fxConvert(r.tax+r.social,r.currency,doc),0);
+  const body=rows.map(x=>`<tr>
+    <td><b>${esc(x.cur)}</b>${x.cur===doc?` <span class="pill" style="font-size:10px;padding:0 5px">document</span>`:""}</td>
+    <td class="num td-r">${x.n}</td>
+    <td class="num td-r">${fmtC(x.gross,x.cur)}</td>
+    <td class="num td-r">${fmtC(x.ded,x.cur)}</td>
+    <td class="num td-r"><b>${fmtC(x.net,x.cur)}</b></td>
+    <td class="num td-r">${x.cur===doc?"1.0000":fxConvert(1,x.cur,doc).toFixed(4)}</td>
+    <td class="num td-r">${fmtC(fxConvert(x.net,x.cur,doc),doc)}</td></tr>`).join("");
+  return `<div class="card"><div class="card-head"><h2>Total amount by currency</h2><span class="count">${rows.length}</span><div class="spacer"></div>
+    <span class="muted" style="font-size:13px">${rows.length>1?"Multi-currency payroll":"Single currency"} · document currency <b>${esc(doc)}</b></span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Local currency</th><th class="th-r">Employees</th><th class="th-r">Gross</th><th class="th-r">Deductions</th><th class="th-r">Net</th><th class="th-r">Rate → ${esc(doc)}</th><th class="th-r">Net (${esc(doc)})</th></tr></thead>
+    <tbody>${body}
+      <tr class="mc-total"><td><b>Total (${esc(doc)})</b></td><td class="num td-r">${run.length}</td><td class="num td-r">${fmtC(totGrossDoc,doc)}</td><td class="num td-r">${fmtC(totDedDoc,doc)}</td><td class="num td-r"><b>${fmtC(totNetDoc,doc)}</b></td><td class="num td-r">—</td><td class="num td-r"><b>${fmtC(totNetDoc,doc)}</b></td></tr>
+    </tbody></table></div></div>`;
+}
 function renderPayroll(){
   if(!S.payMonth)S.payMonth="2026-06";
   const mr=monthRange(S.payMonth);S.payFrom=mr.from;S.payTo=mr.to;
@@ -2088,11 +2983,18 @@ function renderPayroll(){
   const totGrossDoc=run.reduce((a,r)=>a+fxConvert(r.gross,r.currency,doc),0), totNetDoc=run.reduce((a,r)=>a+fxConvert(r.net,r.currency,doc),0);
   const rate=r=>fxConvert(1,r.currency,doc);
   const monthLbl=new Date(S.payFrom+"T00:00:00").toLocaleDateString("en-US",{month:"long",year:"numeric"});
-  app.innerHTML=pageHead("Payroll","Payroll run — monthly")+`
+  const months=payMonths(S.payMonth);
+  const cur=months.find(x=>x.ym===S.payMonth)||{label:monthLbl,range:fmtDate(S.payFrom)+" – "+fmtDate(S.payTo)};
+  const pmCombo=`<div class="combo pm-combo" id="pmCombo" style="min-width:260px">
+    <input id="pmInput" autocomplete="off" placeholder="Search payroll month…" value="${esc(cur.label+"  ·  "+cur.range)}">
+    <button type="button" class="combo-btn" id="pmToggle" title="Choose payroll month">${I.cal}</button>
+    <div class="combo-list" id="pmList">${months.map(x=>`<div class="combo-opt" data-pmopt="${x.ym}"><b>${esc(x.label)}</b> <span class="muted">·  ${esc(x.range)}</span></div>`).join("")}</div>
+  </div>`;
+  app.innerHTML=pageHead("Payroll","Payroll run — monthly · period cut-off day "+((db.payroll&&db.payroll.cutoffDay)||1))+`
   <div class="toolbar">
-    <div class="field"><label>Payroll month</label><input type="month" id="payMonth" value="${S.payMonth}"></div>
+    <div class="field"><label>Payroll month <span class="muted" style="font-weight:400;text-transform:none;letter-spacing:0">(search)</span></label>${pmCombo}</div>
     <div class="field"><label>Document currency</label><select id="payCurr">${opt(db.currencies,doc)}</select></div>
-    <div class="field"><label>Period</label><input type="text" value="${fmtDate(S.payFrom)} – ${fmtDate(S.payTo)}" readonly style="min-width:190px"></div>
+    <div class="field"><label>Period (date to date)</label><input type="text" value="${fmtDate(S.payFrom)} – ${fmtDate(S.payTo)}" readonly style="min-width:190px"></div>
   </div>
   <div class="stat-row">
     <div class="stat"><div class="v num">${run.length}</div><div class="l">Employees</div></div>
@@ -2100,6 +3002,7 @@ function renderPayroll(){
     <div class="stat"><div class="v num">${fmtC(totGrossDoc,doc)}</div><div class="l">Total gross (${doc})</div></div>
     <div class="stat"><div class="v num">${fmtC(totNetDoc,doc)}</div><div class="l">Total net (${doc})</div></div>
   </div>
+  ${multiCurrencyTotals(run,doc,totGrossDoc,totNetDoc)}
   ${dtTable("payroll","Payroll results · "+monthLbl+" · local & document currency",[
     {k:"pernr",l:"Pers.No.",always:true,html:r=>`<span class="pernr num">${r.pernr}</span>`},
     {k:"name",l:"Employee",always:true},
@@ -2115,8 +3018,19 @@ function renderPayroll(){
     {k:"netfx",l:"Net ("+doc+")",v:r=>fxConvert(r.net,r.currency,doc),html:r=>`<b class="num">${fmtC(fxConvert(r.net,r.currency,doc),doc)}</b>`},
     {k:"act",l:"Actions",always:true,html:r=>`<button class="btn sm" data-payslip="${r.pernr}">Payslip</button>`}
   ],run)}`;
-  $("#payMonth").addEventListener("change",e=>{S.payMonth=e.target.value||S.payMonth;renderPayroll();});
   $("#payCurr").addEventListener("change",e=>{S.payCurr=e.target.value;renderPayroll();});
+  // Payroll Month search-list (combobox): focus/type to filter, click to pick.
+  const pmInput=$("#pmInput"),pmList=$("#pmList");
+  if(pmInput&&pmList){
+    const openList=()=>pmList.classList.add("open");
+    pmInput.addEventListener("focus",()=>{pmInput.select();openList();});
+    pmInput.addEventListener("input",()=>{const q=pmInput.value.toLowerCase();openList();
+      let any=false;pmList.querySelectorAll(".combo-opt").forEach(o=>{const m=o.textContent.toLowerCase().includes(q);o.style.display=m?"":"none";if(m)any=true;});
+      let e=pmList.querySelector(".combo-empty");if(!any){if(!e){e=document.createElement("div");e.className="combo-empty";e.textContent="No matching month.";pmList.appendChild(e);}}else if(e)e.remove();});
+    pmList.addEventListener("click",e=>{const o=e.target.closest("[data-pmopt]");if(o){S.payMonth=o.dataset.pmopt;renderPayroll();}});
+  }
+  const pmToggle=$("#pmToggle");
+  if(pmToggle)pmToggle.addEventListener("click",e=>{e.stopPropagation();pmList.classList.toggle("open");if(pmList.classList.contains("open"))pmInput.focus();});
 }
 function payslipContent(pernr){
   const s=payslip(pernr,S.payFrom||"2026-06-01",S.payTo||"2026-06-30");const c=s.currency;
@@ -2160,6 +3074,7 @@ function editModeSel(id){return `<div class="grp"><label>Edit mode</label><selec
   <option value="correct">Correction — overwrite the current record (no new slice)</option></select></div>`;}
 function optName(arr,sel){return `<option value="">—</option>`+arr.map(o=>`<option value="${o.id}" ${String(sel)===String(o.id)?'selected':''}>${esc(o.name)}</option>`).join("");}
 function modal(title,bodyHtml,footHtml){
+  document.querySelectorAll(".nav-sub.open,.action-menu.open").forEach(d=>d.classList.remove("open"));
   $("#modal-root").innerHTML=`<div class="modal-bg" data-close><div class="modal" role="dialog" aria-modal="true">
     <h3>${title}</h3><div class="body">${bodyHtml}</div><div class="foot">${footHtml}</div></div></div>`;
   const first=$("#modal-root input,#modal-root select");if(first)first.focus();
@@ -2473,7 +3388,8 @@ function cfgCostDialog(){modal("Add cost center",`
 function cfgOrgDialog(){const orgs=orgFlat(S.key);
   modal("Add organizational unit",`
   <div class="grp"><label>Name <span class="req">*</span></label><input id="co_name"></div>
-  <div class="grp"><label>Reports to (parent)</label><select id="co_parent"><option value="">— none —</option>${orgs.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join("")}</select></div>`,
+  <div class="grp"><label>Reports to (parent)</label><select id="co_parent"><option value="">— none —</option>${orgs.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join("")}</select></div>
+  <div class="grp"><label>Company code</label><select id="co_bukrs"><option value="">— inherit from parent —</option>${opt(db.T001,"")}</select></div>`,
   `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="cfgOrg">Add</button>`);}
 function cfgTitleDialog(){modal("Add title · IT0002",`
   <div class="grp"><label>Title <span class="req">*</span></label><input id="ct_txt" placeholder="e.g. Dr., Prof., M.Sc."></div>`,
@@ -2525,21 +3441,36 @@ function cfgUserDialog(username){
   const edit=username!=null;const u=edit?db.users.find(x=>x.username===username)||{}:{};
   const uRoles=u.roles||(u.role?[u.role]:[]);
   cfgCtx={user:edit?username:null};
-  const roleChecks=Object.entries(db.roleNames).map(([k,v])=>`<label class="rolechk"><input type="checkbox" class="cu_role" value="${k}" ${(edit?uRoles.includes(k):k==="EMPLOYEE")?"checked":""}> ${esc(v)}</label>`).join("");
+  const roleChecks=Object.entries(db.roleNames).map(([k,v])=>`<label class="rolechk"><input type="checkbox" class="cu_role" value="${k}" ${(edit?uRoles.includes(k):k==="EMPLOYEE")?"checked":""}> <b>${esc(k)}</b> — ${esc(v)}</label>`).join("");
   const empOpts=db.emp.map(e=>{const p=validOn(db.PA0002,e.pernr,today());return `<option value="${e.pernr}" ${u.pernr===e.pernr?"selected":""}>${e.pernr} - ${p?esc(p.vorna+" "+p.nachn):""}</option>`;}).join("");
-  modal(edit?"Edit user &amp; roles":"Add user with roles",`
+  const typeOpts=Object.entries(USER_TYPES).map(([k,v])=>`<option value="${k}" ${uType(u)===k?"selected":""}>${k} – ${esc(v)}</option>`).join("");
+  const grpOpts=`<option value="">—</option>`+USER_GROUPS.map(g=>`<option value="${g}" ${uGroup(u)===g?"selected":""}>${g}</option>`).join("");
+  modal(edit?`Change user · ${esc(u.username)}`:"Create user · SU01",`
+  <div class="grp sec">Logon data</div>
   <div class="two">
-    <div class="grp"><label>Username <span class="req">*</span></label><input id="cu_user" value="${esc(u.username||"")}"></div>
-    <div class="grp"><label>Password ${edit?"":`<span class="req">*</span>`}</label><input id="cu_pw" type="password" placeholder="${edit?"leave blank to keep":""}"></div>
+    <div class="grp"><label>User <span class="req">*</span></label><input id="cu_user" value="${esc(u.username||"")}"></div>
+    <div class="grp"><label>User type</label><select id="cu_type">${typeOpts}</select></div>
   </div>
   <div class="two">
-    <div class="grp"><label>Display name</label><input id="cu_name" value="${esc(u.name||"")}"></div>
+    <div class="grp"><label>User group</label><select id="cu_group">${grpOpts}</select></div>
+    <div class="grp"><label>Initial password ${edit?"":`<span class="req">*</span>`}</label><input id="cu_pw" type="password" placeholder="${edit?"leave blank to keep":""}"></div>
+  </div>
+  <div class="two">
+    <div class="grp"><label>Valid from</label><input id="cu_vfrom" type="date" value="${esc(uValidFrom(u))}"></div>
+    <div class="grp"><label>Valid to</label><input id="cu_vto" type="date" value="${uValidTo(u)===HIGH?"":esc(uValidTo(u))}"></div>
+  </div>
+  <div class="grp"><label class="chk" style="margin-top:2px"><input type="checkbox" id="cu_locked" ${uLocked(u)?"checked":""}> Lock user (logon blocked)</label></div>
+  <div class="grp sec">Address</div>
+  <div class="two">
+    <div class="grp"><label>User name (full)</label><input id="cu_name" value="${esc(u.name||"")}"></div>
     <div class="grp"><label>E-mail</label><input id="cu_email" type="email" value="${esc(u.email||"")}"></div>
   </div>
-  <div class="grp"><label>Roles <span class="req">*</span> <span class="muted" style="font-weight:400">(a user can hold several)</span></label>
+  <div class="grp sec">Business roles (PFCG)</div>
+  <div class="grp"><label class="muted" style="font-weight:400">A user can hold several roles — assignment drives menu &amp; authorizations.</label>
     <div class="rolechks">${roleChecks}</div></div>
-  <div class="grp"><label>Linked employee (for self-service)</label><select id="cu_pernr"><option value="">— none —</option>${empOpts}</select></div>`,
-  `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="cfgUser">${edit?"Save":"Add user"}</button>`);}
+  <div class="grp sec">Personnel assignment</div>
+  <div class="grp"><label>Linked employee (ESS / MSS self-service)</label><select id="cu_pernr"><option value="">— none —</option>${empOpts}</select></div>`,
+  `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="cfgUser">${edit?"Save":"Create"}</button>`);}
 function orgEditDialog(id){const o=db.HRP1000.find(x=>x.otype==="O"&&x.objid===id)||{};
   const rel=db.HRP1001.find(r=>r.otype==="O"&&r.objid===id&&r.relat==="002"&&r.rsign==="A");
   const parent=rel?+rel.sobid:null;
@@ -2548,7 +3479,8 @@ function orgEditDialog(id){const o=db.HRP1000.find(x=>x.otype==="O"&&x.objid===i
   modal("Edit organizational unit",`
   <div class="grp"><label>Name <span class="req">*</span></label><input id="oe_name" value="${esc(o.stext||"")}"></div>
   <div class="grp"><label>Short</label><input id="oe_short" value="${esc(o.short||"")}"></div>
-  <div class="grp"><label>Reports to (parent)</label><select id="oe_parent"><option value="">— none —</option>${orgs.map(x=>`<option value="${x.objid}" ${x.objid===parent?"selected":""}>${esc(x.stext)}</option>`).join("")}</select></div>`,
+  <div class="grp"><label>Reports to (parent)</label><select id="oe_parent"><option value="">— none —</option>${orgs.map(x=>`<option value="${x.objid}" ${x.objid===parent?"selected":""}>${esc(x.stext)}</option>`).join("")}</select></div>
+  <div class="grp"><label>Company code</label><select id="oe_bukrs"><option value="">— inherit from parent —</option>${opt(db.T001,o.bukrs||"")}</select></div>`,
   `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-do="orgSave">Save</button>`);}
 function attendanceDialog(){
   const att={}; Object.keys(db.T554S).forEach(k=>att[k]=db.T554S[k]);
@@ -2594,15 +3526,20 @@ document.addEventListener("click",ev=>{
   const comboOpt=ev.target.closest("[data-cityopt]");
   if(comboOpt){const combo=comboOpt.closest(".combo"),inp=combo.querySelector("input");
     inp.value=comboOpt.dataset.cityopt;onAddrCity();combo.querySelector(".combo-list").classList.remove("open");return;}
-  const t=ev.target.closest("[data-nav],[data-open],[data-act],[data-tab],[data-tog],[data-do],[data-close],[data-fill],[data-approve],[data-reject],[data-book],[data-advance],[data-payslip],[data-cfg],[data-authrole],[data-cfgadd],[data-cfgedit],[data-cfgdel],[data-useredit],[data-userdel],[data-orgedit],[data-orgdel],[data-roleadd],[data-roleedit],[data-roledel],[data-posadd],[data-posedit],[data-posdel],[data-attach],[data-attview],[data-attdel],[data-addredit],[data-addrdel],[data-comedit],[data-comdel],[data-famedit],[data-famdel],[data-eduedit],[data-edudel],[data-expedit],[data-expdel],[data-qualedit],[data-qualdel],[data-sort],[data-possort],[data-dtsort],[data-dtcols],[data-dtexport],[data-copycsv],[data-reqadd],[data-reqedit],[data-reqdel],[data-appladd],[data-appledit],[data-appldel],[data-crsadd],[data-crsedit],[data-crsdel],[data-regsave],[data-regtoday],[data-regexport],[data-empatt],[data-more],[data-tabmore],[data-photo]");
+  const t=ev.target.closest("[data-nav],[data-open],[data-act],[data-tab],[data-tog],[data-do],[data-close],[data-fill],[data-approve],[data-reject],[data-book],[data-advance],[data-payslip],[data-cfg],[data-authrole],[data-cfgadd],[data-cfgedit],[data-cfgdel],[data-useredit],[data-userdel],[data-orgedit],[data-orgdel],[data-roleadd],[data-roleedit],[data-roledel],[data-posadd],[data-posedit],[data-posdel],[data-attach],[data-attview],[data-attdel],[data-addredit],[data-addrdel],[data-comedit],[data-comdel],[data-famedit],[data-famdel],[data-eduedit],[data-edudel],[data-expedit],[data-expdel],[data-qualedit],[data-qualdel],[data-sort],[data-possort],[data-dtsort],[data-dtcols],[data-dtexport],[data-copycsv],[data-reqadd],[data-reqedit],[data-reqdel],[data-appladd],[data-appledit],[data-appldel],[data-crsadd],[data-crsedit],[data-crsdel],[data-regsave],[data-regtoday],[data-regexport],[data-empatt],[data-more],[data-tabmore],[data-photo],[data-lcedit],[data-lcdel],[data-navmenu],[data-actionmenu]");
+  if(!ev.target.closest(".navgroup"))document.querySelectorAll(".nav-sub.open").forEach(d=>d.classList.remove("open"));
+  if(!ev.target.closest(".action-wrap"))document.querySelectorAll(".action-menu.open").forEach(d=>d.classList.remove("open"));
   if(!t){const mm=$("#moreMenu");if(mm)mm.classList.remove("open");const tm=$("#tabMoreMenu");if(tm)tm.classList.remove("open");return;}
+  if(t.dataset.navmenu!==undefined){const sub=document.getElementById("navSub"+t.dataset.navmenu);const wasOpen=sub&&sub.classList.contains("open");document.querySelectorAll(".nav-sub.open").forEach(d=>d.classList.remove("open"));if(sub&&!wasOpen)sub.classList.add("open");return;}
+  if(t.hasAttribute("data-actionmenu")){const am=$("#actionMenu");if(am)am.classList.toggle("open");return;}
   if(t.hasAttribute("data-more")){const mm=$("#moreMenu");mm.classList.toggle("open");return;}
   if(t.hasAttribute("data-tabmore")){const tm=$("#tabMoreMenu");tm.classList.toggle("open");return;}
-  if(t.dataset.nav){ev.preventDefault();S.view=t.dataset.nav;S.tab="personal";render();return;}
+  if(t.dataset.nav){ev.preventDefault();if(t.dataset.cfggrp)S.cfgGroup=t.dataset.cfggrp;if(t.dataset.cfgtab)S.cfgTab=t.dataset.cfgtab;if(t.dataset.rep)S.rep=t.dataset.rep;S.view=t.dataset.nav;S.tab="personal";render();return;}
   if(t.dataset.open){S.view="detail";S.pernr=+t.dataset.open;S.tab="personal";render();return;}
   if(t.dataset.tab){S.tab=t.dataset.tab;renderDetail();return;}
   if(t.dataset.tog){const id=+t.dataset.tog;S.open.has(id)?S.open.delete(id):S.open.add(id);renderOrg();return;}
   if(t.dataset.act){
+    if(t.dataset.act.slice(0,3)==="lc:"){openLifecycle(t.dataset.act.slice(3));return;}
     if(t.dataset.act==="hire")hireDialog();
     else if(t.dataset.act==="edit")editDialog();
     else if(t.dataset.act==="reassign")reassignDialog();
@@ -2629,6 +3566,12 @@ document.addEventListener("click",ev=>{
     else if(t.dataset.act==="cfgUser")cfgUserDialog();
     else if(t.dataset.act==="attendance")attendanceDialog();
     else if(t.dataset.act==="reqleave")reqLeaveDialog();
+    else if(t.dataset.act==="payrollcfg")payrollCfgDialog();
+    else if(t.dataset.act==="payperiodcfg")payperiodCfgDialog();
+    else if(t.dataset.act==="se16run"){S.se16Table=val("se16tab");S.se16Max=Math.max(1,+val("se16max")||500);S.se16Go=true;renderConfig();return;}
+    else if(t.dataset.act==="se11go"){S.se11Table=val("se11tab");S.se11Go=true;renderConfig();return;}
+    else if(t.dataset.act==="periodOpen"){db.payroll.openPeriod=t.dataset.ym;toast("Payroll period opened.","good");renderConfig();return;}
+    else if(t.dataset.act==="periodClose"){const ps=payrollPeriods();const i=ps.findIndex(x=>x.ym===t.dataset.ym);const nx=ps[i+1];db.payroll.openPeriod=nx?nx.ym:t.dataset.ym;toast(nx?"Period closed; next period opened.":"This is the last period.",nx?"good":"warn");renderConfig();return;}
     else if(t.dataset.act==="cols"){S.showCols=!S.showCols;renderList();}
     else if(t.dataset.act==="mypayslip")payslipDialog(SESSION.pernr);
     return;
@@ -2690,6 +3633,8 @@ document.addEventListener("click",ev=>{
   if(t.hasAttribute("data-crsadd")){courseDialog(null);return;}
   if(t.dataset.crsedit){courseDialog(t.dataset.crsedit);return;}
   if(t.dataset.crsdel){if(confirm("Delete this course?")){deleteCourse(t.dataset.crsdel);toast("Course deleted.","good");render();}return;}
+  if(t.dataset.lcedit){const r=db.lifecycle.find(x=>x._id===t.dataset.lcedit);if(r)openLifecycle(r.kind,r);return;}
+  if(t.dataset.lcdel){if(confirm("Delete this record?")){db.lifecycle=db.lifecycle.filter(x=>x._id!==t.dataset.lcdel);toast("Record deleted.","good");renderDetail();}return;}
   if(t.hasAttribute("data-close")){
     // Backdrop closes only on a direct click; clicks inside the dialog (e.g. a
     // dropdown or input) must NOT close it. Close buttons always close.
@@ -2796,6 +3741,14 @@ function doAction(kind){
       if(editingRec&&editingRec.type==="exp"){editExperience(editingRec.id,f);toast("Previous employer updated.","good");}
       else{addExperience(S.pernr,f);toast("Previous employer added.","good");}
       editingRec=null;closeModal();S.tab="edu";renderDetail();
+    }else if(kind==="lcSave"){
+      const cfg=LC_KINDS[lcCtx.kind];const data={pernr:S.pernr,kind:lcCtx.kind};
+      cfg.fields.forEach(f=>{const el=document.getElementById("lc_"+f.k);if(!el)return;
+        data[f.k]=f.type==="chk"?el.checked:(f.type==="num"?(el.value===""?"":+el.value):el.value.trim());});
+      if(cfg.fields.some(f=>f.req&&(data[f.k]===""||data[f.k]==null))){toast("Please complete the required field(s).","bad");return;}
+      if(lcCtx.id){const r=db.lifecycle.find(x=>x._id===lcCtx.id);if(r)Object.assign(r,data);toast(cfg.it+" updated.","good");}
+      else{data._id="lc"+_recId++;db.lifecycle.push(data);toast(cfg.it+" added.","good");}
+      lcCtx=null;closeModal();renderDetail();
     }else if(kind==="cfgSave"){
       const def=CFG_SCHEMA[cfgCtx.tab];
       const key=(def.autokey&&cfgCtx.key==null)?null:val("cf_key").trim();
@@ -2805,8 +3758,10 @@ function doAction(kind){
       cfgUpsert(def,cfgCtx.key,key,data);closeModal();toast("Saved.","good");renderConfig();
     }else if(kind==="roleSave"){
       const edit=cfgCtx&&cfgCtx.role;const name=val("ro_name").trim();
-      if(!name){toast("Enter a display name.","bad");return;}
-      if(edit){db.roleNames[edit]=name;}else{addRole(val("ro_key"),name);}
+      if(!name){toast("Enter a description.","bad");return;}
+      const type=val("ro_type")||"S",desc=val("ro_desc").trim();
+      db.roleMeta=db.roleMeta||{};
+      if(edit){db.roleNames[edit]=name;db.roleMeta[edit]={type,desc};}else{addRole(val("ro_key"),name,type,desc);}
       closeModal();toast("Role saved.","good");renderConfig();
     }else if(kind==="posSave"){
       const name=val("po_name").trim();if(!name){toast("Enter a position name.","bad");return;}
@@ -2829,25 +3784,28 @@ function doAction(kind){
       if(cfgCtx&&cfgCtx.crsid){editCourse(cfgCtx.crsid,f);toast("Course updated.","good");}else{addCourse(f);toast("Course added.","good");}
       closeModal();render();
     }else if(kind==="cfgOrg"){
-      const id=addOrgUnit(val("co_name").trim(),val("co_parent")?+val("co_parent"):null);closeModal();toast("Organizational unit "+id+" added.","good");renderConfig();
+      const id=addOrgUnit(val("co_name").trim(),val("co_parent")?+val("co_parent"):null,val("co_bukrs")||null);closeModal();toast("Organizational unit "+id+" added.","good");renderConfig();
     }else if(kind==="orgSave"){
       const id=cfgCtx.orgid;const o=db.HRP1000.find(x=>x.otype==="O"&&x.objid===id);
-      if(o){o.stext=val("oe_name").trim();o.short=val("oe_short").trim();}
+      if(o){o.stext=val("oe_name").trim();o.short=val("oe_short").trim();const bk=val("oe_bukrs");if(bk)o.bukrs=bk;else delete o.bukrs;}
       const parent=val("oe_parent")?+val("oe_parent"):null;
       db.HRP1001=db.HRP1001.filter(r=>!(r.otype==="O"&&r.objid===id&&r.relat==="002"&&r.rsign==="A"));
       if(parent)db.HRP1001.push({otype:"O",objid:id,rsign:"A",relat:"002",sclas:"O",sobid:String(parent),begda:"2020-01-01",endda:HIGH});
       closeModal();toast("Organizational unit updated.","good");renderConfig();
     }else if(kind==="cfgUser"){
       const roles=[...document.querySelectorAll(".cu_role:checked")].map(c=>c.value);
-      if(!roles.length){toast("Select at least one role.","bad");return;}
+      if(!roles.length){toast("Assign at least one business role.","bad");return;}
       const edit=cfgCtx&&cfgCtx.user;
+      const common={userType:val("cu_type")||"A",userGroup:val("cu_group")||"",validFrom:val("cu_vfrom")||"2020-01-01",
+        validTo:val("cu_vto")||HIGH,locked:!!($("#cu_locked")&&$("#cu_locked").checked)};
       if(edit){const u=db.users.find(x=>x.username===edit);
         u.username=val("cu_user").trim()||u.username;const pw=val("cu_pw");if(pw)u.password=pw;
         u.name=val("cu_name").trim();u.email=val("cu_email").trim();u.roles=roles;u.pernr=val("cu_pernr")?+val("cu_pernr"):null;
-        closeModal();toast("User updated.","good");renderConfig();
+        Object.assign(u,common);
+        closeModal();toast("User saved.","good");renderConfig();
       }else{
-        addUser({username:val("cu_user").trim(),password:val("cu_pw"),name:val("cu_name").trim(),email:val("cu_email").trim(),roles,pernr:val("cu_pernr")?+val("cu_pernr"):null});
-        closeModal();toast("User added.","good");renderConfig();}
+        addUser({username:val("cu_user").trim(),password:val("cu_pw"),name:val("cu_name").trim(),email:val("cu_email").trim(),roles,pernr:val("cu_pernr")?+val("cu_pernr"):null,...common});
+        closeModal();toast("User created.","good");renderConfig();}
     }else if(kind==="family"){
       const f={relationType:val("fm_rel"),firstName:val("fm_first").trim(),lastName:val("fm_last").trim(),gender:val("fm_gender"),birthDate:val("fm_dob"),phone:val("fm_phone").trim(),email:val("fm_email").trim(),occupation:val("fm_occ").trim(),dependent:val("fm_dep")};
       if(!f.firstName||!f.lastName){toast("Enter first and last name.","bad");return;}
@@ -2862,31 +3820,113 @@ function doAction(kind){
       const u=val("lu").trim(),pw=val("lp");
       const found=db.users.find(x=>x.username===u&&x.password===pw&&pw);
       if(!found){const e=$("#loginErr");e.textContent="Invalid username or password.";e.style.display="block";return;}
+      if(found.locked){const e=$("#loginErr");e.textContent="User is locked. Contact your administrator.";e.style.display="block";return;}
       const roles=found.roles||[found.role];
       const primary=roles.includes("HR_ADMIN")?"HR_ADMIN":roles.includes("HR_MANAGER")?"HR_MANAGER":roles[0];
       SESSION={username:found.username,name:found.name,roles:roles,role:primary,pernr:found.pernr,email:found.email};
       if(found.theme){document.documentElement.setAttribute("data-theme",found.theme);}
-      S.view=primary==="HR_ADMIN"?"list":primary==="HR_MANAGER"?"mss":(found.pernr?"ess":"list");
+      S.view="home";
       toast("Welcome, "+found.name+".","good");render();
     }else if(kind==="reqleave"){
       const f={pernr:SESSION.pernr,type:val("rl_type"),begda:val("rl_begda"),endda:val("rl_endda"),note:val("rl_note").trim()};
       if(!f.begda||!f.endda){toast("Enter start and end dates.","bad");return;}
       if(f.endda<f.begda){toast("End date must not be before start date.","bad");return;}
       const d=requestLeave(f);closeModal();toast("Leave request submitted ("+d+" day(s)).","good");render();
+    }else if(kind==="payrollcfg"){
+      const cut=Math.round(+val("pc_cut"));
+      if(!(cut>=1&&cut<=28)){toast("Cut-off day must be between 1 and 28.","bad");return;}
+      const num=(id,d)=>{const v=parseFloat(val(id));return isNaN(v)?d:v;};
+      db.payroll.cutoffDay=cut;
+      db.payroll.monthlyFactor=num("pc_mf",db.payroll.monthlyFactor);
+      db.payroll.taxRate=num("pc_tax",db.payroll.taxRate*100)/100;
+      db.payroll.socialRate=num("pc_soc",db.payroll.socialRate*100)/100;
+      db.payroll.otMult={normal:num("pc_otn",db.payroll.otMult.normal),sunday:num("pc_ots",db.payroll.otMult.sunday),holiday:num("pc_oth",db.payroll.otMult.holiday)};
+      closeModal();toast("Payroll configuration saved.","good");renderConfig();
+    }else if(kind==="payperiodcfg"){
+      const cut=Math.round(+val("pp_cut"));
+      if(!(cut>=1&&cut<=28)){toast("Cut-off day must be between 1 and 28.","bad");return;}
+      const start=val("pp_start");if(!/^\d{4}-\d{2}$/.test(start)){toast("Enter a valid first period (month).","bad");return;}
+      const count=Math.round(+val("pp_count"));
+      if(!(count>=1&&count<=60)){toast("Number of periods must be between 1 and 60.","bad");return;}
+      db.payroll.cutoffDay=cut;db.payroll.periodFreq=val("pp_freq")||"monthly";
+      db.payroll.periodStart=start;db.payroll.periodCount=count;
+      const open=val("pp_open");
+      // Keep the open period within the regenerated calendar.
+      const ps=payrollPeriods();db.payroll.openPeriod=ps.some(x=>x.ym===open)?open:(ps[0]?ps[0].ym:start);
+      closeModal();toast("Payroll period configuration saved.","good");renderConfig();
     }
   }catch(err){toast(err.message,"bad");}
 }
 
 /* ---- utility buttons ---- */
 $("#logout").addEventListener("click",()=>{SESSION=null;S.view="list";S.pernr=null;render();toast("Signed out.","good");});
-$("#reset").addEventListener("click",()=>{db=seed();S.view=SESSION?(isEmployee()?"ess":isManager()?"mss":"list"):"list";S.pernr=null;S.search="";S.open=new Set([50000001]);render();toast("Demo data reset to seed.","good");});
+$("#reset").addEventListener("click",()=>{db=seed();S.view=SESSION?"home":"list";S.pernr=null;S.search="";S.open=new Set([50000001]);render();toast("Demo data reset to seed.","good");});
+/* Fiori 4.0 shell actions: notifications, help, and the unified search field. */
+$("#notif").addEventListener("click",()=>{const p=SESSION?(db.leaveRequests||[]).filter(r=>r.status==="Pending").length:0;toast(p?`${p} leave request(s) awaiting approval.`:"No new notifications.",p?"warn":"good");});
+$("#help").addEventListener("click",()=>toast("HR module demo — sign in as admin / manager / linda. Use the search field to jump to People.","good"));
+/* SAP-style command field: transaction codes jump straight to a screen. */
+const TCODES={
+  SE16N:{grp:"Development (ABAP)",tab:"se16n"},SE16:{grp:"Development (ABAP)",tab:"se16n"},
+  SE11:{grp:"Development (ABAP)",tab:"se11"},
+  SU01:{grp:"Security",tab:"users"},SU10:{grp:"Security",tab:"users"},PFCG:{grp:"Security",tab:"roles"},
+  PA20:{view:"list"},PA30:{view:"list"},PPOSE:{view:"org"},PPOME:{view:"org"},PO13:{view:"pos"}
+};
+(function wireSearch(){
+  const inp=$("#cmdField"),go=$("#cmdGo"),scope=$("#searchScope");
+  const run=()=>{if(!SESSION)return;const q=(inp.value||"").trim();
+    // Transaction code? (accept /n, /o, /i, /nex … prefixes like the SAP command field)
+    const tc=q.replace(/^\/(?:nex|oex|n|o|i)/i,"").trim().toUpperCase();
+    const dest=TCODES[tc];
+    if(dest){if(dest.tab){S.cfgGroup=dest.grp;S.cfgTab=dest.tab;S.view="config";}else{S.view=dest.view;}
+      render();inp.value="";toast("Transaction "+tc,"good");return;}
+    const sc=scope?scope.value:"Apps";
+    if(sc==="Configuration"){S.view="config";render();inp.value="";return;}
+    // People / Apps / All → employee directory filtered by the query.
+    S.search=q;S.view="list";render();inp.value="";};
+  if(go)go.addEventListener("click",run);
+  if(inp)inp.addEventListener("keydown",e=>{if(e.key==="Enter")run();});
+  if(scope)scope.addEventListener("change",()=>{if(inp)inp.placeholder='Search In: "'+scope.value+'"';});
+})();
+/* ---- Multiple colour themes (SuccessFactors-style theme picker) ----
+   Each theme supplies a light and a dark accent set; the neutral surfaces come
+   from the base stylesheet, so every theme works in both light and dark. */
+const THEMES={
+  oracle:{name:"Oracle Red",light:{a:"#c74634",s:"#a3382a",soft:"#f7e8e5",shell:"#c74634"},dark:{a:"#ec6a58",s:"#f2836f",soft:"#3a201b",shell:"#241d19"}},
+  sap:{name:"Fiori Blue",light:{a:"#0070f2",s:"#0064d9",soft:"#e3f0ff",shell:"#ffffff"},dark:{a:"#4dabf7",s:"#74c0fc",soft:"#1d3547",shell:"#1b232b"}},
+  teal:{name:"Teal",light:{a:"#0f7f8c",s:"#0b616b",soft:"#e0f2f4",shell:"#0f7f8c"},dark:{a:"#4fc4d0",s:"#78d4dd",soft:"#0e2b2f",shell:"#0c1e21"}},
+  emerald:{name:"Emerald",light:{a:"#0a7d55",s:"#075c3e",soft:"#e2f4ec",shell:"#0a7d55"},dark:{a:"#4cc38a",s:"#74d3a5",soft:"#0f2c20",shell:"#0d1f18"}},
+  violet:{name:"Violet",light:{a:"#6a3fb5",s:"#552f95",soft:"#efe8fa",shell:"#6a3fb5"},dark:{a:"#a985ec",s:"#c0a6f2",soft:"#241a3a",shell:"#1a1526"}},
+  magenta:{name:"Magenta",light:{a:"#b31d6b",s:"#8f1656",soft:"#fbe4f0",shell:"#b31d6b"},dark:{a:"#ef74af",s:"#f49ac6",soft:"#331228",shell:"#241019"}},
+  amber:{name:"Amber",light:{a:"#a65f00",s:"#824b00",soft:"#fbeed6",shell:"#a65f00"},dark:{a:"#f0a94a",s:"#f4be74",soft:"#33240f",shell:"#251c10"}},
+  slate:{name:"Slate",light:{a:"#3b566a",s:"#2c4150",soft:"#e7edf1",shell:"#33475a"},dark:{a:"#8fb0c6",s:"#aac4d6",soft:"#20303b",shell:"#161f27"}}
+};
+let currentAccent="sap";
+function accentMode(){return document.documentElement.getAttribute("data-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");}
+function applyAccent(key){
+  currentAccent=THEMES[key]?key:"oracle";
+  const set=THEMES[currentAccent][accentMode()==="dark"?"dark":"light"],r=document.documentElement.style;
+  r.setProperty("--accent",set.a);r.setProperty("--accent-strong",set.s);
+  r.setProperty("--accent-soft",set.soft);
+  // Fiori Horizon keeps a neutral shell bar — the palette only re-tints the
+  // brand accent, not the shell (so --shell-bg stays white / dark content).
+  const pm=$("#paletteMenu");if(pm)pm.querySelectorAll(".swatch").forEach(sw=>sw.classList.toggle("sel",sw.dataset.theme===currentAccent));
+}
 (function themeInit(){
   const btn=$("#theme");
   btn.addEventListener("click",()=>{
     const cur=document.documentElement.getAttribute("data-theme");
     const next=cur==="dark"?"light":cur==="light"?"dark":(matchMedia("(prefers-color-scheme:dark)").matches?"light":"dark");
     document.documentElement.setAttribute("data-theme",next);
+    applyAccent(currentAccent);   // re-pick the accent shade for the new mode
   });
+})();
+(function paletteInit(){
+  const btn=$("#palette"),menu=$("#paletteMenu");if(!btn||!menu)return;
+  menu.innerHTML=`<div class="palette-title">Theme colour</div>`+Object.entries(THEMES).map(([k,v])=>
+    `<button class="swatch${k===currentAccent?" sel":""}" data-theme="${k}" title="${v.name}" style="background:${v.light.a}"><span class="tick">✓</span></button>`).join("");
+  btn.addEventListener("click",e=>{e.stopPropagation();menu.classList.toggle("open");});
+  menu.addEventListener("click",e=>{const sw=e.target.closest(".swatch");if(!sw)return;applyAccent(sw.dataset.theme);menu.classList.remove("open");toast("Theme colour: "+THEMES[currentAccent].name,"good");});
+  document.addEventListener("click",e=>{if(!e.target.closest(".palette-wrap"))menu.classList.remove("open");});
 })();
 (function langInit(){
   const sel=$("#lang");if(!sel)return;

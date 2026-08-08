@@ -1,5 +1,6 @@
 /* ============================================================================
    HR Module - Organizational Management (OM)
+   Platform : Microsoft SQL Server (T-SQL)
    Reference: SAP ECC 6.0 EHP8 - Organizational Management (PA-OS)
 
    OM in SAP is built from objects and the relationships between them:
@@ -17,63 +18,68 @@
      B 012 "is managed by"     O->S (org unit managed by chief position)
    ============================================================================ */
 
-USE [HRModule];
+USE HRModule;
 GO
 
 /* ----------------------------------------------------------------------------
    HRP1000 - Object (Org unit / Position / Job)
    ---------------------------------------------------------------------------- */
-IF OBJECT_ID(N'HR.HRP1000', N'U') IS NULL
-BEGIN
-    CREATE TABLE HR.HRP1000
-    (
-        MANDT   VARCHAR(3)   NOT NULL CONSTRAINT DF_HRP1000_MANDT DEFAULT ('100'), -- Client
-        PLVAR   VARCHAR(2)   NOT NULL CONSTRAINT DF_HRP1000_PLVAR DEFAULT ('01'),  -- Plan version (active)
-        OTYPE   VARCHAR(2)   NOT NULL,             -- Object type O/S/C/P
-        OBJID   INT          NOT NULL,             -- Object ID
-        ISTAT   VARCHAR(1)   NOT NULL CONSTRAINT DF_HRP1000_ISTAT DEFAULT ('1'),   -- Planning status (1=active)
-        BEGDA   DATE         NOT NULL,
-        ENDDA   DATE         NOT NULL CONSTRAINT DF_HRP1000_ENDDA DEFAULT ('9999-12-31'),
-        SEQNR   VARCHAR(3)   NOT NULL CONSTRAINT DF_HRP1000_SEQNR DEFAULT ('000'),
-        LANGU   VARCHAR(1)   NOT NULL CONSTRAINT DF_HRP1000_LANGU DEFAULT ('E'),
-        SHORT   NVARCHAR(12) NULL,                 -- Object abbreviation
-        STEXT   NVARCHAR(40) NULL,                 -- Object name / description
-        AEDTM   DATE         NULL,
-        UNAME   VARCHAR(12)  NULL,
-        CONSTRAINT PK_HRP1000 PRIMARY KEY (PLVAR, OTYPE, OBJID, ISTAT, ENDDA, BEGDA, SEQNR)
-    );
-END
+IF OBJECT_ID('HR.HRP1000','U') IS NULL
+CREATE TABLE HR.HRP1000
+(
+    MANDT   NVARCHAR(3)   DEFAULT '100' NOT NULL,          -- Client
+    PLVAR   NVARCHAR(2)   DEFAULT '01'  NOT NULL,          -- Plan version (active)
+    OTYPE   NVARCHAR(2)   NOT NULL,                        -- Object type O/S/C/P
+    OBJID   INT           NOT NULL,                        -- Object ID
+    ISTAT   NVARCHAR(1)   DEFAULT '1'   NOT NULL,          -- Planning status (1=active)
+    BEGDA   DATE          NOT NULL,
+    ENDDA   DATE          DEFAULT '9999-12-31' NOT NULL,
+    SEQNR   NVARCHAR(3)   DEFAULT '000' NOT NULL,
+    LANGU   NVARCHAR(1)   DEFAULT 'E'   NOT NULL,
+    SHORT   NVARCHAR(12)  NULL,                            -- Object abbreviation
+    STEXT   NVARCHAR(40)  NULL,                            -- Object name / description
+    AEDTM   DATE          NULL,
+    UNAME   NVARCHAR(12)  NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
+    CONSTRAINT PK_HRP1000 PRIMARY KEY (PLVAR, OTYPE, OBJID, ISTAT, ENDDA, BEGDA, SEQNR)
+);
 GO
 
 /* ----------------------------------------------------------------------------
    HRP1001 - Relationships
    ---------------------------------------------------------------------------- */
-IF OBJECT_ID(N'HR.HRP1001', N'U') IS NULL
-BEGIN
-    CREATE TABLE HR.HRP1001
-    (
-        MANDT   VARCHAR(3)   NOT NULL CONSTRAINT DF_HRP1001_MANDT DEFAULT ('100'),
-        PLVAR   VARCHAR(2)   NOT NULL CONSTRAINT DF_HRP1001_PLVAR DEFAULT ('01'),
-        OTYPE   VARCHAR(2)   NOT NULL,             -- Source object type
-        OBJID   INT          NOT NULL,             -- Source object ID
-        ISTAT   VARCHAR(1)   NOT NULL CONSTRAINT DF_HRP1001_ISTAT DEFAULT ('1'),
-        BEGDA   DATE         NOT NULL,
-        ENDDA   DATE         NOT NULL CONSTRAINT DF_HRP1001_ENDDA DEFAULT ('9999-12-31'),
-        SEQNR   VARCHAR(3)   NOT NULL CONSTRAINT DF_HRP1001_SEQNR DEFAULT ('000'),
-        RSIGN   VARCHAR(1)   NOT NULL,             -- Relationship specification A/B
-        RELAT   VARCHAR(3)   NOT NULL,             -- Relationship (002,003,007,008,012...)
-        SCLAS   VARCHAR(2)   NOT NULL,             -- Type of related object
-        SOBID   VARCHAR(45)  NOT NULL,             -- ID of related object
-        PRIOX   VARCHAR(4)   NULL,                 -- Priority
-        AEDTM   DATE         NULL,
-        UNAME   VARCHAR(12)  NULL,
-        CONSTRAINT PK_HRP1001 PRIMARY KEY (PLVAR, OTYPE, OBJID, ISTAT, ENDDA, BEGDA, RSIGN, RELAT, SCLAS, SOBID, SEQNR)
-    );
-END
+IF OBJECT_ID('HR.HRP1001','U') IS NULL
+CREATE TABLE HR.HRP1001
+(
+    MANDT   NVARCHAR(3)   DEFAULT '100' NOT NULL,
+    PLVAR   NVARCHAR(2)   DEFAULT '01'  NOT NULL,
+    OTYPE   NVARCHAR(2)   NOT NULL,                        -- Source object type
+    OBJID   INT           NOT NULL,                        -- Source object ID
+    ISTAT   NVARCHAR(1)   DEFAULT '1'   NOT NULL,
+    BEGDA   DATE          NOT NULL,
+    ENDDA   DATE          DEFAULT '9999-12-31' NOT NULL,
+    SEQNR   NVARCHAR(3)   DEFAULT '000' NOT NULL,
+    RSIGN   NVARCHAR(1)   NOT NULL,                        -- Relationship specification A/B
+    RELAT   NVARCHAR(3)   NOT NULL,                        -- Relationship (002,003,007,008,012...)
+    SCLAS   NVARCHAR(2)   NOT NULL,                        -- Type of related object
+    SOBID   NVARCHAR(45)  NOT NULL,                        -- ID of related object
+    PRIOX   NVARCHAR(4)   NULL,                            -- Priority
+    AEDTM   DATE          NULL,
+    UNAME   NVARCHAR(12)  NULL,
+    CreatedOn DATETIME2(0) DEFAULT SYSUTCDATETIME() NOT NULL,   -- audit: created date/time
+    CreatedBy NVARCHAR(12) NULL,                                -- audit: created by
+    ChangedOn DATETIME2(0) NULL,                                 -- audit: last updated date/time
+    ChangedBy NVARCHAR(12) NULL,                                -- audit: last changed by
+    CONSTRAINT PK_HRP1001 PRIMARY KEY (PLVAR, OTYPE, OBJID, ISTAT, ENDDA, BEGDA, RSIGN, RELAT, SCLAS, SOBID, SEQNR)
+);
 GO
 
-IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_HRP1001_Source')
-    CREATE INDEX IX_HRP1001_Source ON HR.HRP1001 (OTYPE, OBJID, RELAT, RSIGN, BEGDA, ENDDA);
-IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_HRP1001_Target')
-    CREATE INDEX IX_HRP1001_Target ON HR.HRP1001 (SCLAS, SOBID, RELAT, RSIGN, BEGDA, ENDDA);
+IF INDEX_ID('HR.HRP1001', 'IX_HRP1001_Source') IS NULL
+CREATE INDEX IX_HRP1001_Source ON HR.HRP1001 (OTYPE, OBJID, RELAT, RSIGN, BEGDA, ENDDA);
+GO
+IF INDEX_ID('HR.HRP1001', 'IX_HRP1001_Target') IS NULL
+CREATE INDEX IX_HRP1001_Target ON HR.HRP1001 (SCLAS, SOBID, RELAT, RSIGN, BEGDA, ENDDA);
 GO

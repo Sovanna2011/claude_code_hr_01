@@ -11,8 +11,11 @@
     },
     "dataSources": {
       "hrApi": {
-        "uri": "/api/",
-        "type": "JSON"
+        "uri": "http://localhost:5000/api/",
+        "type": "JSON",
+        "settings": {
+          "localUri": "http://localhost:5000/api/"
+        }
       }
     }
   },

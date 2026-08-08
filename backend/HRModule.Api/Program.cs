@@ -79,14 +79,26 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("ui5");
 
-// Serve the bundled SAPUI5 app from wwwroot if present.
-app.UseDefaultFiles();
-app.UseStaticFiles();
+// This backend is a PURE REST API — it does not serve any front end. The
+// SAPUI5 web app under ../frontend is a separate application (its own origin)
+// that calls these endpoints over HTTP; cross-origin calls are allowed via the
+// CORS policy above (configure Cors:AllowedOrigins for your front-end origin).
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "UP", module = "HCM", time = DateTime.UtcNow }));
+
+// Root returns API metadata only (no UI) so the API-only nature is explicit.
+app.MapGet("/", () => Results.Ok(new
+{
+    name = "HR Module REST API",
+    module = "HCM (PA · OM · PT)",
+    version = "v1",
+    docs = "/swagger",
+    health = "/health",
+    note = "REST API only — the SAPUI5 front end is a separate application that calls this API."
+}));
 
 app.Run();

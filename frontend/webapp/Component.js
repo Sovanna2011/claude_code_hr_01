@@ -24,8 +24,14 @@ sap.ui.define([
             oDeviceModel.setDefaultBindingMode("OneWay");
             this.setModel(oDeviceModel, "device");
 
+            // Backend REST API base URL. The backend is a separate application
+            // on its own origin (see index.html → window["hr-module-config"]).
+            // Falls back to a same-origin "/api" if no config is injected.
+            var oRuntimeCfg = window["hr-module-config"] || {};
+            var sApiBase = oRuntimeCfg.apiBase || "/api";
+
             // Config model - central place for the API base URL.
-            this.setModel(new JSONModel({ apiBase: "/api", keyDate: null }), "config");
+            this.setModel(new JSONModel({ apiBase: sApiBase, keyDate: null }), "config");
 
             // Auth model - current user + role (drives visibility).
             this.setModel(new JSONModel({
@@ -34,7 +40,7 @@ sap.ui.define([
                 isAdmin: false, isManager: false, isEmployee: false
             }), "auth");
 
-            HRService.setBase("/api");
+            HRService.setBase(sApiBase);
             // On any 401, drop the session and return to the login screen.
             HRService.setUnauthorizedHandler(function () { this.logout(); }.bind(this));
 

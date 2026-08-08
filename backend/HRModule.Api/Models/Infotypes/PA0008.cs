@@ -26,4 +26,8 @@ public class PA0008WageType
     public decimal? BETRG { get; set; }                // Amount
     public string? WAERS { get; set; }                 // Currency
     public decimal? ANZHL { get; set; }                // Number / quantity
+    public DateTime CreatedOn { get; set; }            // audit: created date/time (UTC)
+    public string? CreatedBy { get; set; }             // audit: created by (user)
+    public DateTime? ChangedOn { get; set; }           // audit: last updated date/time (UTC)
+    public string? ChangedBy { get; set; }             // audit: last changed by (user)
 }

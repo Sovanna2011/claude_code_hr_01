@@ -3,8 +3,8 @@
 A full-stack **HR / HCM module** modelled on the **SAP ECC 6.0 EHP8** Human
 Capital Management application, built on an open stack:
 
-- **Database** — Microsoft **SQL Server** (SAP-faithful schema: PA infotypes,
-  Organizational Management, customizing/T-tables, stored procedures, views)
+- **Database** — **Microsoft SQL Server** (SAP-faithful schema: PA infotypes,
+  Organizational Management, customizing/T-tables, T-SQL procedures, views)
 - **Backend** — **C# / ASP.NET Core 8** Web API with **Entity Framework Core**
 - **Frontend** — **SAPUI5** (Fiori, Horizon theme) master–detail application
 
@@ -42,12 +42,12 @@ stack (C# + SQL Server), follow the setup steps below.
 
 ```
 Claude-Code/
-├── database/                 # SQL Server scripts (run in numeric order)
-│   ├── 01_create_database.sql … 08_views.sql
-│   └── run_all.sql           # SQLCMD master installer
-├── backend/HRModule.Api/     # ASP.NET Core 8 Web API (EF Core)
+├── database/                 # T-SQL scripts (run in numeric order)
+│   ├── 01_create_schema.sql … 13_schema_payroll_time.sql
+│   └── run_all.sql           # sqlcmd master installer
+├── backend/HRModule.Api/     # ASP.NET Core 8 Web API (EF Core, SQL Server provider)
 │   ├── Models/               # EmployeeMaster, Infotypes, OrgManagement, Customizing
-│   ├── Data/HRDbContext.cs   # EF Core mappings (schema [HR])
+│   ├── Data/HRDbContext.cs   # EF Core mappings (schema HR)
 │   ├── DTOs/ Services/ Controllers/ Middleware/
 │   └── Program.cs · appsettings.json
 ├── frontend/                 # SAPUI5 (Fiori) app
@@ -60,25 +60,49 @@ Claude-Code/
 
 | Tool | Version | Used for |
 |------|---------|----------|
-| SQL Server | 2019+ (or Azure SQL / LocalDB) | database |
+| Microsoft SQL Server | 2019 / 2022 (Express / Developer edition is fine) | database |
 | .NET SDK | 8.0 | backend build/run |
 | Node.js | 18+ | UI5 dev server / build |
 
 ## 1. Database
 
-Run the scripts in order (idempotent). With **sqlcmd**:
+Run the scripts in order (idempotent) from a login that can `CREATE DATABASE`
+(e.g. `sa`). With **sqlcmd**, from the `database/` folder:
 
 ```bash
 cd database
-sqlcmd -S localhost -i run_all.sql
+sqlcmd -S localhost -U sa -P <password> -i run_all.sql
 ```
 
-Or open `01…08` individually in SQL Server Management Studio. This creates the
-`HRModule` database, the `HR` schema, all tables, seed customizing data, a small
-organizational structure, two demo employees (PERNR **1000** & **1001**),
-stored procedures and reporting views.
+`01_create_schema.sql` creates the **`HRModule`** database and the **`HR`**
+schema; the remaining scripts create, fully qualified as `HR.<name>`, all
+tables, seed customizing data, a small organizational structure, two demo
+employees (PERNR **1000** & **1001**), T-SQL procedures and reporting views.
+You can also run the files individually in SSMS / Azure Data Studio (each one
+begins with `USE HRModule`). The default `sa` connection string is in
+`backend/HRModule.Api/appsettings.json` — change credentials outside a
+throwaway dev box.
 
-## 2. Backend API
+## Separated architecture: API-only backend + standalone front end
+
+The backend and the front end are **two independent applications** with no
+shared process:
+
+- **Backend** (`backend/HRModule.Api`) is a **pure REST API** — it returns JSON
+  only and serves **no** front-end assets. Its root (`/`) returns API metadata,
+  `/swagger` the API docs, `/health` a health check, and everything else lives
+  under `/api/*`.
+- **Front end** (`frontend`) is a **standalone SAPUI5 app** served on its own
+  origin. It bundles no server; it only makes HTTP calls to the backend REST
+  API. The backend URL is configured in one place —
+  `webapp/index.html → window["hr-module-config"].apiBase` (default
+  `http://localhost:5000/api`) — and read by `Component.js`/`HRService`.
+
+Cross-origin calls from the front end to the API are permitted by the backend
+CORS policy (`Cors:AllowedOrigins` in `appsettings.json`, default
+`http://localhost:8080`).
+
+## 2. Backend API (REST only)
 
 Set the connection string in `backend/HRModule.Api/appsettings.json`
 (`ConnectionStrings:HRModule`) if it differs from the local default, then:
@@ -90,16 +114,17 @@ dotnet run
 ```
 
 The API starts on `http://localhost:5000` (Swagger UI at `/swagger` in
-Development). Health check: `GET /health`.
+Development). Health check: `GET /health`. It serves no UI.
 
 Quick smoke test:
 
 ```bash
+curl http://localhost:5000/                # API metadata
 curl http://localhost:5000/api/employees
 curl http://localhost:5000/api/orgunits/50000001/structure
 ```
 
-## 3. Frontend (SAPUI5)
+## 3. Front end (standalone SAPUI5 app)
 
 ```bash
 cd frontend
@@ -107,8 +132,14 @@ npm install
 npm start
 ```
 
-Opens `http://localhost:8080`. The dev server proxies `/api/*` to the backend on
-port 5000 (see `ui5.yaml`), so no CORS setup is needed for local development.
+Opens `http://localhost:8080` and calls the backend directly at the `apiBase`
+configured in `webapp/index.html` (allowed by the backend CORS policy).
+
+- **To point at a different backend** (stage/prod), edit `apiBase` in
+  `webapp/index.html`.
+- **Alternative — same-origin dev proxy:** set `apiBase` back to `/api` and the
+  UI5 dev server will proxy `/api/*` to `http://localhost:5000` (see
+  `ui5.yaml`), avoiding CORS entirely. Both modes keep the backend API-only.
 
 > The app bootstraps SAPUI5 from the public CDN (`ui5.sap.com`). For an
 > air-gapped setup, point the bootstrap `src` in `webapp/index.html` at a local

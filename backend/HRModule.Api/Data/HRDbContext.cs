@@ -9,8 +9,9 @@ namespace HRModule.Api.Data;
 
 /// <summary>
 /// EF Core context mapping the HR module tables. All objects live in the SQL
-/// schema [HR], mirroring the SAP HR application area. Infotypes use the
-/// composite SAP key (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, SEQNR).
+/// Server schema [HR] inside the HRModule database, mirroring the SAP HR
+/// application area. Infotypes use the composite SAP key
+/// (PERNR, SUBTY, OBJPS, SPRPS, ENDDA, SEQNR).
 /// </summary>
 public class HRDbContext : DbContext
 {
@@ -148,7 +149,56 @@ public class HRDbContext : DbContext
             e.HasIndex(x => x.Username).IsUnique();
         });
 
+        // SQL Server identifiers are case-insensitive under the default
+        // collation, so no identifier folding is needed: EF Core's quoted,
+        // case-preserving names (e.g. "HireDate") match the T-SQL DDL in
+        // database/*.sql regardless of case.
+
         base.OnModelCreating(mb);
+    }
+
+    // ---- Audit stamping ------------------------------------------------
+    // Populate the CreatedOn / ChangedOn audit columns automatically on save
+    // for any entity that declares them (real or shadow properties).
+    public override int SaveChanges()
+    {
+        StampAudit();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        StampAudit();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// The user recorded in the CreatedBy / ChangedBy audit fields. Set this per
+    /// request (e.g. from the authenticated principal) before calling SaveChanges;
+    /// defaults to SYSTEM.
+    /// </summary>
+    public string CurrentUser { get; set; } = "SYSTEM";
+
+    private void StampAudit()
+    {
+        var now = DateTime.UtcNow;
+        foreach (var entry in ChangeTracker.Entries())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                if (entry.Metadata.FindProperty("CreatedOn") is not null)
+                    entry.Property("CreatedOn").CurrentValue = now;
+                if (entry.Metadata.FindProperty("CreatedBy") is not null)
+                    entry.Property("CreatedBy").CurrentValue = CurrentUser;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                if (entry.Metadata.FindProperty("ChangedOn") is not null)
+                    entry.Property("ChangedOn").CurrentValue = now;
+                if (entry.Metadata.FindProperty("ChangedBy") is not null)
+                    entry.Property("ChangedBy").CurrentValue = CurrentUser;
+            }
+        }
     }
 
     /// <summary>Applies the shared SAP infotype key + table mapping.</summary>

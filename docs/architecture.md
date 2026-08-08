@@ -5,10 +5,10 @@ EHP8**. It reproduces the core HR data model and business behaviour using an
 open technology stack.
 
 ```
-┌──────────────────────────┐     HTTPS/JSON      ┌──────────────────────────┐     T-SQL      ┌─────────────────┐
-│      SAPUI5 (Fiori)       │  ───────────────▶   │   ASP.NET Core Web API    │  ──────────▶   │   SQL Server    │
-│  MVC · JSONModel · Router │  ◀───────────────   │   EF Core · Services      │  ◀──────────   │  HR schema      │
-└──────────────────────────┘                     └──────────────────────────┘                └─────────────────┘
+┌──────────────────────────┐     HTTPS/JSON      ┌──────────────────────────┐      T-SQL     ┌─────────────────────┐
+│      SAPUI5 (Fiori)       │  ───────────────▶   │   ASP.NET Core Web API    │  ──────────▶   │  SQL Server         │
+│  MVC · JSONModel · Router │  ◀───────────────   │   EF Core · Services      │  ◀──────────   │  HRModule · HR schema│
+└──────────────────────────┘                     └──────────────────────────┘                └─────────────────────┘
         Presentation                                    Application                                Persistence
 ```
 
@@ -17,8 +17,8 @@ open technology stack.
 | Layer | Technology | Responsibility |
 |-------|------------|----------------|
 | Presentation | SAPUI5 1.120+, Fiori Horizon theme | Fiori-style master/detail UI, routing, value helps, personnel actions |
-| Application  | C# / ASP.NET Core 8, EF Core 8 | REST API, infotype read on key date, SAP "delimit + new time slice" logic, org path evaluation |
-| Persistence  | Microsoft SQL Server | SAP-faithful schema (PA infotypes, HRP1000/1001, T-tables), stored procedures, reporting views |
+| Application  | C# / ASP.NET Core 8, EF Core 8 (SQL Server provider) | REST API, infotype read on key date, SAP "delimit + new time slice" logic, org path evaluation |
+| Persistence  | Microsoft SQL Server (2019/2022) | SAP-faithful schema (PA infotypes, HRP1000/1001, T-tables), T-SQL procedures, reporting views |
 
 ## SAP concepts reproduced
 
@@ -125,3 +125,31 @@ person-level **reporting line** build on the OM relationships (A 002 / B 012).
   from `InfotypeBase`, (2) a `ConfigureInfotype<T>` line in `HRDbContext`,
   (3) DTO/service/controller members. OM is extended by adding relationship
   types to `HRP1001` and evaluation logic in `OrgService`.
+
+## SQL Server persistence notes
+
+The persistence layer runs on **Microsoft SQL Server**. The application logic
+is unchanged — only provider-sensitive details matter:
+
+- **Provider** — `Microsoft.EntityFrameworkCore.SqlServer` with
+  `opt.UseSqlServer(...)`; the connection string is a standard SQL Server DSN
+  (`Server=host,1433;Database=HRModule;User Id=…;TrustServerCertificate=True`).
+- **Database + schema** — objects live in the `HR` schema inside the `HRModule`
+  database (`01_create_schema.sql` creates both). Entities keep `ToTable("…","HR")`.
+- **Case-insensitive identifiers** — under the default collation SQL Server
+  identifiers are case-insensitive, so EF Core's quoted, case-preserving names
+  (e.g. `"HireDate"`) match the T-SQL DDL regardless of case — no identifier
+  folding is needed in `HRDbContext`.
+- **Initial key values** — the SAP-initial value of the mandatory key fields
+  `SUBTY`/`OBJPS`/`SPRPS` is a single space (`InfotypeBase` and the DDL
+  `DEFAULT ' '`), keeping the composite PK non-null.
+- **Type mapping** — `INT`, `BIGINT`, `NVARCHAR(n)`, `NCHAR(n)`,
+  `DECIMAL(p,s)`, `BIT` (booleans/flags), `DATE`, `DATETIME2(0)`
+  (`SYSUTCDATETIME()` default), `TIME(0)` for SAP clock-time fields (maps to
+  `TimeSpan`), and `INT IDENTITY(1,1)` for surrogate keys.
+- **T-SQL dialect** — `MERGE … USING (VALUES …) AS src (…)` for idempotent
+  seeds, `IF OBJECT_ID('HR.X','U') IS NULL` guards for re-runnable DDL split
+  into `GO` batches, `CREATE OR ALTER PROCEDURE`/`VIEW`, `TRY/CATCH` +
+  `BEGIN TRAN` procedures returning result sets (in place of `SYS_REFCURSOR`),
+  a recursive `WITH … OPTION (MAXRECURSION 100)` org tree, and a deterministic
+  computed column for the overtime category.

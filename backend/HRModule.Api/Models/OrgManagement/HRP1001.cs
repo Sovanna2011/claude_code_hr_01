@@ -18,4 +18,8 @@ public class HRP1001
     public string? PRIOX { get; set; }
     public DateTime? AEDTM { get; set; }
     public string? UNAME { get; set; }
+    public DateTime CreatedOn { get; set; }      // audit: created date/time (UTC)
+    public string? CreatedBy { get; set; }       // audit: created by (user)
+    public DateTime? ChangedOn { get; set; }     // audit: last updated date/time (UTC)
+    public string? ChangedBy { get; set; }       // audit: last changed by (user)
 }
